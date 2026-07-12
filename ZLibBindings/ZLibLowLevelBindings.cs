@@ -5,7 +5,10 @@ namespace ZLibBindings;
 
 public static partial class ZLibLowLevelBindings
 {
-    [LibraryImport("zlib1.dll", StringMarshalling = StringMarshalling.Utf8)]
+    [LibraryImport("zlib1.dll")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial string zlibVersion();
+    private static partial IntPtr zlibVersion();
+
+    public static string ZlibVersion() =>
+        Marshal.PtrToStringUTF8(zlibVersion())!;
 }
