@@ -1,4 +1,6 @@
 <Solution>
   <Project Path="ArchiveAccessPointVisualizer/ArchiveAccessPointVisualizer.csproj" />
   <Project Path="ArchiveViewerBackend/ArchiveViewerBackend.csproj" />
+  <Project Path="ZLibBindings.Tests/ZLibBindings.Tests.csproj" />
+  <Project Path="ZLibBindings/ZLibBindings.csproj" />
 </Solution>
