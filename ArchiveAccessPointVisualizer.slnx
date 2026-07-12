@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ArchiveAccessPointVisualizer/ArchiveAccessPointVisualizer.csproj" />
+  <Project Path="ArchiveViewerBackend/ArchiveViewerBackend.csproj" />
+</Solution>
