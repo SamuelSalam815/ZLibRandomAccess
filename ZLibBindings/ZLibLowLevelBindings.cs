@@ -1,12 +1,11 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using ZLibBindings.Constants;
+using unsafe z_streamp = ZLibBindings.State.z_stream_s**;
 
 namespace ZLibBindings;
 
-using unsafe voidpf = void**;
-using unsafe Bytef = byte*;
-
-public static partial class ZLibLowLevelBindings
+public static unsafe partial class ZLibLowLevelBindings
 {
     private const string ZlibLibrary = "z.dll";
 
@@ -16,27 +15,20 @@ public static partial class ZLibLowLevelBindings
 
     public static string ZlibVersion() =>
         Marshal.PtrToStringUTF8(zlibVersion())!;
-}
 
+    [LibraryImport(ZlibLibrary)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial ZReturnCode deflateInit(z_streamp strm, ZCompressionLevel level);
 
-public unsafe delegate voidpf alloc_func(voidpf opaque, uint items, uint size);
+    [LibraryImport(ZlibLibrary)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial ZReturnCode deflateEnd(z_streamp strm);
 
-public unsafe delegate void free_func(voidpf opaque, voidpf address);
+    [LibraryImport(ZlibLibrary)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial ZReturnCode inflateInit(z_streamp strm);
 
-public unsafe struct z_stream_s
-{
-    Bytef *next_in;
-    uint avail_in;
-    uint total_in;
-
-    Bytef *next_out;
-    uint avail_out;
-    ulong total_out;
-
-    byte* msg;
-    void** state;
-
-    IntPtr zalloc;
-    IntPtr zfree;
-
+    [LibraryImport(ZlibLibrary)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial ZReturnCode inflateEnd(z_streamp strm);
 }
