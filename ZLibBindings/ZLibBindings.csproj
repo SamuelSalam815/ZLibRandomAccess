@@ -5,12 +5,34 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+        <ZlibSourceDir>$(MSBuildThisFileDirectory)..\zlib-1.3.2\</ZlibSourceDir>
+        <ZlibBuildDir>$(ZlibSourceDir)build\</ZlibBuildDir>
+        <ZlibDll>$(ZlibBuildDir)Release\z.dll</ZlibDll>
     </PropertyGroup>
 
     <ItemGroup>
-      <None Update="zlib1.dll">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
+        <None Include="$(ZlibDLL)">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <Visible>false</Visible>
+            <Link>z.dll</Link>
+        </None>
+
+        <!--Define list of source files for building zlib-->
+        <ZlibSource Include="$(ZlibSourceDir)**\*.c;$(ZlibSourceDir)**\*.h;$(ZlibSourceDir)CMakeLists.txt"
+                    Exclude="$(ZlibBuildDir)**" />
     </ItemGroup>
+
+    <!--Build zlib library from source using visual studio-->
+    <Target Name="BuildZlib"
+            BeforeTargets="AssignTargetPaths"
+            Inputs="@(ZlibSource)"
+            Outputs="$(ZlibDll)"
+            Condition="'$(DesignTimeBuild)' != 'true'">
+        <Exec WorkingDirectory="$(ZlibSourceDir)"
+              Command="cmake -S . -B build -D ZLIB_BUILD_TESTING=OFF -D ZLIB_BUILD_SHARED=ON -D ZLIB_BUILD_STATIC=OFF -D ZLIB_BUILD_MINIZIP=OFF -D ZLIB_INSTALL=OFF -D ZLIB_PREFIX=OFF -G &quot;Visual Studio 17 2022&quot;" />
+        <Exec WorkingDirectory="$(ZlibSourceDir)"
+              Command="cmake --build build --config Release" />
+    </Target>
 
 </Project>

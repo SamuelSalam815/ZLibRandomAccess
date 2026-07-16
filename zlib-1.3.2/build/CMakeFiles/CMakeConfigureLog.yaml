@@ -1,0 +1,608 @@
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineSystem.cmake:205 (message)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      The system is: Windows - 10.0.26200 - AMD64
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCCompiler.cmake:123 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+      Compiler:  
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      MSBuild version 17.9.5+33de0b227 for .NET Framework
+      Build started 16/07/2026 04:44:23.
+      
+      Project "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\4.0.1\\CompilerIdC\\CompilerIdC.vcxproj" on node 1 (default targets).
+      PrepareForBuild:
+        Creating directory "Debug\\".
+        Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+        Creating directory "Debug\\CompilerIdC.tlog\\".
+      InitializeBuildStatus:
+        Creating "Debug\\CompilerIdC.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+        Touching "Debug\\CompilerIdC.tlog\\unsuccessfulbuild".
+      ClCompile:
+        C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\bin\\HostX64\\x64\\CL.exe /c /nologo /W0 /WX- /diagnostics:column /Od /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\\\" /Fd"Debug\\vc143.pdb" /external:W0 /Gd /TC /FC /errorReport:queue CMakeCCompilerId.c
+        CMakeCCompilerId.c
+      Link:
+        C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:".\\CompilerIdC.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\\CompilerIdC.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\\CompilerIdC.lib" /MACHINE:X64 Debug\\CMakeCCompilerId.obj
+        CompilerIdC.vcxproj -> C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\4.0.1\\CompilerIdC\\CompilerIdC.exe
+      PostBuildEvent:
+        for %%i in (cl.exe) do @echo CMAKE_C_COMPILER=%%~$PATH:i
+        :VCEnd
+        CMAKE_C_COMPILER=C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\bin\\Hostx64\\x64\\cl.exe
+      FinalizeBuildStatus:
+        Deleting file "Debug\\CompilerIdC.tlog\\unsuccessfulbuild".
+        Touching "Debug\\CompilerIdC.tlog\\CompilerIdC.lastbuildstate".
+      Done Building Project "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\4.0.1\\CompilerIdC\\CompilerIdC.vcxproj" (default targets).
+      
+      Build succeeded.
+          0 Warning(s)
+          0 Error(s)
+      
+      Time Elapsed 00:00:00.60
+      
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.exe"
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.vcxproj"
+      
+      The C compiler identification is MSVC, found in:
+        C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/4.0.1/CompilerIdC/CompilerIdC.exe
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:83 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    checks:
+      - "Detecting C compiler ABI info"
+    directories:
+      source: "C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-3f55bu"
+      binary: "C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-3f55bu"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "CMAKE_C_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-3f55bu'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_c43c0.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild version 17.9.5+33de0b227 for .NET Framework
+        Build started 16/07/2026 04:44:24.
+        
+        Project "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-3f55bu\\cmTC_c43c0.vcxproj" on node 1 (default targets).
+        PrepareForBuild:
+          Creating directory "cmTC_c43c0.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creating directory "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-3f55bu\\Debug\\".
+          Creating directory "cmTC_c43c0.dir\\Debug\\cmTC_c43c0.tlog\\".
+        InitializeBuildStatus:
+          Creating "cmTC_c43c0.dir\\Debug\\cmTC_c43c0.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_c43c0.dir\\Debug\\cmTC_c43c0.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_c43c0.dir\\Debug\\\\" /Fd"cmTC_c43c0.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.0\\Modules\\CMakeCCompilerABI.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.39.33519 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_c43c0.dir\\Debug\\\\" /Fd"cmTC_c43c0.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.0\\Modules\\CMakeCCompilerABI.c"
+          CMakeCCompilerABI.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-3f55bu\\Debug\\cmTC_c43c0.exe" /INCREMENTAL /ILK:"cmTC_c43c0.dir\\Debug\\cmTC_c43c0.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-3f55bu/Debug/cmTC_c43c0.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-3f55bu/Debug/cmTC_c43c0.lib" /MACHINE:X64  /machine:x64 cmTC_c43c0.dir\\Debug\\CMakeCCompilerABI.obj
+          cmTC_c43c0.vcxproj -> C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-3f55bu\\Debug\\cmTC_c43c0.exe
+        FinalizeBuildStatus:
+          Deleting file "cmTC_c43c0.dir\\Debug\\cmTC_c43c0.tlog\\unsuccessfulbuild".
+          Touching "cmTC_c43c0.dir\\Debug\\cmTC_c43c0.tlog\\cmTC_c43c0.lastbuildstate".
+        Done Building Project "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-3f55bu\\cmTC_c43c0.vcxproj" (default targets).
+        
+        Build succeeded.
+            0 Warning(s)
+            0 Error(s)
+        
+        Time Elapsed 00:00:00.52
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:227 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Parsed C implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?))("|,| |$)]
+        linker tool for 'C': C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.39.33519/bin/HostX64/x64/link.exe
+        implicit libs: []
+        implicit objs: []
+        implicit dirs: []
+        implicit fwks: []
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/Internal/CMakeDetermineLinkerId.cmake:36 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:264 (cmake_determine_linker_id)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Running the C compiler's linker: "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.39.33519/bin/HostX64/x64/link.exe" "-v"
+      Microsoft (R) Incremental Linker Version 14.39.33519.0
+      Copyright (C) Microsoft Corporation.  All rights reserved.
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckIncludeFile.cmake:99 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckTypeSize.cmake:318 (check_include_file)"
+      - "CMakeLists.txt:78 (check_type_size)"
+    checks:
+      - "Looking for sys/types.h"
+    directories:
+      source: "C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-7om7w8"
+      binary: "C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-7om7w8"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "HAVE_SYS_TYPES_H"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-7om7w8'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_feae2.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild version 17.9.5+33de0b227 for .NET Framework
+        Build started 16/07/2026 04:44:25.
+        
+        Project "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-7om7w8\\cmTC_feae2.vcxproj" on node 1 (default targets).
+        PrepareForBuild:
+          Creating directory "cmTC_feae2.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creating directory "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-7om7w8\\Debug\\".
+          Creating directory "cmTC_feae2.dir\\Debug\\cmTC_feae2.tlog\\".
+        InitializeBuildStatus:
+          Creating "cmTC_feae2.dir\\Debug\\cmTC_feae2.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_feae2.dir\\Debug\\cmTC_feae2.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _LARGEFILE64_SOURCE=1 /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_feae2.dir\\Debug\\\\" /Fd"cmTC_feae2.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-7om7w8\\CheckIncludeFile.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.39.33519 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _LARGEFILE64_SOURCE=1 /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_feae2.dir\\Debug\\\\" /Fd"cmTC_feae2.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-7om7w8\\CheckIncludeFile.c"
+          CheckIncludeFile.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-7om7w8\\Debug\\cmTC_feae2.exe" /INCREMENTAL /ILK:"cmTC_feae2.dir\\Debug\\cmTC_feae2.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-7om7w8/Debug/cmTC_feae2.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-7om7w8/Debug/cmTC_feae2.lib" /MACHINE:X64  /machine:x64 cmTC_feae2.dir\\Debug\\CheckIncludeFile.obj
+          cmTC_feae2.vcxproj -> C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-7om7w8\\Debug\\cmTC_feae2.exe
+        FinalizeBuildStatus:
+          Deleting file "cmTC_feae2.dir\\Debug\\cmTC_feae2.tlog\\unsuccessfulbuild".
+          Touching "cmTC_feae2.dir\\Debug\\cmTC_feae2.tlog\\cmTC_feae2.lastbuildstate".
+        Done Building Project "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-7om7w8\\cmTC_feae2.vcxproj" (default targets).
+        
+        Build succeeded.
+            0 Warning(s)
+            0 Error(s)
+        
+        Time Elapsed 00:00:00.61
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckIncludeFile.cmake:99 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckTypeSize.cmake:319 (check_include_file)"
+      - "CMakeLists.txt:78 (check_type_size)"
+    checks:
+      - "Looking for stdint.h"
+    directories:
+      source: "C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-g8yo88"
+      binary: "C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-g8yo88"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "HAVE_STDINT_H"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-g8yo88'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_9a5dc.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild version 17.9.5+33de0b227 for .NET Framework
+        Build started 16/07/2026 04:44:26.
+        
+        Project "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-g8yo88\\cmTC_9a5dc.vcxproj" on node 1 (default targets).
+        PrepareForBuild:
+          Creating directory "cmTC_9a5dc.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creating directory "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-g8yo88\\Debug\\".
+          Creating directory "cmTC_9a5dc.dir\\Debug\\cmTC_9a5dc.tlog\\".
+        InitializeBuildStatus:
+          Creating "cmTC_9a5dc.dir\\Debug\\cmTC_9a5dc.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_9a5dc.dir\\Debug\\cmTC_9a5dc.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _LARGEFILE64_SOURCE=1 /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_9a5dc.dir\\Debug\\\\" /Fd"cmTC_9a5dc.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-g8yo88\\CheckIncludeFile.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.39.33519 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _LARGEFILE64_SOURCE=1 /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_9a5dc.dir\\Debug\\\\" /Fd"cmTC_9a5dc.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-g8yo88\\CheckIncludeFile.c"
+          CheckIncludeFile.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-g8yo88\\Debug\\cmTC_9a5dc.exe" /INCREMENTAL /ILK:"cmTC_9a5dc.dir\\Debug\\cmTC_9a5dc.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-g8yo88/Debug/cmTC_9a5dc.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-g8yo88/Debug/cmTC_9a5dc.lib" /MACHINE:X64  /machine:x64 cmTC_9a5dc.dir\\Debug\\CheckIncludeFile.obj
+          cmTC_9a5dc.vcxproj -> C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-g8yo88\\Debug\\cmTC_9a5dc.exe
+        FinalizeBuildStatus:
+          Deleting file "cmTC_9a5dc.dir\\Debug\\cmTC_9a5dc.tlog\\unsuccessfulbuild".
+          Touching "cmTC_9a5dc.dir\\Debug\\cmTC_9a5dc.tlog\\cmTC_9a5dc.lastbuildstate".
+        Done Building Project "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-g8yo88\\cmTC_9a5dc.vcxproj" (default targets).
+        
+        Build succeeded.
+            0 Warning(s)
+            0 Error(s)
+        
+        Time Elapsed 00:00:00.54
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckIncludeFile.cmake:99 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckTypeSize.cmake:320 (check_include_file)"
+      - "CMakeLists.txt:78 (check_type_size)"
+    checks:
+      - "Looking for stddef.h"
+    directories:
+      source: "C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-vkd3th"
+      binary: "C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-vkd3th"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "HAVE_STDDEF_H"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-vkd3th'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_190ac.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild version 17.9.5+33de0b227 for .NET Framework
+        Build started 16/07/2026 04:44:27.
+        
+        Project "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-vkd3th\\cmTC_190ac.vcxproj" on node 1 (default targets).
+        PrepareForBuild:
+          Creating directory "cmTC_190ac.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creating directory "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-vkd3th\\Debug\\".
+          Creating directory "cmTC_190ac.dir\\Debug\\cmTC_190ac.tlog\\".
+        InitializeBuildStatus:
+          Creating "cmTC_190ac.dir\\Debug\\cmTC_190ac.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_190ac.dir\\Debug\\cmTC_190ac.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _LARGEFILE64_SOURCE=1 /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_190ac.dir\\Debug\\\\" /Fd"cmTC_190ac.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-vkd3th\\CheckIncludeFile.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.39.33519 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _LARGEFILE64_SOURCE=1 /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_190ac.dir\\Debug\\\\" /Fd"cmTC_190ac.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-vkd3th\\CheckIncludeFile.c"
+          CheckIncludeFile.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-vkd3th\\Debug\\cmTC_190ac.exe" /INCREMENTAL /ILK:"cmTC_190ac.dir\\Debug\\cmTC_190ac.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-vkd3th/Debug/cmTC_190ac.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-vkd3th/Debug/cmTC_190ac.lib" /MACHINE:X64  /machine:x64 cmTC_190ac.dir\\Debug\\CheckIncludeFile.obj
+          cmTC_190ac.vcxproj -> C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-vkd3th\\Debug\\cmTC_190ac.exe
+        FinalizeBuildStatus:
+          Deleting file "cmTC_190ac.dir\\Debug\\cmTC_190ac.tlog\\unsuccessfulbuild".
+          Touching "cmTC_190ac.dir\\Debug\\cmTC_190ac.tlog\\cmTC_190ac.lastbuildstate".
+        Done Building Project "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-vkd3th\\cmTC_190ac.vcxproj" (default targets).
+        
+        Build succeeded.
+            0 Warning(s)
+            0 Error(s)
+        
+        Time Elapsed 00:00:00.56
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckTypeSize.cmake:212 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckTypeSize.cmake:339 (__check_type_size_impl)"
+      - "CMakeLists.txt:78 (check_type_size)"
+    checks:
+      - "Check size of off64_t"
+    directories:
+      source: "C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-1q42v4"
+      binary: "C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-1q42v4"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "HAVE_OFF64_T"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-1q42v4'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_cf4e7.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild version 17.9.5+33de0b227 for .NET Framework
+        Build started 16/07/2026 04:44:27.
+        
+        Project "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q42v4\\cmTC_cf4e7.vcxproj" on node 1 (default targets).
+        PrepareForBuild:
+          Creating directory "cmTC_cf4e7.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creating directory "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q42v4\\Debug\\".
+          Creating directory "cmTC_cf4e7.dir\\Debug\\cmTC_cf4e7.tlog\\".
+        InitializeBuildStatus:
+          Creating "cmTC_cf4e7.dir\\Debug\\cmTC_cf4e7.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_cf4e7.dir\\Debug\\cmTC_cf4e7.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _LARGEFILE64_SOURCE=1 /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_cf4e7.dir\\Debug\\\\" /Fd"cmTC_cf4e7.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q42v4\\OFF64_T.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.39.33519 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _LARGEFILE64_SOURCE=1 /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_cf4e7.dir\\Debug\\\\" /Fd"cmTC_cf4e7.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q42v4\\OFF64_T.c"
+          OFF64_T.c
+        C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q42v4\\OFF64_T.c(29,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q42v4\\cmTC_cf4e7.vcxproj]
+        C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q42v4\\OFF64_T.c(30,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q42v4\\cmTC_cf4e7.vcxproj]
+        C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q42v4\\OFF64_T.c(31,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q42v4\\cmTC_cf4e7.vcxproj]
+        C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q42v4\\OFF64_T.c(32,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q42v4\\cmTC_cf4e7.vcxproj]
+        C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q42v4\\OFF64_T.c(33,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q42v4\\cmTC_cf4e7.vcxproj]
+        Done Building Project "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q42v4\\cmTC_cf4e7.vcxproj" (default targets) -- FAILED.
+        
+        Build FAILED.
+        
+        "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q42v4\\cmTC_cf4e7.vcxproj" (default target) (1) ->
+        (ClCompile target) -> 
+          C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q42v4\\OFF64_T.c(29,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q42v4\\cmTC_cf4e7.vcxproj]
+          C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q42v4\\OFF64_T.c(30,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q42v4\\cmTC_cf4e7.vcxproj]
+          C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q42v4\\OFF64_T.c(31,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q42v4\\cmTC_cf4e7.vcxproj]
+          C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q42v4\\OFF64_T.c(32,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q42v4\\cmTC_cf4e7.vcxproj]
+          C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q42v4\\OFF64_T.c(33,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1q42v4\\cmTC_cf4e7.vcxproj]
+        
+            0 Warning(s)
+            5 Error(s)
+        
+        Time Elapsed 00:00:00.35
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckFunctionExists.cmake:93 (try_compile)"
+      - "CMakeLists.txt:84 (check_function_exists)"
+    checks:
+      - "Looking for fseeko"
+    directories:
+      source: "C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-bl8q88"
+      binary: "C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-bl8q88"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "HAVE_FSEEKO"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-bl8q88'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_7f6a9.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild version 17.9.5+33de0b227 for .NET Framework
+        Build started 16/07/2026 04:44:28.
+        
+        Project "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-bl8q88\\cmTC_7f6a9.vcxproj" on node 1 (default targets).
+        PrepareForBuild:
+          Creating directory "cmTC_7f6a9.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creating directory "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-bl8q88\\Debug\\".
+          Creating directory "cmTC_7f6a9.dir\\Debug\\cmTC_7f6a9.tlog\\".
+        InitializeBuildStatus:
+          Creating "cmTC_7f6a9.dir\\Debug\\cmTC_7f6a9.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_7f6a9.dir\\Debug\\cmTC_7f6a9.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=fseeko /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_7f6a9.dir\\Debug\\\\" /Fd"cmTC_7f6a9.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-bl8q88\\CheckFunctionExists.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.39.33519 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=fseeko /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_7f6a9.dir\\Debug\\\\" /Fd"cmTC_7f6a9.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-bl8q88\\CheckFunctionExists.c"
+          CheckFunctionExists.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-bl8q88\\Debug\\cmTC_7f6a9.exe" /INCREMENTAL /ILK:"cmTC_7f6a9.dir\\Debug\\cmTC_7f6a9.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-bl8q88/Debug/cmTC_7f6a9.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-bl8q88/Debug/cmTC_7f6a9.lib" /MACHINE:X64  /machine:x64 cmTC_7f6a9.dir\\Debug\\CheckFunctionExists.obj
+        CheckFunctionExists.obj : error LNK2019: unresolved external symbol fseeko referenced in function main [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-bl8q88\\cmTC_7f6a9.vcxproj]
+        C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-bl8q88\\Debug\\cmTC_7f6a9.exe : fatal error LNK1120: 1 unresolved externals [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-bl8q88\\cmTC_7f6a9.vcxproj]
+        Done Building Project "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-bl8q88\\cmTC_7f6a9.vcxproj" (default targets) -- FAILED.
+        
+        Build FAILED.
+        
+        "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-bl8q88\\cmTC_7f6a9.vcxproj" (default target) (1) ->
+        (Link target) -> 
+          CheckFunctionExists.obj : error LNK2019: unresolved external symbol fseeko referenced in function main [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-bl8q88\\cmTC_7f6a9.vcxproj]
+          C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-bl8q88\\Debug\\cmTC_7f6a9.exe : fatal error LNK1120: 1 unresolved externals [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-bl8q88\\cmTC_7f6a9.vcxproj]
+        
+            0 Warning(s)
+            2 Error(s)
+        
+        Time Elapsed 00:00:00.48
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckIncludeFile.cmake:99 (try_compile)"
+      - "CMakeLists.txt:89 (check_include_file)"
+    checks:
+      - "Looking for stdarg.h"
+    directories:
+      source: "C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-zrfnc3"
+      binary: "C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-zrfnc3"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "HAVE_STDARG_H"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-zrfnc3'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_27007.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild version 17.9.5+33de0b227 for .NET Framework
+        Build started 16/07/2026 04:44:29.
+        
+        Project "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zrfnc3\\cmTC_27007.vcxproj" on node 1 (default targets).
+        PrepareForBuild:
+          Creating directory "cmTC_27007.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creating directory "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zrfnc3\\Debug\\".
+          Creating directory "cmTC_27007.dir\\Debug\\cmTC_27007.tlog\\".
+        InitializeBuildStatus:
+          Creating "cmTC_27007.dir\\Debug\\cmTC_27007.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_27007.dir\\Debug\\cmTC_27007.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_27007.dir\\Debug\\\\" /Fd"cmTC_27007.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zrfnc3\\CheckIncludeFile.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.39.33519 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_27007.dir\\Debug\\\\" /Fd"cmTC_27007.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zrfnc3\\CheckIncludeFile.c"
+          CheckIncludeFile.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zrfnc3\\Debug\\cmTC_27007.exe" /INCREMENTAL /ILK:"cmTC_27007.dir\\Debug\\cmTC_27007.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-zrfnc3/Debug/cmTC_27007.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-zrfnc3/Debug/cmTC_27007.lib" /MACHINE:X64  /machine:x64 cmTC_27007.dir\\Debug\\CheckIncludeFile.obj
+          cmTC_27007.vcxproj -> C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zrfnc3\\Debug\\cmTC_27007.exe
+        FinalizeBuildStatus:
+          Deleting file "cmTC_27007.dir\\Debug\\cmTC_27007.tlog\\unsuccessfulbuild".
+          Touching "cmTC_27007.dir\\Debug\\cmTC_27007.tlog\\cmTC_27007.lastbuildstate".
+        Done Building Project "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zrfnc3\\cmTC_27007.vcxproj" (default targets).
+        
+        Build succeeded.
+            0 Warning(s)
+            0 Error(s)
+        
+        Time Elapsed 00:00:00.52
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckIncludeFile.cmake:99 (try_compile)"
+      - "CMakeLists.txt:94 (check_include_file)"
+    checks:
+      - "Looking for unistd.h"
+    directories:
+      source: "C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-7th6na"
+      binary: "C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-7th6na"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "HAVE_UNISTD_H"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-7th6na'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_fef22.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild version 17.9.5+33de0b227 for .NET Framework
+        Build started 16/07/2026 04:44:30.
+        
+        Project "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-7th6na\\cmTC_fef22.vcxproj" on node 1 (default targets).
+        PrepareForBuild:
+          Creating directory "cmTC_fef22.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creating directory "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-7th6na\\Debug\\".
+          Creating directory "cmTC_fef22.dir\\Debug\\cmTC_fef22.tlog\\".
+        InitializeBuildStatus:
+          Creating "cmTC_fef22.dir\\Debug\\cmTC_fef22.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_fef22.dir\\Debug\\cmTC_fef22.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_fef22.dir\\Debug\\\\" /Fd"cmTC_fef22.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-7th6na\\CheckIncludeFile.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.39.33519 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_fef22.dir\\Debug\\\\" /Fd"cmTC_fef22.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-7th6na\\CheckIncludeFile.c"
+          CheckIncludeFile.c
+        C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-7th6na\\CheckIncludeFile.c(1,10): error C1083: Cannot open include file: 'unistd.h': No such file or directory [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-7th6na\\cmTC_fef22.vcxproj]
+        Done Building Project "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-7th6na\\cmTC_fef22.vcxproj" (default targets) -- FAILED.
+        
+        Build FAILED.
+        
+        "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-7th6na\\cmTC_fef22.vcxproj" (default target) (1) ->
+        (ClCompile target) -> 
+          C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-7th6na\\CheckIncludeFile.c(1,10): error C1083: Cannot open include file: 'unistd.h': No such file or directory [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-7th6na\\cmTC_fef22.vcxproj]
+        
+            0 Warning(s)
+            1 Error(s)
+        
+        Time Elapsed 00:00:00.37
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/Internal/CheckSourceCompiles.cmake:104 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckCSourceCompiles.cmake:58 (cmake_check_source_compiles)"
+      - "CMakeLists.txt:105 (check_c_source_compiles)"
+    checks:
+      - "Performing Test HAVE___ATTR__VIS_HIDDEN"
+    directories:
+      source: "C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-446n2r"
+      binary: "C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-446n2r"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "HAVE___ATTR__VIS_HIDDEN"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/CMakeScratch/TryCompile-446n2r'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_c614d.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild version 17.9.5+33de0b227 for .NET Framework
+        Build started 16/07/2026 04:44:30.
+        
+        Project "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\cmTC_c614d.vcxproj" on node 1 (default targets).
+        PrepareForBuild:
+          Creating directory "cmTC_c614d.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creating directory "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\Debug\\".
+          Creating directory "cmTC_c614d.dir\\Debug\\cmTC_c614d.tlog\\".
+        InitializeBuildStatus:
+          Creating "cmTC_c614d.dir\\Debug\\cmTC_c614d.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_c614d.dir\\Debug\\cmTC_c614d.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D HAVE___ATTR__VIS_HIDDEN /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_c614d.dir\\Debug\\\\" /Fd"cmTC_c614d.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\src.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.39.33519 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W1 /WX /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D HAVE___ATTR__VIS_HIDDEN /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_c614d.dir\\Debug\\\\" /Fd"cmTC_c614d.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\src.c"
+          src.c
+        C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\src.c(3,29): error C2061: syntax error: identifier '__attribute__' [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\cmTC_c614d.vcxproj]
+        C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\src.c(3,29): error C2059: syntax error: ';' [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\cmTC_c614d.vcxproj]
+        C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\src.c(3,56): error C2143: syntax error: missing ')' before 'string' [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\cmTC_c614d.vcxproj]
+        C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\src.c(3,64): error C2059: syntax error: ')' [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\cmTC_c614d.vcxproj]
+        C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\src.c(3,65): error C2059: syntax error: ')' [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\cmTC_c614d.vcxproj]
+        C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\src.c(3,66): error C2059: syntax error: ')' [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\cmTC_c614d.vcxproj]
+        Done Building Project "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\cmTC_c614d.vcxproj" (default targets) -- FAILED.
+        
+        Build FAILED.
+        
+        "C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\cmTC_c614d.vcxproj" (default target) (1) ->
+        (ClCompile target) -> 
+          C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\src.c(3,29): error C2061: syntax error: identifier '__attribute__' [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\cmTC_c614d.vcxproj]
+          C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\src.c(3,29): error C2059: syntax error: ';' [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\cmTC_c614d.vcxproj]
+          C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\src.c(3,56): error C2143: syntax error: missing ')' before 'string' [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\cmTC_c614d.vcxproj]
+          C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\src.c(3,64): error C2059: syntax error: ')' [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\cmTC_c614d.vcxproj]
+          C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\src.c(3,65): error C2059: syntax error: ')' [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\cmTC_c614d.vcxproj]
+          C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\src.c(3,66): error C2059: syntax error: ')' [C:\\Users\\Sam\\source\\repos\\ArchiveAccessPointVisualizer\\ZLibBindings\\zlib-1.3.2\\build\\CMakeFiles\\CMakeScratch\\TryCompile-446n2r\\cmTC_c614d.vcxproj]
+        
+            0 Warning(s)
+            6 Error(s)
+        
+        Time Elapsed 00:00:00.36
+        
+      exitCode: 1
+...
