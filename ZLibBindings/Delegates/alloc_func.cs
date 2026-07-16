@@ -1,4 +1,4 @@
-﻿using unsafe Voidpf = void**;
+﻿using unsafe Voidpf = void*;
 
 namespace ZLibBindings.Delegates;
 

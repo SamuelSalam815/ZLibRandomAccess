@@ -1,71 +1,69 @@
-﻿using unsafe Bytef = byte*;
-
-namespace ZLibBindings.State;
+﻿namespace ZLibBindings.State;
 
 public unsafe struct gz_header_s
 {
     /// <summary>
     /// True if compressed data believed to be text
     /// </summary>
-    int text;
+    public int text;
 
     /// <summary>
     /// Modification time
     /// </summary>
-    ulong time;
+    public ulong time;
 
     /// <summary>
     /// Extra flags (not used when writing a gzip file)
     /// </summary>
-    int xflags;
+    public int xflags;
 
     /// <summary>
     /// Operating system
     /// </summary>
-    int os;
+    public int os;
 
     /// <summary>
     /// pointer to extra field or Z_NULL if none
     /// </summary>
-    Bytef* extra;
+    public byte* extra;
 
     /// <summary>
     /// extra field length (valid if extra != Z_NULL)
     /// </summary>
-    uint extra_len;
+    public uint extra_len;
 
     /// <summary>
     /// space at extra (only when reading header)
     /// </summary>
-    uint extra_max;
+    public uint extra_max;
 
     /// <summary>
     /// pointer to zero-terminated file name or Z_NULL
     /// </summary>
-    Bytef* name;
+    public byte* name;
 
     /// <summary>
     /// space at name (only when reading header)
     /// </summary>
-    uint name_max;
+    public uint name_max;
 
     /// <summary>
     /// pointer to zero-terminated comment or Z_NULL
     /// </summary>
-    Bytef* comment;
+    public byte* comment;
 
     /// <summary>
     /// space at comment (only when reading header)
     /// </summary>
-    uint comm_max;
+    public uint comm_max;
 
     /// <summary>
     /// true if there was or will be a header crc
     /// </summary>
-    int hcrc;
+    public int hcrc;
 
     /// <summary>
     /// true when done reading gzip header (not used when writing a gzip file)
     /// </summary>
-    int done;
+    public int done;
 }

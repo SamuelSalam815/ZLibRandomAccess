@@ -1,7 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using ZLibBindings.Constants;
-using unsafe z_streamp = ZLibBindings.State.z_stream_s**;
+using unsafe z_streamp = ZLibBindings.State.z_stream_s*;
 
 namespace ZLibBindings;
 
@@ -22,11 +22,23 @@ public static unsafe partial class ZLibLowLevelBindings
 
     [LibraryImport(ZlibLibrary)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial ZReturnCode deflate(z_streamp strm, ZFlushValue flush);
+
+    [LibraryImport(ZlibLibrary)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial ZReturnCode deflatePending(z_streamp strm, uint* pending, int* bits);
+
+    [LibraryImport(ZlibLibrary)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial ZReturnCode deflateEnd(z_streamp strm);
 
     [LibraryImport(ZlibLibrary)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial ZReturnCode inflateInit(z_streamp strm);
+
+    [LibraryImport(ZlibLibrary)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial ZReturnCode inflate(z_streamp strm, ZFlushValue flush);
 
     [LibraryImport(ZlibLibrary)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
