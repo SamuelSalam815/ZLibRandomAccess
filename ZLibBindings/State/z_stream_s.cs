@@ -32,7 +32,7 @@ public unsafe struct z_stream_s
     /// <summary>
     /// Total number of bytes output so far
     /// </summary>
-    public ulong total_out;
+    public uint total_out;
 
     /// <summary>
     /// Last error message, NULL if no error
@@ -68,10 +68,10 @@ public unsafe struct z_stream_s
     /// <summary>
     /// Adler-32 or CRC-32 value of the uncompressed data
     /// </summary>
-    public ulong adler;
+    public uint adler;
 
     /// <summary>
     /// Reserved for future use
     /// </summary>
-    public ulong reserved;
+    public uint reserved;
 }

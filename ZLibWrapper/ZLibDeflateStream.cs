@@ -9,9 +9,11 @@ namespace ZLibWrapper;
 
 internal unsafe class ZLibDeflateStream : Stream
 {
+    private const int BufferSize = 1024 * 4;
     private readonly z_stream_s* _zLibStream;
     private readonly Stream _stream;
     private readonly bool _leaveOpen;
+    private bool _isDisposed;
 
     public ZLibDeflateStream(Stream stream, bool leaveOpen = false)
     {
@@ -31,7 +33,13 @@ internal unsafe class ZLibDeflateStream : Stream
 
     public override void Flush()
     {
-        throw new NotSupportedException("Flush is not supported!");
+        Flush(ZFlushValue.Z_SYNC_FLUSH);
+    }
+
+    private void Flush(ZFlushValue flushValue)
+    {
+        var outputBuffer = stackalloc byte[BufferSize];
+        ProcessZLibStream(null, 0, outputBuffer, BufferSize, flushValue);
     }
 
     public override int Read(byte[] buffer, int offset, int count)
@@ -51,22 +59,44 @@ internal unsafe class ZLibDeflateStream : Stream
 
     public override void Write(byte[] buffer, int offset, int count)
     {
-        const int bufferSize = 1024 * 4;
-        var outputBuffer = stackalloc byte[bufferSize];
+        var outputBuffer = stackalloc byte[BufferSize];
         fixed (byte* inputBuffer = &buffer[offset])
         {
-            ProcessZLibStream(count, inputBuffer, outputBuffer, bufferSize);
+            ProcessZLibStream(inputBuffer, count, outputBuffer, BufferSize, ZFlushValue.Z_NO_FLUSH);
         }
     }
 
-    private void ProcessZLibStream(int count, byte* inputBuffer, byte* outputBuffer, int bufferSize)
+    private void ProcessZLibStream(byte* inputBufferPointer, int inputBufferSize, byte* outputBufferPointer, int outputBufferSize, ZFlushValue flushValue)
     {
-        _zLibStream->next_in = inputBuffer;
-        _zLibStream->avail_in = (uint)count;
-        _zLibStream->next_out = outputBuffer;
-        _zLibStream->avail_out = (uint)bufferSize;
+        _zLibStream->next_in = inputBufferPointer;
+        _zLibStream->avail_in = (uint)inputBufferSize;
+        _zLibStream->next_out = outputBufferPointer;
+        _zLibStream->avail_out = (uint)outputBufferSize;
+
         while (true)
         {
+            var returnCode = ZLibLowLevelBindings
+                .deflate(_zLibStream, flushValue)
+                .GuardAgainstFatalErrors(_zLibStream);
+            var nextAction = ZLibDeflateLogic.GetNextAction(_zLibStream, returnCode, flushValue);
+            var outputBytes = new Span<byte>(outputBufferPointer, outputBufferSize - (int)_zLibStream->avail_out);
+
+            switch (nextAction)
+            {
+                case ZLibWriteAction.CompleteInput:
+                    _stream.Write(outputBytes);
+                    return;
+                case ZLibWriteAction.RequestMoreOutputSpace:
+                    _stream.Write(outputBytes);
+                    _zLibStream->next_out = outputBufferPointer;
+                    _zLibStream->avail_out = (uint)outputBufferSize;
+                    break;
+                case ZLibWriteAction.Continue:
+                    break;
+                case ZLibWriteAction.FailToDecide:
+                default:
+                    throw new UnreachableException($"Enum value ({nextAction}) was not explicitly handled! This indicates a logical error!");
+            }
         }
     }
 
@@ -86,18 +116,21 @@ internal unsafe class ZLibDeflateStream : Stream
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing)
+        if (!disposing || _isDisposed)
         {
-            if (!_leaveOpen)
-            {
-                _stream.Dispose();
-            }
-
-            ZLibLowLevelBindings
-                .deflateEnd(_zLibStream)
-                .GuardAgainstFatalErrors(_zLibStream);
-            Marshal.FreeHGlobal((IntPtr)_zLibStream);
+            return;
         }
-        base.Dispose(disposing);
+
+        Flush(ZFlushValue.Z_FINISH);
+        ZLibLowLevelBindings
+            .deflateEnd(_zLibStream)
+            .GuardAgainstFatalErrors(_zLibStream);
+        Marshal.FreeHGlobal((IntPtr)_zLibStream);
+
+        if (!_leaveOpen)
+        {
+            _stream.Dispose();
+        }
+        _isDisposed = true;
     }
 }
