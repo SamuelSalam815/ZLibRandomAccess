@@ -92,11 +92,10 @@ http-client.private.env.json
 
 **/indexLayout.xml
 
-ZLibSource/*.tar
-ZLibSource/**/*.gz
-ZLibSource/**/*.o
-ZLibSource/**/*.a
-ZLibSource/**/*.exe
-ZLibSource/**/*.dll
+zlib-1.3.2/**/*.o
+zlib-1.3.2/**/*.a
+zlib-1.3.2/**/*.exe
+zlib-1.3.2/**/*.dll
+zlib-1.3.2/build/
 
 *.DotSettings.user
