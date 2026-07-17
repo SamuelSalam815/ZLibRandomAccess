@@ -1,8 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/cmake_install.cmake",
-		"C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/contrib/cmake_install.cmake"
-	],
-	"Parallel" : false
-}

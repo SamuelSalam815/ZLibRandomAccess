@@ -1,5 +1,0 @@
-C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/zlib.dir
-C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/PACKAGE.dir
-C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/ALL_BUILD.dir
-C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/CMakeFiles/ZERO_CHECK.dir
-C:/Users/Sam/source/repos/ArchiveAccessPointVisualizer/ZLibBindings/zlib-1.3.2/build/contrib/CMakeFiles/PACKAGE.dir
