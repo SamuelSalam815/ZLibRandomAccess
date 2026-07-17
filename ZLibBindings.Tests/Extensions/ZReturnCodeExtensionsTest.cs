@@ -41,6 +41,24 @@ public unsafe class ZReturnCodeExtensionsTest
         exception.ReturnCode.ShouldBe(returnCode);
     }
 
+    [TestMethod]
+    [DataRow(ZReturnCode.Z_BUF_ERROR)]
+    public void NonFatalErrors_ShouldPassThrough(ZReturnCode returnCode)
+    {
+        var state = new z_stream_s();
+        returnCode.GuardAgainstFatalErrors(&state).ShouldBe(returnCode);
+    }
+
+    [TestMethod]
+    [DataRow(ZReturnCode.Z_OK)]
+    [DataRow(ZReturnCode.Z_STREAM_END)]
+    [DataRow(ZReturnCode.Z_NEED_DICT)]
+    public void ReturnCodes_ShouldPassThrough(ZReturnCode returnCode)
+    {
+        var state = new z_stream_s();
+        returnCode.GuardAgainstFatalErrors(&state).ShouldBe(returnCode);
+    }
+
     [TestCleanup]
     public void CleanUp()
     {

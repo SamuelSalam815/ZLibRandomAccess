@@ -5,8 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-
-        <ZlibSourceDir>$(MSBuildThisFileDirectory)..\zlib-1.3.2\</ZlibSourceDir>
+        <ZlibSourceDir>$(MSBuildThisFileDirectory)..\zlib\</ZlibSourceDir>
         <ZlibBuildDir>$(ZlibSourceDir)build\</ZlibBuildDir>
         <ZlibDll>$(ZlibBuildDir)Release\z.dll</ZlibDll>
     </PropertyGroup>
