@@ -3,38 +3,32 @@ using ZLibBindings.State;
 
 namespace ZLibWrapper;
 
-internal class ZLibDeflateLogic
+internal static unsafe class ZLibDeflateLogic
 {
-    public static ZLibDeflateAction DecideNextAction(z_stream_s zLibStream, ZReturnCode returnCode)
+    public static ZLibWriteAction GetNextAction(z_stream_s* zLibStream, ZReturnCode returnCode)
     {
         switch (returnCode)
         {
             case ZReturnCode.Z_OK:
-                return ZLibDeflateAction.CallDeflateAgain;
-            case ZReturnCode.Z_BUF_ERROR:
-                if (zLibStream.avail_in == 0)
-                {
-                    return ZLibDeflateAction.InputBufferConsumed;
-                }
-
-                if (zLibStream.avail_out == 0)
-                {
-                    return ZLibDeflateAction.OutputBufferConsumed;
-                }
-
-                return ZLibDeflateAction.FailedToDecide;
+                return ZLibWriteAction.Continue;
 
             case ZReturnCode.Z_STREAM_END:
-            case ZReturnCode.Z_NEED_DICT:
-                return ZLibDeflateAction.FailedToDecide;
+                return ZLibWriteAction.CompleteInput;
 
-            case ZReturnCode.Z_ERRNO:
-            case ZReturnCode.Z_STREAM_ERROR:
-            case ZReturnCode.Z_DATA_ERROR:
-            case ZReturnCode.Z_MEM_ERROR:
-            case ZReturnCode.Z_VERSION_ERROR:
+            case ZReturnCode.Z_BUF_ERROR:
+                if (zLibStream->avail_in == 0)
+                {
+                    return ZLibWriteAction.CompleteInput;
+                }
+
+                if (zLibStream->avail_out == 0)
+                {
+                    return ZLibWriteAction.RequestMoreOutputSpace;
+                }
+
+                return ZLibWriteAction.FailToDecide;
             default:
-                return ZLibDeflateAction.FatalError;
+                return ZLibWriteAction.FailToDecide;
         }
     }
 }

@@ -4,6 +4,8 @@
     <TargetFrameworks>net10.0-windows7.0</TargetFrameworks>
     
     <IsPackable>false</IsPackable>
+    
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ZLibBindings\ZLibBindings.csproj" />
+    <ProjectReference Include="..\ZLibWrapper\ZLibWrapper.csproj" />
   </ItemGroup>
   
 </Project>

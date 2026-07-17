@@ -24,7 +24,9 @@ internal unsafe class ZLibDeflateStream : Stream
             zalloc = null,
             opaque = null
         };
-        ZLibLowLevelBindings.deflateInit(_zLibStream, ZCompressionLevel.Z_DEFAULT_COMPRESSION).GuardAgainstFatalErrors(_zLibStream);
+        ZLibLowLevelBindings.deflateInit(
+            _zLibStream,
+            ZCompressionLevel.Z_DEFAULT_COMPRESSION).GuardAgainstFatalErrors(_zLibStream);
     }
 
     public override void Flush()
@@ -65,28 +67,6 @@ internal unsafe class ZLibDeflateStream : Stream
         _zLibStream->avail_out = (uint)bufferSize;
         while (true)
         {
-            var returnCode = ZLibLowLevelBindings.deflate(_zLibStream, ZFlushValue.Z_NO_FLUSH);
-            var numBytesReadyToWrite = (int)(bufferSize - _zLibStream->avail_out);
-            var writtenBytes = new ReadOnlySpan<byte>(outputBuffer, numBytesReadyToWrite);
-            switch (ZLibDeflateLogic.DecideNextAction(*_zLibStream, returnCode))
-            {
-                case ZLibDeflateAction.FailedToDecide:
-                    throw new ZLibException("Failed to interpret the required action for the given return code in the current state.", returnCode);
-                case ZLibDeflateAction.FatalError:
-                    throw new ZLibException($"Encountered fatal error '{returnCode.ToString()}' : {(*_zLibStream).GetErrorMessage()}!", returnCode);
-                case ZLibDeflateAction.InputBufferConsumed:
-                    _stream.Write(writtenBytes);
-                    return;
-                case ZLibDeflateAction.OutputBufferConsumed:
-                    _stream.Write(writtenBytes);
-                    _zLibStream->next_out = outputBuffer;
-                    _zLibStream->avail_out = (uint)bufferSize;
-                    break;
-                case ZLibDeflateAction.CallDeflateAgain:
-                    break;
-                default:
-                    throw new UnreachableException("Unknown ZLibDeflateAction! Logical error!");
-            }
         }
     }
 

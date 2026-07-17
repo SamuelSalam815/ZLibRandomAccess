@@ -17,7 +17,8 @@ public static unsafe class ZReturnCodeExtensions
             case ZReturnCode.Z_DATA_ERROR:
             case ZReturnCode.Z_MEM_ERROR:
             case ZReturnCode.Z_VERSION_ERROR:
-                throw new ZLibException((*streamState).GetErrorMessage(), returnCode);
+                var errorMessage = (*streamState).GetErrorMessage();
+                throw new ZLibException(errorMessage, returnCode);
             default:
                 return returnCode;
         }

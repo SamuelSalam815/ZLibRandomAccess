@@ -12,6 +12,6 @@ public class ZLibLowLevelBindingsTest
     [TestMethod]
     public void ZLibVersion_IsExpected()
     {
-        ZLibLowLevelBindings.ZlibVersion().ShouldBe("1.3.2");
+        ZLibLowLevelBindings.GetZlibVersion().ShouldBe("1.3.2");
     }
 }
