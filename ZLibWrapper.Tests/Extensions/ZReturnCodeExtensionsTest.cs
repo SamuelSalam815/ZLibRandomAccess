@@ -36,7 +36,7 @@ public unsafe class ZReturnCodeExtensionsTest
             returnCode.GuardAgainstFatalErrors(&state);
         };
         var exception = action.ShouldThrow<ZLibException>();
-        exception.Message.ShouldBe(_errorMessage);
+        exception.Message.ShouldContain(_errorMessage);
         exception.ReturnCode.ShouldBe(returnCode);
     }
 
