@@ -29,7 +29,7 @@ internal unsafe class ZLibInflateStream : Stream
             opaque = null
         };
         ZLibLowLevelBindings
-            .inflateInit(_zLibStream)
+            .inflateInit2(_zLibStream, ZWindowBits.AutoDetectHeader32KbWindow)
             .GuardAgainstFatalErrors(_zLibStream);
         _inputBuffer = (byte*)Marshal.AllocHGlobal(InputBufferSize);
     }

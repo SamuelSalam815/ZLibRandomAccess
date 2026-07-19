@@ -1,10 +1,8 @@
 ﻿namespace ZLibBindings.Constants;
 
-public enum ZCompressionLevel
+public enum ZMemoryLevel
 {
-    Z_NO_COMPRESSION = 0,
-
-    Z_BEST_SPEED = Level1,
+    Default = 8,
 
     Level1 = 1,
     Level2 = 2,
@@ -15,8 +13,4 @@ public enum ZCompressionLevel
     Level7 = 7,
     Level8 = 8,
     Level9 = 9,
-
-    Z_BEST_COMPRESSION = 9,
-
-    Z_DEFAULT_COMPRESSION = (-1),
 }

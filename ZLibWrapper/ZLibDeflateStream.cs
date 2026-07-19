@@ -27,9 +27,7 @@ internal unsafe class ZLibDeflateStream : Stream
             zalloc = null,
             opaque = null
         };
-        ZLibLowLevelBindings.deflateInit(
-            _zLibStream,
-            ZCompressionLevel.Z_DEFAULT_COMPRESSION).GuardAgainstFatalErrors(_zLibStream);
+        ZLibLowLevelBindings.deflateInit2(_zLibStream).GuardAgainstFatalErrors(_zLibStream);
     }
 
     public override void Flush()

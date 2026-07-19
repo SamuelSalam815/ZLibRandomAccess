@@ -27,7 +27,7 @@ public class ZLibInflateStreamTest
     private Stream Compress(string data)
     {
         var outputStream = new MemoryStream();
-        using var sut = new ZLibStream(outputStream, CompressionLevel.Optimal,leaveOpen: true);
+        using var sut = new ZLibDeflateStream(outputStream, leaveOpen: true);
         using var streamWriter = new StreamWriter(sut);
 
         streamWriter.WriteLine(data);
