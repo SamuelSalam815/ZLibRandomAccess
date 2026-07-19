@@ -1,9 +1,8 @@
 ﻿using System.IO;
 using JetBrains.Annotations;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ZLibWrapper;
 
-namespace ZLibBindings.Tests;
+namespace ZLibWrapper.Tests;
 
 [TestClass]
 [TestSubject(typeof(ZLibDeflateStream))]

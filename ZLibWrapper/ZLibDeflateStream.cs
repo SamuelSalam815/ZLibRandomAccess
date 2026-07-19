@@ -4,12 +4,13 @@ using ZLibBindings;
 using ZLibBindings.Constants;
 using ZLibBindings.State;
 using ZLibWrapper.Extensions;
+using ZLibWrapper.Logic;
 
 namespace ZLibWrapper;
 
 internal unsafe class ZLibDeflateStream : Stream
 {
-    private const int BufferSize = 1024 * 4;
+    private const int BufferSize = 1024;
     private readonly z_stream_s* _zLibStream;
     private readonly Stream _stream;
     private readonly bool _leaveOpen;
@@ -39,7 +40,7 @@ internal unsafe class ZLibDeflateStream : Stream
     private void Flush(ZFlushValue flushValue)
     {
         var outputBuffer = stackalloc byte[BufferSize];
-        ProcessZLibStream(null, 0, outputBuffer, BufferSize, flushValue);
+        Write(null, 0, outputBuffer, BufferSize, flushValue);
     }
 
     public override int Read(byte[] buffer, int offset, int count)
@@ -62,11 +63,11 @@ internal unsafe class ZLibDeflateStream : Stream
         var outputBuffer = stackalloc byte[BufferSize];
         fixed (byte* inputBuffer = &buffer[offset])
         {
-            ProcessZLibStream(inputBuffer, count, outputBuffer, BufferSize, ZFlushValue.Z_NO_FLUSH);
+            Write(inputBuffer, count, outputBuffer, BufferSize, ZFlushValue.Z_NO_FLUSH);
         }
     }
 
-    private void ProcessZLibStream(byte* inputBufferPointer, int inputBufferSize, byte* outputBufferPointer, int outputBufferSize, ZFlushValue flushValue)
+    private void Write(byte* inputBufferPointer, int inputBufferSize, byte* outputBufferPointer, int outputBufferSize, ZFlushValue flushValue)
     {
         _zLibStream->next_in = inputBufferPointer;
         _zLibStream->avail_in = (uint)inputBufferSize;
@@ -78,22 +79,22 @@ internal unsafe class ZLibDeflateStream : Stream
             var returnCode = ZLibLowLevelBindings
                 .deflate(_zLibStream, flushValue)
                 .GuardAgainstFatalErrors(_zLibStream);
-            var nextAction = ZLibDeflateLogic.GetNextAction(_zLibStream, returnCode, flushValue);
+            var nextAction = ZLibPumpLogic.GetNextAction(_zLibStream, returnCode, flushValue);
             var outputBytes = new Span<byte>(outputBufferPointer, outputBufferSize - (int)_zLibStream->avail_out);
 
             switch (nextAction)
             {
-                case ZLibWriteAction.CompleteInput:
+                case ZLibPumpAction.RequestMoreInputSpace:
                     _stream.Write(outputBytes);
                     return;
-                case ZLibWriteAction.RequestMoreOutputSpace:
+                case ZLibPumpAction.RequestMoreOutputSpace:
                     _stream.Write(outputBytes);
                     _zLibStream->next_out = outputBufferPointer;
                     _zLibStream->avail_out = (uint)outputBufferSize;
                     break;
-                case ZLibWriteAction.Continue:
+                case ZLibPumpAction.Continue:
                     break;
-                case ZLibWriteAction.FailToDecide:
+                case ZLibPumpAction.FailToDecide:
                 default:
                     throw new UnreachableException($"Enum value ({nextAction}) was not explicitly handled! This indicates a logical error!");
             }

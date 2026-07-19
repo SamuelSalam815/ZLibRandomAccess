@@ -1,1 +1,1 @@
-﻿[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ZLibBindings.Tests")]
+﻿[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ZLibWrapper.Tests")]

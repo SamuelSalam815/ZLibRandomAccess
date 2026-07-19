@@ -3,5 +3,6 @@
   <Project Path="ArchiveViewerBackend/ArchiveViewerBackend.csproj" />
   <Project Path="ZLibBindings.Tests/ZLibBindings.Tests.csproj" />
   <Project Path="ZLibBindings/ZLibBindings.csproj" />
+  <Project Path="ZLibWrapper.Tests/ZLibWrapper.Tests.csproj" />
   <Project Path="ZLibWrapper/ZLibWrapper.csproj" />
 </Solution>

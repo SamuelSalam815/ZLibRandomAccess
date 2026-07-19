@@ -5,10 +5,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shouldly;
 using ZLibBindings.Constants;
 using ZLibBindings.State;
-using ZLibWrapper;
 using ZLibWrapper.Extensions;
 
-namespace ZLibBindings.Tests.Extensions;
+namespace ZLibWrapper.Tests.Extensions;
 
 [TestClass]
 [TestSubject(typeof(ZReturnCodeExtensions))]
