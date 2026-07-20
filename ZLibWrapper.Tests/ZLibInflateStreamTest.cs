@@ -27,12 +27,14 @@ public class ZLibInflateStreamTest
     private Stream Compress(string data)
     {
         var outputStream = new MemoryStream();
-        using var sut = new ZLibDeflateStream(outputStream, leaveOpen: true);
-        using var streamWriter = new StreamWriter(sut);
-
-        streamWriter.WriteLine(data);
-        streamWriter.Flush();
-
+        // Use native dotnet ZLibStream to set up compressed data
+        using (var sut = new ZLibStream(outputStream, CompressionMode.Compress, leaveOpen: true))
+        {
+            using (var streamWriter = new StreamWriter(sut))
+            {
+                streamWriter.Write(data);
+            }
+        }
         outputStream.Position = 0;
         return outputStream;
     }

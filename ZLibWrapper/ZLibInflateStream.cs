@@ -15,9 +15,13 @@ internal unsafe class ZLibInflateStream : Stream
     private readonly bool _leaveOpen;
     private readonly byte* _inputBuffer;
     private const int InputBufferSize = 1024;
+    private int _numBytesInInputBuffer;
+    private bool _isDisposed;
+
+
     private Span<byte> InputBufferSpan => new(_inputBuffer, InputBufferSize);
 
-    public ZLibInflateStream(Stream compressedStream, bool leaveOpen = false)
+    public ZLibInflateStream(Stream compressedStream, bool leaveOpen = false, ZWindowBits windowBits = ZWindowBits.Default)
     {
         _compressedStream = compressedStream;
         _leaveOpen = leaveOpen;
@@ -29,9 +33,10 @@ internal unsafe class ZLibInflateStream : Stream
             opaque = null
         };
         ZLibLowLevelBindings
-            .inflateInit2(_zLibStream, ZWindowBits.AutoDetectHeader32KbWindow)
+            .inflateInit2(_zLibStream, windowBits)
             .GuardAgainstFatalErrors(_zLibStream);
         _inputBuffer = (byte*)Marshal.AllocHGlobal(InputBufferSize);
+        _numBytesInInputBuffer = 0;
     }
 
     public override void Flush()
@@ -53,32 +58,34 @@ internal unsafe class ZLibInflateStream : Stream
         }
     }
 
-    private int Read(byte* outputPtr, int outputSize)
+    private int Read(byte* outputBufferPointer, int outputBufferSize)
     {
         checked
         {
-            _zLibStream->next_out = outputPtr;
-            _zLibStream->avail_out = (uint)outputSize;
+            _zLibStream->next_out = outputBufferPointer;
+            _zLibStream->avail_out = (uint)outputBufferSize;
             while (true)
             {
                 var zNoFlush = ZFlushValue.Z_NO_FLUSH;
                 var returnCode = ZLibLowLevelBindings.inflate(_zLibStream, zNoFlush)
                     .GuardAgainstFatalErrors(_zLibStream);
-                var nextAction = ZLibPumpLogic.GetNextAction(_zLibStream, returnCode, zNoFlush);
+                var nextAction = ZLibPumpLogic.GetNextAction(_zLibStream, returnCode);
 
                 switch (nextAction)
                 {
                     case ZLibPumpAction.RequestMoreInputSpace:
-                        if (_compressedStream.Read(InputBufferSpan) == 0)
+                        _numBytesInInputBuffer = _compressedStream.Read(InputBufferSpan);
+                        if (_numBytesInInputBuffer == 0)
                         {
-                            return outputSize - (int)_zLibStream->avail_out;
+                            return GetNumBytesReadFromZlib(outputBufferSize);
                         }
 
                         _zLibStream->next_in = _inputBuffer;
-                        _zLibStream->avail_in = InputBufferSize;
+                        _zLibStream->avail_in = (uint)_numBytesInInputBuffer;
                         break;
+                    case ZLibPumpAction.CompleteStream:
                     case ZLibPumpAction.RequestMoreOutputSpace:
-                        return outputSize - (int)_zLibStream->avail_out;
+                        return GetNumBytesReadFromZlib(outputBufferSize);
                     case ZLibPumpAction.Continue:
                         break;
                     case ZLibPumpAction.FailToDecide:
@@ -86,6 +93,14 @@ internal unsafe class ZLibInflateStream : Stream
                         throw new UnreachableException($"Enum value ({nextAction}) was not explicitly handled! This indicates a logical error!");
                 }
             }
+        }
+    }
+
+    private int GetNumBytesReadFromZlib(int outputBufferSize)
+    {
+        checked
+        {
+            return outputBufferSize - (int)_zLibStream->avail_out;
         }
     }
 
@@ -120,7 +135,7 @@ internal unsafe class ZLibInflateStream : Stream
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing)
+        if (disposing && !_isDisposed)
         {
             if (!_leaveOpen)
             {
@@ -131,6 +146,7 @@ internal unsafe class ZLibInflateStream : Stream
                 .inflateEnd(_zLibStream)
                 .GuardAgainstFatalErrors(_zLibStream);
             Marshal.FreeHGlobal((IntPtr)_zLibStream);
+            _isDisposed = true;
         }
         base.Dispose(disposing);
     }

@@ -1,51 +1,55 @@
-﻿using ZLibBindings.Constants;
+﻿using System.Diagnostics.CodeAnalysis;
+using ZLibBindings.Constants;
 using ZLibBindings.State;
 
 namespace ZLibWrapper.Logic;
 
 internal static unsafe class ZLibPumpLogic
 {
-    public static ZLibPumpAction GetNextAction(z_stream_s* zLibStream, ZReturnCode returnCode,
-        ZFlushValue  flushValue)
+    public static ZLibPumpAction GetNextAction(z_stream_s* zLibStream, ZReturnCode returnCode)
     {
         switch (returnCode)
         {
             case ZReturnCode.Z_OK:
-                return HandleOk(zLibStream, flushValue);
+                return ZLibPumpAction.Continue;
 
             case ZReturnCode.Z_STREAM_END:
-                return ZLibPumpAction.RequestMoreInputSpace;
+                return ZLibPumpAction.CompleteStream;
 
             case ZReturnCode.Z_BUF_ERROR:
-                return HandleBufferError(zLibStream);
+                return TryGetActionForMoreBufferSpace(zLibStream, out var bufferSpaceAction)
+                    ? bufferSpaceAction.Value
+                    : ZLibPumpAction.FailToDecide;
+
             default:
                 return ZLibPumpAction.FailToDecide;
         }
     }
 
-    private static ZLibPumpAction HandleOk(z_stream_s* zLibStream, ZFlushValue flushValue)
+    private static bool TryGetActionForMoreBufferSpace(z_stream_s* zLibStream, [NotNullWhen(true)]out ZLibPumpAction? action)
     {
-        if (flushValue == ZFlushValue.Z_NO_FLUSH)
+        var needMoreInput = zLibStream->avail_in == 0;
+        var needMoreOutput = zLibStream->avail_out == 0;
+
+        if (needMoreInput && needMoreOutput)
         {
-            return ZLibPumpAction.Continue;
+            action = ZLibPumpAction.RequestMoreOutputSpace;
+            return true;
         }
 
-        var outputFullyConsumed = zLibStream->avail_out == 0;
-        return outputFullyConsumed ? ZLibPumpAction.RequestMoreOutputSpace : ZLibPumpAction.RequestMoreInputSpace;
-    }
-
-    private static ZLibPumpAction HandleBufferError(z_stream_s* zLibStream)
-    {
-        if (zLibStream->avail_in == 0)
+        if (needMoreInput)
         {
-            return ZLibPumpAction.RequestMoreInputSpace;
+            action = ZLibPumpAction.RequestMoreInputSpace;
+            return true;
         }
 
-        if (zLibStream->avail_out == 0)
+        if (needMoreOutput)
         {
-            return ZLibPumpAction.RequestMoreOutputSpace;
+            action = ZLibPumpAction.RequestMoreOutputSpace;
+            return true;
         }
 
-        return ZLibPumpAction.FailToDecide;
+        action = null;
+        return false;
     }
 }

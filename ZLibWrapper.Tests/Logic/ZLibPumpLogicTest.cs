@@ -14,10 +14,9 @@ public unsafe class ZLibPumpLogicTest
     private void TestDecision(
         z_stream_s state,
         ZReturnCode returnCode,
-        ZFlushValue flushValue,
         ZLibPumpAction expectedAction)
     {
-        ZLibPumpLogic.GetNextAction(&state, returnCode, flushValue).ShouldBe(expectedAction);
+        ZLibPumpLogic.GetNextAction(&state, returnCode).ShouldBe(expectedAction);
     }
 
     [TestMethod]
@@ -28,60 +27,45 @@ public unsafe class ZLibPumpLogicTest
     [DataRow(ZReturnCode.Z_VERSION_ERROR)]
     public void FatalErrorCodes_ShouldFail(ZReturnCode returnCode)
     {
-        TestDecision(new z_stream_s(), returnCode, ZFlushValue.Z_NO_FLUSH, ZLibPumpAction.FailToDecide);
+        TestDecision(new z_stream_s(), returnCode, ZLibPumpAction.FailToDecide);
     }
 
     [TestMethod]
     public void BufferErrorWhenNeitherInputNorOutputAreConsumed_ShouldFail()
     {
-        TestDecision(new z_stream_s{avail_in = 1, avail_out = 1}, ZReturnCode.Z_BUF_ERROR, ZFlushValue.Z_NO_FLUSH, ZLibPumpAction.FailToDecide);
+        TestDecision(
+            new z_stream_s { avail_in = 1, avail_out = 1 },
+            ZReturnCode.Z_BUF_ERROR,
+            ZLibPumpAction.FailToDecide);
     }
 
     [TestMethod]
-    public void ConsumedInputBuffer_ShouldCompleteInput()
+    public void ConsumedInputBuffer_ShouldRequestMoreSpace()
     {
-        TestDecision(new z_stream_s(), ZReturnCode.Z_BUF_ERROR, ZFlushValue.Z_NO_FLUSH, ZLibPumpAction.RequestMoreInputSpace);
+        TestDecision(new z_stream_s { avail_out = 1 }, ZReturnCode.Z_BUF_ERROR, ZLibPumpAction.RequestMoreInputSpace);
     }
 
     [TestMethod]
     public void ConsumedOutputBuffer_ShouldRequestMoreSpace()
     {
-        TestDecision(new z_stream_s { avail_in = 1 }, ZReturnCode.Z_BUF_ERROR, ZFlushValue.Z_NO_FLUSH, ZLibPumpAction.RequestMoreOutputSpace);
+        TestDecision(new z_stream_s { avail_in = 1 }, ZReturnCode.Z_BUF_ERROR, ZLibPumpAction.RequestMoreOutputSpace);
+    }
+
+    [TestMethod]
+    public void ConsumedInputAndConsumedOutput_ShouldRequestMoreOutputSpace()
+    {
+        TestDecision(new z_stream_s(), ZReturnCode.Z_BUF_ERROR, ZLibPumpAction.RequestMoreOutputSpace);
     }
 
     [TestMethod]
     public void OkErrorCode_ShouldContinue()
     {
-        TestDecision(new z_stream_s(), ZReturnCode.Z_OK, ZFlushValue.Z_NO_FLUSH, ZLibPumpAction.Continue);
+        TestDecision(new z_stream_s { avail_in = 1, avail_out = 1 }, ZReturnCode.Z_OK, ZLibPumpAction.Continue);
     }
 
     [TestMethod]
-    [DataRow(ZFlushValue.Z_PARTIAL_FLUSH)]
-    [DataRow(ZFlushValue.Z_SYNC_FLUSH)]
-    [DataRow(ZFlushValue.Z_FULL_FLUSH)]
-    [DataRow(ZFlushValue.Z_FINISH)]
-    [DataRow(ZFlushValue.Z_BLOCK)]
-    [DataRow(ZFlushValue.Z_TREES)]
-    public void OkCodeOnFlushAndFullOutput_ShouldRequestMoreOutputSpace(ZFlushValue flushValue)
+    public void EndOfStream_ShouldCompleteStream()
     {
-        TestDecision(new z_stream_s(), ZReturnCode.Z_OK, flushValue, ZLibPumpAction.RequestMoreOutputSpace);
-    }
-
-    [TestMethod]
-    [DataRow(ZFlushValue.Z_PARTIAL_FLUSH)]
-    [DataRow(ZFlushValue.Z_SYNC_FLUSH)]
-    [DataRow(ZFlushValue.Z_FULL_FLUSH)]
-    [DataRow(ZFlushValue.Z_FINISH)]
-    [DataRow(ZFlushValue.Z_BLOCK)]
-    [DataRow(ZFlushValue.Z_TREES)]
-    public void OkCodeOnFlush_ShouldCompleteInput(ZFlushValue flushValue)
-    {
-        TestDecision(new z_stream_s{avail_out = 1}, ZReturnCode.Z_OK, flushValue, ZLibPumpAction.RequestMoreInputSpace);
-    }
-
-    [TestMethod]
-    public void EndOfStream_ShouldCompleteInput()
-    {
-        TestDecision(new z_stream_s(), ZReturnCode.Z_STREAM_END, ZFlushValue.Z_NO_FLUSH, ZLibPumpAction.RequestMoreInputSpace);
+        TestDecision(new z_stream_s(), ZReturnCode.Z_STREAM_END, ZLibPumpAction.CompleteStream);
     }
 }

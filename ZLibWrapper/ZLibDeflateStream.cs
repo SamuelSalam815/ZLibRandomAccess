@@ -16,7 +16,8 @@ internal unsafe class ZLibDeflateStream : Stream
     private readonly bool _leaveOpen;
     private bool _isDisposed;
 
-    public ZLibDeflateStream(Stream stream, bool leaveOpen = false)
+    public ZLibDeflateStream(Stream stream, bool leaveOpen = false,
+        ZLibDeflateConfiguration? configuration = null)
     {
         _stream = stream;
         _leaveOpen = leaveOpen;
@@ -27,7 +28,14 @@ internal unsafe class ZLibDeflateStream : Stream
             zalloc = null,
             opaque = null
         };
-        ZLibLowLevelBindings.deflateInit2(_zLibStream).GuardAgainstFatalErrors(_zLibStream);
+        configuration ??= new ZLibDeflateConfiguration();
+        ZLibLowLevelBindings.deflateInit2(_zLibStream,
+            configuration.CompressionLevel,
+            ZDeflateCompressionMethod.Z_DEFLATED,
+            configuration.WindowBits,
+            configuration.MemoryLevel,
+            configuration.CompressionStrategy
+            ).GuardAgainstFatalErrors(_zLibStream);
     }
 
     public override void Flush()
@@ -77,12 +85,13 @@ internal unsafe class ZLibDeflateStream : Stream
             var returnCode = ZLibLowLevelBindings
                 .deflate(_zLibStream, flushValue)
                 .GuardAgainstFatalErrors(_zLibStream);
-            var nextAction = ZLibPumpLogic.GetNextAction(_zLibStream, returnCode, flushValue);
+            var nextAction = ZLibPumpLogic.GetNextAction(_zLibStream, returnCode);
             var outputBytes = new Span<byte>(outputBufferPointer, outputBufferSize - (int)_zLibStream->avail_out);
 
             switch (nextAction)
             {
                 case ZLibPumpAction.RequestMoreInputSpace:
+                case ZLibPumpAction.CompleteStream:
                     _stream.Write(outputBytes);
                     return;
                 case ZLibPumpAction.RequestMoreOutputSpace:
