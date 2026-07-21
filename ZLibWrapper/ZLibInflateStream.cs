@@ -10,33 +10,33 @@ namespace ZLibWrapper;
 
 internal unsafe class ZLibInflateStream : Stream
 {
-    private readonly z_stream_s* _zLibStream;
-    private readonly Stream _compressedStream;
-    private readonly bool _leaveOpen;
-    private readonly byte* _inputBuffer;
     private const int InputBufferSize = 1024;
-    private int _numBytesInInputBuffer;
+
+    protected readonly byte* InputBuffer;
+    protected readonly z_stream_s* ZLibStream;
+    protected readonly Stream CompressedStream;
+
+    private readonly bool _leaveOpen;
     private bool _isDisposed;
 
 
-    private Span<byte> InputBufferSpan => new(_inputBuffer, InputBufferSize);
+    protected Span<byte> InputBufferSpan => new(InputBuffer, InputBufferSize);
 
     public ZLibInflateStream(Stream compressedStream, bool leaveOpen = false, ZWindowBits windowBits = ZWindowBits.Default)
     {
-        _compressedStream = compressedStream;
+        CompressedStream = compressedStream;
         _leaveOpen = leaveOpen;
-        _zLibStream = (z_stream_s*)Marshal.AllocHGlobal(sizeof(z_stream_s));
-        *_zLibStream = new z_stream_s
+        ZLibStream = (z_stream_s*)Marshal.AllocHGlobal(sizeof(z_stream_s));
+        *ZLibStream = new z_stream_s
         {
             zfree = null,
             zalloc = null,
             opaque = null
         };
         ZLibLowLevelBindings
-            .inflateInit2(_zLibStream, windowBits)
-            .GuardAgainstFatalErrors(_zLibStream);
-        _inputBuffer = (byte*)Marshal.AllocHGlobal(InputBufferSize);
-        _numBytesInInputBuffer = 0;
+            .inflateInit2(ZLibStream, windowBits)
+            .GuardAgainstFatalErrors(ZLibStream);
+        InputBuffer = (byte*)Marshal.AllocHGlobal(InputBufferSize);
     }
 
     public override void Flush()
@@ -51,56 +51,71 @@ internal unsafe class ZLibInflateStream : Stream
             throw new ArgumentException(
                 $"Not enough space in buffer after offset={offset} to read the maximum count={count} of bytes");
         }
-        var outputSpan = new Span<byte>(buffer, offset, count);
-        fixed (byte* outputPtr = outputSpan)
+
+        fixed (byte* outputPtr = new Span<byte>(buffer, offset, count))
         {
-            return Read(outputPtr, count);
+            return Read(outputPtr, count, ZFlushValue.Z_NO_FLUSH);
         }
     }
 
-    private int Read(byte* outputBufferPointer, int outputBufferSize)
+    protected int Read(byte* outputBufferPointer, int outputBufferSize, ZFlushValue flushValue)
     {
         checked
         {
-            _zLibStream->next_out = outputBufferPointer;
-            _zLibStream->avail_out = (uint)outputBufferSize;
+            ZLibStream->next_out = outputBufferPointer;
+            ZLibStream->avail_out = (uint)outputBufferSize;
             while (true)
             {
-                var zNoFlush = ZFlushValue.Z_NO_FLUSH;
-                var returnCode = ZLibLowLevelBindings.inflate(_zLibStream, zNoFlush)
-                    .GuardAgainstFatalErrors(_zLibStream);
-                var nextAction = ZLibPumpLogic.GetNextAction(_zLibStream, returnCode);
+                var returnCode = ZLibLowLevelBindings.inflate(ZLibStream, flushValue)
+                    .GuardAgainstFatalErrors(ZLibStream);
+                var nextAction = ZLibPumpLogic.GetNextAction(ZLibStream, returnCode);
 
-                switch (nextAction)
+                if (HandleZLibReadAction(nextAction))
                 {
-                    case ZLibPumpAction.RequestMoreInputSpace:
-                        _numBytesInInputBuffer = _compressedStream.Read(InputBufferSpan);
-                        if (_numBytesInInputBuffer == 0)
-                        {
-                            return GetNumBytesReadFromZlib(outputBufferSize);
-                        }
-
-                        _zLibStream->next_in = _inputBuffer;
-                        _zLibStream->avail_in = (uint)_numBytesInInputBuffer;
-                        break;
-                    case ZLibPumpAction.CompleteStream:
-                    case ZLibPumpAction.RequestMoreOutputSpace:
-                        return GetNumBytesReadFromZlib(outputBufferSize);
-                    case ZLibPumpAction.Continue:
-                        break;
-                    case ZLibPumpAction.FailToDecide:
-                    default:
-                        throw new UnreachableException($"Enum value ({nextAction}) was not explicitly handled! This indicates a logical error!");
+                    return GetNumBytesReadFromZlib(outputBufferSize);
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Handles various values of the <see cref="ZLibPumpAction"/>
+    /// </summary>
+    /// <param name="nextAction"></param>
+    /// <returns>True if the read operation has completed.</returns>
+    /// <exception cref="UnreachableException"></exception>
+    protected virtual bool HandleZLibReadAction(ZLibPumpAction nextAction)
+    {
+        switch (nextAction)
+        {
+            case ZLibPumpAction.RequestMoreInputSpace:
+                var numBytesInInputBuffer = CompressedStream.Read(InputBufferSpan);
+                if (numBytesInInputBuffer == 0)
+                {
+                    return true;
+                }
+
+                ZLibStream->next_in = InputBuffer;
+                ZLibStream->avail_in = (uint)numBytesInInputBuffer;
+                break;
+            case ZLibPumpAction.CompleteStream:
+            case ZLibPumpAction.RequestMoreOutputSpace:
+                return true;
+            case ZLibPumpAction.Continue:
+                break;
+            case ZLibPumpAction.FailToDecide:
+            default:
+                throw new UnreachableException($"Enum value ({nextAction}) was not explicitly handled! This indicates a logical error!");
+        }
+
+        return false;
     }
 
     private int GetNumBytesReadFromZlib(int outputBufferSize)
     {
         checked
         {
-            return outputBufferSize - (int)_zLibStream->avail_out;
+            return outputBufferSize - (int)ZLibStream->avail_out;
         }
     }
 
@@ -119,17 +134,17 @@ internal unsafe class ZLibInflateStream : Stream
         throw new InvalidOperationException("Cannot write to a read-only stream!");
     }
 
-    public override bool CanRead => _compressedStream.CanRead;
+    public override bool CanRead => CompressedStream.CanRead;
 
     public override bool CanSeek => false;
 
     public override bool CanWrite => false;
 
-    public override long Length => _compressedStream.Length;
+    public override long Length => CompressedStream.Length;
 
     public override long Position
     {
-        get => _compressedStream.Position;
+        get => CompressedStream.Position;
         set => throw new NotSupportedException("Setting stream position is not supported!");
     }
 
@@ -139,13 +154,13 @@ internal unsafe class ZLibInflateStream : Stream
         {
             if (!_leaveOpen)
             {
-                _compressedStream.Dispose();
+                CompressedStream.Dispose();
             }
 
             ZLibLowLevelBindings
-                .inflateEnd(_zLibStream)
-                .GuardAgainstFatalErrors(_zLibStream);
-            Marshal.FreeHGlobal((IntPtr)_zLibStream);
+                .inflateEnd(ZLibStream)
+                .GuardAgainstFatalErrors(ZLibStream);
+            Marshal.FreeHGlobal((IntPtr)ZLibStream);
             _isDisposed = true;
         }
         base.Dispose(disposing);

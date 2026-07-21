@@ -43,20 +43,11 @@ internal unsafe class ZLibDeflateStream : Stream
         Flush(ZFlushValue.Z_SYNC_FLUSH);
     }
 
-    /// <summary>
-    /// Flushes the stream so that decompression can begin from this point without prior data.
-    /// </summary>
-    /// <returns>The byte offset in the compressed stream of the recovery point.</returns>
-    public long WriteRecoveryPoint()
-    {
-        Flush(ZFlushValue.Z_FULL_FLUSH);
-        return _stream.Position;
-    }
-
-    private void Flush(ZFlushValue flushValue)
+    protected void Flush(ZFlushValue flushValue)
     {
         var outputBuffer = stackalloc byte[BufferSize];
         Write(null, 0, outputBuffer, BufferSize, flushValue);
+        _stream.Flush();
     }
 
     public override int Read(byte[] buffer, int offset, int count)
