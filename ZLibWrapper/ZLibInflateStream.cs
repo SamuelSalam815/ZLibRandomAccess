@@ -22,7 +22,7 @@ internal unsafe class ZLibInflateStream : Stream
 
     protected Span<byte> InputBufferSpan => new(InputBuffer, InputBufferSize);
 
-    public ZLibInflateStream(Stream compressedStream, bool leaveOpen = false, ZWindowBits windowBits = ZWindowBits.Default)
+    public ZLibInflateStream(Stream compressedStream, bool leaveOpen = false, ZWindowBits windowBits = ZWindowBits.DefaultWindowSize)
     {
         CompressedStream = compressedStream;
         _leaveOpen = leaveOpen;

@@ -15,7 +15,7 @@ internal unsafe class ZLibInflateStreamWithRecoveryPoints : ZLibInflateStream
     public ZLibInflateStreamWithRecoveryPoints(
         Stream compressedStream,
         bool leaveOpen = false,
-        ZWindowBits windowBits = ZWindowBits.Default) : base(compressedStream, leaveOpen, windowBits)
+        ZWindowBits windowBits = ZWindowBits.DefaultWindowSize) : base(compressedStream, leaveOpen, windowBits)
     {
         _windowBits = windowBits;
     }

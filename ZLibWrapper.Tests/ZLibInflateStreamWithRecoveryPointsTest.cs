@@ -12,14 +12,13 @@ namespace ZLibWrapper.Tests;
 [TestSubject(typeof(ZLibInflateStreamWithRecoveryPoints))]
 public class ZLibInflateStreamWithRecoveryPointsTest
 {
-
     [TestMethod]
-    [DataRow(ZWindowBits.ZLib512BWindow)]
-    [DataRow(ZWindowBits.ZLib32KbWindow)]
-    [DataRow(ZWindowBits.GZip512BWindow)]
-    [DataRow(ZWindowBits.GZip32KbWindow)]
-    [DataRow(ZWindowBits.RawDeflate512BWindow)]
-    [DataRow(ZWindowBits.RawDeflate32KbWindow)]
+    [DataRow(ZWindowBits.WindowSize512B)]
+    [DataRow(ZWindowBits.WindowSize32Kb)]
+    [DataRow(ZWindowBits.WindowSize512B | ZWindowBits.GZipStream)]
+    [DataRow(ZWindowBits.WindowSize32Kb | ZWindowBits.GZipStream)]
+    [DataRow(ZWindowBits.RawDeflateStreamWindowSize512B)]
+    [DataRow(ZWindowBits.RawDeflateStreamWindowSize32Kb)]
     public void JumpingToRecoveryPoint_ShouldAllowSuccessfulDataRead(ZWindowBits windowBits)
     {
         const string greetingLine = "Hello, World!";

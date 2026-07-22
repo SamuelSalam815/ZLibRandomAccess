@@ -17,7 +17,7 @@ public static unsafe partial class ZLibLowLevelBindings
         z_streamp strm,
         ZCompressionLevel level = ZCompressionLevel.Z_DEFAULT_COMPRESSION,
         ZDeflateCompressionMethod method = ZDeflateCompressionMethod.Z_DEFLATED,
-        ZWindowBits windowBits = ZWindowBits.Default,
+        ZWindowBits windowBits = ZWindowBits.DefaultWindowSize,
         ZMemoryLevel memLevel = ZMemoryLevel.Default,
         ZCompressionStrategy strategy = ZCompressionStrategy.Z_DEFAULT_STRATEGY
     ) => deflateInit2_(strm, level, method, windowBits, memLevel, strategy, zlibVersion(), sizeof(z_stream_s));
@@ -36,7 +36,7 @@ public static unsafe partial class ZLibLowLevelBindings
 
     public static ZReturnCode inflateInit(z_streamp strm) => inflateInit_(strm, zlibVersion(), sizeof(z_stream_s));
 
-    public static ZReturnCode inflateInit2(z_streamp strm, ZWindowBits windowBits = ZWindowBits.Default) =>
+    public static ZReturnCode inflateInit2(z_streamp strm, ZWindowBits windowBits = ZWindowBits.DefaultWindowSize) =>
         inflateInit2_(strm, windowBits, zlibVersion(), sizeof(z_stream_s));
 
 

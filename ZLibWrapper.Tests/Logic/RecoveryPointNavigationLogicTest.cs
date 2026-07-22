@@ -11,12 +11,14 @@ namespace ZLibWrapper.Tests.Logic;
 public class RecoveryPointNavigationLogicTest
 {
     [TestMethod]
-    [DataRow(ZWindowBits.ZLib512BWindow, true)]
-    [DataRow(ZWindowBits.ZLib32KbWindow, true)]
-    [DataRow(ZWindowBits.GZip512BWindow, true)]
-    [DataRow(ZWindowBits.GZip32KbWindow, true)]
-    [DataRow(ZWindowBits.RawDeflate512BWindow, false)]
-    [DataRow(ZWindowBits.RawDeflate32KbWindow, false)]
+    [DataRow(ZWindowBits.WindowSize512B, true)]
+    [DataRow(ZWindowBits.WindowSize32Kb, true)]
+    [DataRow(ZWindowBits.WindowSize512B | ZWindowBits.GZipStream, true)]
+    [DataRow(ZWindowBits.WindowSize32Kb | ZWindowBits.GZipStream, true)]
+    [DataRow(ZWindowBits.WindowSize512B | ZWindowBits.AutoDetectHeader, true)]
+    [DataRow(ZWindowBits.WindowSize32Kb | ZWindowBits.AutoDetectHeader, true)]
+    [DataRow(ZWindowBits.RawDeflateStreamWindowSize512B, false)]
+    [DataRow(ZWindowBits.RawDeflateStreamWindowSize32Kb, false)]
     public void HeaderNeedsToBeRead_OnlyWhenWindowBitsRequireIt(ZWindowBits windowBits, bool shouldReadHeader)
     {
         RecoveryPointNavigationLogic.CreateFrom(windowBits)

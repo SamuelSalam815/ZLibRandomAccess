@@ -6,7 +6,7 @@ public record ZLibDeflateConfiguration
 {
     public ZCompressionLevel CompressionLevel { get; init; } = ZCompressionLevel.Z_DEFAULT_COMPRESSION;
 
-    public ZWindowBits WindowBits { get; init; } = ZWindowBits.Default;
+    public ZWindowBits WindowBits { get; init; } = ZWindowBits.DefaultWindowSize;
 
     public ZMemoryLevel MemoryLevel { get; init; } = ZMemoryLevel.Default;
 
