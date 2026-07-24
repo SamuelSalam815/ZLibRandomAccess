@@ -23,7 +23,7 @@ public class DiceRollResultTest
     [DataRow(2, 3)]
     public void ProvidingInvalidRollValues_ShouldThrow(int dieSize, int rolledValue)
     {
-        AssertArgumentException(() => RollBuilder.Roll(1).D(dieSize).Create().ResolveWith([rolledValue]));
+        AssertArgumentException(() => RollRequestBuilder.Roll(1).D(dieSize).Create().ResolveWith([rolledValue]));
     }
 
     [TestMethod]
@@ -32,7 +32,7 @@ public class DiceRollResultTest
     [DataRow(2, 3)]
     public void ProvidingIncorrectNumberOfRolls_ShouldThrow(int requestedNumberOfRolls, int actualNumberOfRolls)
     {
-        AssertArgumentException(() => RollBuilder
+        AssertArgumentException(() => RollRequestBuilder
             .Roll(requestedNumberOfRolls)
             .Create()
             .ResolveWith(Enumerable.Repeat(2, actualNumberOfRolls).ToArray()));
@@ -51,7 +51,7 @@ public class DiceRollResultTest
     public void ProvidingIncorrectNumberOfRollsWhenExtraRollsAreRequested_ShouldThrow(ExtraRollRequest extraRollRequest, int actualNumberOfReplacements)
     {
         AssertArgumentException(() =>
-            RollBuilder.Roll(1)
+            RollRequestBuilder.Roll(1)
             .With(extraRollRequest)
             .Create()
             .ResolveWith(
@@ -63,7 +63,7 @@ public class DiceRollResultTest
     [TestMethod]
     public void ProvidingValidDieRolls_ShouldCreateAnExpectedResult()
     {
-        RollBuilder
+        RollRequestBuilder
             .Roll(2)
             .D(3)
             .Create()
@@ -75,7 +75,7 @@ public class DiceRollResultTest
     [TestMethod]
     public void AdvantagedRolls_ShouldDiscardTheLowestValues()
     {
-        RollBuilder
+        RollRequestBuilder
             .Roll(2)
             .D(3)
             .WithAdvantage(2)
@@ -88,7 +88,7 @@ public class DiceRollResultTest
     [TestMethod]
     public void DisadvantagedRolls_ShouldDiscardTheHighestValues()
     {
-        RollBuilder
+        RollRequestBuilder
             .Roll(2)
             .D(3)
             .WithDisadvantage(2)

@@ -64,11 +64,4 @@ public record DiceRollResult
         rollDescription.AddLine("Total Roll: {0} = {1}", string.Join(" + ", selectedRolls), totalRoll);
         return new DiceRollResult(diceRollRequest, selectedRolls, discardedRolls, totalRoll, rollDescription);
     }
-
-    public bool Against(Test test, out GameEventDescription testDescription)
-    {
-        var didSucceed = test.AttemptWith(RollTotal, out testDescription);
-        testDescription.Append(RollDescription);
-        return didSucceed;
-    }
 }
