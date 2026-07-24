@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Linq;
 using JetBrains.Annotations;
-using LogSimulator.Checks;
+using LogSimulator.Rolls;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shouldly;
 
-namespace LogSimulator.Tests.Checks;
+namespace LogSimulator.Tests.Rolls;
 
 [TestClass]
-[TestSubject(typeof(AbilityCheckResolution.ByRolling))]
-public class ByRollingTest
+[TestSubject(typeof(CheckedRollResolution))]
+public class CheckedRollResolutionTest
 {
     private const string TestQuestion = "Will I rewrite this code?";
 
@@ -25,7 +25,7 @@ public class ByRollingTest
     public void ResolvingWithTheIncorrectNumberOfDice_ShouldThrow(int numberOfRolls)
     {
         var rolls = Enumerable.Repeat(2, numberOfRolls).ToArray();
-        AssertThrows(() => AbilityCheckBuilder
+        AssertThrows(() => CheckedRollBuilder
             .Test(TestQuestion)
             .Roll(3)
             .D(4)
@@ -39,7 +39,7 @@ public class ByRollingTest
     [DataRow(new[]{1,2,0,4})]
     public void ResolvingWithAnyInvalidRolls_ShouldThrow(int[] rolls)
     {
-        AssertThrows(() => AbilityCheckBuilder
+        AssertThrows(() => CheckedRollBuilder
             .Test(TestQuestion)
             .Roll(3)
             .D(4)
@@ -56,7 +56,7 @@ public class ByRollingTest
     [DataRow(new[] { 2, 1, 2, 2}, 5, -1)]
     public void RollingAboveTheDifficulty_ShouldSucceed(int[] rolls, int difficulty, int advantage)
     {
-        AbilityCheckBuilder
+        CheckedRollBuilder
             .Test(TestQuestion)
             .Roll(3)
             .D(4)
@@ -74,7 +74,7 @@ public class ByRollingTest
     [DataRow(new[] { 4, 2, 3, 4}, 10, -1)]
     public void RollingBelowTheDifficulty_ShouldFail(int[] rolls, int difficulty, int advantage)
     {
-        AbilityCheckBuilder
+        CheckedRollBuilder
             .Test(TestQuestion)
             .Roll(3)
             .D(4)
@@ -88,7 +88,7 @@ public class ByRollingTest
     [TestMethod]
     public void ResolvingWithDisadvantage_ShouldDropTheHighestValues()
     {
-        var resolution = AbilityCheckBuilder
+        var resolution = CheckedRollBuilder
             .Test(TestQuestion)
             .Roll(3)
             .D(4)
@@ -105,12 +105,14 @@ public class ByRollingTest
     [TestMethod]
     public void ResolvingWithAdvantage_ShouldDropTheLowestValues()
     {
-        var resolution = AbilityCheckBuilder
+        var resolution = CheckedRollBuilder
             .Test(TestQuestion)
             .Roll(3)
             .D(4)
             .WithDisadvantage(1)
-            .AgainstDifficulty(10).WithAdvantage(2).ResolveWith(1, 1, 4, 4, 4);
+            .AgainstDifficulty(10)
+            .WithAdvantage(2)
+            .ResolveWith(1, 1, 4, 4, 4);
 
         resolution.RollsSelected.ShouldBe([4,4,4]);
         resolution.RollsDiscarded.ShouldBe([1,1]);
@@ -126,7 +128,7 @@ public class ByRollingTest
         int[] expectedRollsSelected,
         int[] expectedRollsDiscarded)
     {
-        var resolution = AbilityCheckBuilder
+        var resolution = CheckedRollBuilder
             .Test(TestQuestion)
             .Roll(3)
             .D(4)

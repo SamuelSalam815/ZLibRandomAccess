@@ -1,13 +1,6 @@
-﻿namespace LogSimulator.Checks;
+﻿namespace LogSimulator.Rolls;
 
-[Flags]
-public enum ResolutionMethods
-{
-    None = 0,
-    DieRoll = 1,
-}
-
-public record AbilityCheckRequest(
+public record CheckedRollRequest(
     string Question,
     AbilityScore? TestedAbility,
     int BaseDiceCount,
@@ -21,10 +14,10 @@ public record AbilityCheckRequest(
     public bool IsDisadvantaged => AdvantageRating.IsDisadvantaged;
     public int TotalNumberOfDiceRequested => BaseDiceCount + AdvantageRating.AdditionalDice;
 
-    public AbilityCheckResolution AutoSucceed() => new AbilityCheckResolution.ByDeclaration(this, true);
-    public AbilityCheckResolution AutoFail() => new AbilityCheckResolution.ByDeclaration(this, false);
+    public AutomaticCheckedRollResolution AutoSucceed() => new AutomaticCheckedRollResolution(this, true);
+    public IRollResolution AutoFail() => new AutomaticCheckedRollResolution(this, false);
 
-    public AbilityCheckResolution ResolveWith(DieRollGenerator dieRollGenerator)
+    public CheckedRollResolution ResolveWith(DieRollGenerator dieRollGenerator)
     {
         var rolls = new int[TotalNumberOfDiceRequested];
         for (var i = 0; i < rolls.Length; i++)
@@ -32,6 +25,6 @@ public record AbilityCheckRequest(
             rolls[i] = dieRollGenerator(DiceFaceCount);
         }
 
-        return AbilityCheckResolution.ByRolling.CreateFrom(this, rolls);
+        return CheckedRollResolution.CreateFrom(this, rolls);
     }
 }

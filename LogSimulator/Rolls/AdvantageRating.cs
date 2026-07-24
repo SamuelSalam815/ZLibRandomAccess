@@ -1,4 +1,4 @@
-﻿namespace LogSimulator.Checks;
+﻿namespace LogSimulator.Rolls;
 
 public record struct AdvantageRating(int Value)
 {

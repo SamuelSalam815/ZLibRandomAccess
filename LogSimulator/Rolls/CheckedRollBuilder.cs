@@ -1,6 +1,6 @@
-﻿namespace LogSimulator.Checks;
+﻿namespace LogSimulator.Rolls;
 
-public class AbilityCheckBuilder(
+public class CheckedRollBuilder(
     string question,
     AbilityScore? testedAbility,
     int baseDiceCount,
@@ -15,7 +15,7 @@ public class AbilityCheckBuilder(
 
     public const int StandardTestDifficulty = 10;
 
-    public static AbilityCheckBuilder Test(string question) =>
+    public static CheckedRollBuilder Test(string question) =>
         new(
             question,
             null,
@@ -24,7 +24,7 @@ public class AbilityCheckBuilder(
             AdvantageRating.Zero,
             StandardTestDifficulty);
 
-    public AbilityCheckBuilder With(AbilityScore newTestedAbility) => new(
+    public CheckedRollBuilder With(AbilityScore newTestedAbility) => new(
         question,
         newTestedAbility,
         baseDiceCount,
@@ -33,7 +33,7 @@ public class AbilityCheckBuilder(
         difficulty
     );
 
-    public AbilityCheckBuilder Roll(int newBaseDiceCount) => new(
+    public CheckedRollBuilder Roll(int newBaseDiceCount) => new(
         question,
         testedAbility,
         newBaseDiceCount,
@@ -42,7 +42,7 @@ public class AbilityCheckBuilder(
         difficulty
     );
 
-    public AbilityCheckBuilder D(int newDiceFaceCount) => new(
+    public CheckedRollBuilder D(int newDiceFaceCount) => new(
         question,
         testedAbility,
         baseDiceCount,
@@ -51,7 +51,7 @@ public class AbilityCheckBuilder(
         difficulty
     );
 
-    public AbilityCheckBuilder With(AdvantageRating newAdvantageRating) =>
+    public CheckedRollBuilder With(AdvantageRating newAdvantageRating) =>
         new(
         question,
         testedAbility,
@@ -61,11 +61,11 @@ public class AbilityCheckBuilder(
         difficulty
     );
 
-    public AbilityCheckBuilder WithAdvantage(int magnitude) => With(new AdvantageRating(magnitude));
+    public CheckedRollBuilder WithAdvantage(int magnitude) => With(new AdvantageRating(magnitude));
 
-    public AbilityCheckBuilder WithDisadvantage(int magnitude) => With(new AdvantageRating(-magnitude));
+    public CheckedRollBuilder WithDisadvantage(int magnitude) => With(new AdvantageRating(-magnitude));
 
-    public AbilityCheckBuilder AgainstDifficulty(int newDifficulty) => new(
+    public CheckedRollBuilder AgainstDifficulty(int newDifficulty) => new(
         question,
         testedAbility,
         baseDiceCount,
@@ -74,14 +74,14 @@ public class AbilityCheckBuilder(
         newDifficulty
     );
 
-    public AbilityCheckResolution.ByRolling ResolveWith(params int[] rolls)
+    public CheckedRollResolution ResolveWith(params int[] rolls)
     {
-        return AbilityCheckResolution.ByRolling.CreateFrom(Create(), rolls);
+        return CheckedRollResolution.CreateFrom(Create(), rolls);
     }
 
-    public AbilityCheckRequest Create()
+    public CheckedRollRequest Create()
     {
-        return new AbilityCheckRequest(
+        return new CheckedRollRequest(
             question,
             testedAbility,
             baseDiceCount,
@@ -91,5 +91,5 @@ public class AbilityCheckBuilder(
         );
     }
 
-    public static implicit operator AbilityCheckRequest(AbilityCheckBuilder builder) => builder.Create();
+    public static implicit operator CheckedRollRequest(CheckedRollBuilder builder) => builder.Create();
 };
