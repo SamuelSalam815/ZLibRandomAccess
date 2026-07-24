@@ -1,5 +1,4 @@
 ﻿using LogSimulator.Checks;
-using LogSimulator.Rolls;
 
 namespace LogSimulator;
 

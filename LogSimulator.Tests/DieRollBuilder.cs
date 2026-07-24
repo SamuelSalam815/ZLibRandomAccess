@@ -1,6 +1,4 @@
-﻿using LogSimulator.Rolls;
-
-namespace LogSimulator.Tests;
+﻿namespace LogSimulator.Tests;
 
 public record DieRollBuilder(int[] FixedRolls, DieRollGenerator TerminalGenerator)
 {

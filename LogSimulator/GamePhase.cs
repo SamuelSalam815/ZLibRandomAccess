@@ -1,6 +1,4 @@
-﻿using LogSimulator.Rolls;
-
-namespace LogSimulator;
+﻿namespace LogSimulator;
 
 public abstract record GamePhase
 {

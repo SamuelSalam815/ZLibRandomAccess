@@ -1,6 +1,4 @@
-﻿using LogSimulator.Rolls;
-
-namespace LogSimulator.Checks;
+﻿namespace LogSimulator.Checks;
 
 [Flags]
 public enum ResolutionMethods

@@ -11,15 +11,7 @@ namespace LogSimulator.Tests.Checks;
 [TestSubject(typeof(AbilityCheckResolution.ByRolling))]
 public class ByRollingTest
 {
-    private AbilityCheckBuilder BuildTestAbilityCheck()
-    {
-        return AbilityCheckBuilder
-            .Test("Will I rewrite this code?")
-            .Roll(3)
-            .D(4)
-            .With(new AdvantageRating(-1))
-            .AgainstDifficulty(10);
-    }
+    private const string TestQuestion = "Will I rewrite this code?";
 
     private static void AssertThrows(Action action)
     {
@@ -33,16 +25,26 @@ public class ByRollingTest
     public void ResolvingWithTheIncorrectNumberOfDice_ShouldThrow(int numberOfRolls)
     {
         var rolls = Enumerable.Repeat(2, numberOfRolls).ToArray();
-        AssertThrows(() => AbilityCheckResolution.ByRolling.CreateFrom(BuildTestAbilityCheck(), rolls));
+        AssertThrows(() => AbilityCheckBuilder
+            .Test(TestQuestion)
+            .Roll(3)
+            .D(4)
+            .WithDisadvantage(1)
+            .AgainstDifficulty(10).ResolveWith(rolls));
     }
 
     [TestMethod]
     [DataRow(new[]{1,2,3,5})]
     [DataRow(new[]{1,2,-3,4})]
     [DataRow(new[]{1,2,0,4})]
-    public void ResolvingWithFaceValuesOutOfAllowedValues_ShouldThrow(int[] rolls)
+    public void ResolvingWithAnyInvalidRolls_ShouldThrow(int[] rolls)
     {
-        AssertThrows(() => AbilityCheckResolution.ByRolling.CreateFrom(BuildTestAbilityCheck(), rolls));
+        AssertThrows(() => AbilityCheckBuilder
+            .Test(TestQuestion)
+            .Roll(3)
+            .D(4)
+            .WithDisadvantage(1)
+            .AgainstDifficulty(10).ResolveWith(rolls));
     }
 
     [TestMethod]
@@ -54,10 +56,15 @@ public class ByRollingTest
     [DataRow(new[] { 2, 1, 2, 2}, 5, -1)]
     public void RollingAboveTheDifficulty_ShouldSucceed(int[] rolls, int difficulty, int advantage)
     {
-        var abilityCheck = BuildTestAbilityCheck()
+        AbilityCheckBuilder
+            .Test(TestQuestion)
+            .Roll(3)
+            .D(4)
             .AgainstDifficulty(difficulty)
-            .WithAdvantage(advantage);
-        AbilityCheckResolution.ByRolling.CreateFrom(abilityCheck, rolls).IsSuccess().ShouldBeTrue();
+            .WithAdvantage(advantage)
+            .ResolveWith(rolls)
+            .IsSuccess()
+            .ShouldBeTrue();
     }
 
     [TestMethod]
@@ -67,31 +74,46 @@ public class ByRollingTest
     [DataRow(new[] { 4, 2, 3, 4}, 10, -1)]
     public void RollingBelowTheDifficulty_ShouldFail(int[] rolls, int difficulty, int advantage)
     {
-        var abilityCheck = BuildTestAbilityCheck()
+        AbilityCheckBuilder
+            .Test(TestQuestion)
+            .Roll(3)
+            .D(4)
             .AgainstDifficulty(difficulty)
-            .WithAdvantage(advantage);
-        AbilityCheckResolution.ByRolling.CreateFrom(abilityCheck, rolls).IsSuccess().ShouldBeFalse();
+            .WithAdvantage(advantage)
+            .ResolveWith(rolls)
+            .IsSuccess()
+            .ShouldBeFalse();
     }
 
     [TestMethod]
     public void ResolvingWithDisadvantage_ShouldDropTheHighestValues()
     {
-        var abilityCheck = BuildTestAbilityCheck().WithDisadvantage(2);
-        var resolution = AbilityCheckResolution.ByRolling.CreateFrom(abilityCheck, [3, 2, 1, 4, 4]);
+        var resolution = AbilityCheckBuilder
+            .Test(TestQuestion)
+            .Roll(3)
+            .D(4)
+            .WithDisadvantage(1)
+            .AgainstDifficulty(10)
+            .WithDisadvantage(2)
+            .ResolveWith(3, 2, 1, 4, 4);
 
-        resolution.RollsSelected.ShouldAllBe(roll => roll != 4);
-        resolution.RollsDiscarded.ShouldAllBe(roll => roll == 4);
+        resolution.RollsSelected.ShouldBe([3,2,1]);
+        resolution.RollsDiscarded.ShouldBe([4,4]);
         resolution.RolledTotal.ShouldBe(6);
     }
 
     [TestMethod]
     public void ResolvingWithAdvantage_ShouldDropTheLowestValues()
     {
-        var abilityCheck = BuildTestAbilityCheck().WithAdvantage(2);
-        var resolution = AbilityCheckResolution.ByRolling.CreateFrom(abilityCheck, [1, 1, 4, 4, 4]);
+        var resolution = AbilityCheckBuilder
+            .Test(TestQuestion)
+            .Roll(3)
+            .D(4)
+            .WithDisadvantage(1)
+            .AgainstDifficulty(10).WithAdvantage(2).ResolveWith(1, 1, 4, 4, 4);
 
-        resolution.RollsSelected.ShouldAllBe(roll => roll == 4);
-        resolution.RollsDiscarded.ShouldAllBe(roll => roll == 1);
+        resolution.RollsSelected.ShouldBe([4,4,4]);
+        resolution.RollsDiscarded.ShouldBe([1,1]);
         resolution.RolledTotal.ShouldBe(12);
     }
 
@@ -104,8 +126,13 @@ public class ByRollingTest
         int[] expectedRollsSelected,
         int[] expectedRollsDiscarded)
     {
-        var abilityCheck = BuildTestAbilityCheck().WithAdvantage(advantage);
-        var resolution = AbilityCheckResolution.ByRolling.CreateFrom(abilityCheck, rolls);
+        var resolution = AbilityCheckBuilder
+            .Test(TestQuestion)
+            .Roll(3)
+            .D(4)
+            .AgainstDifficulty(10)
+            .WithAdvantage(advantage)
+            .ResolveWith(rolls);
 
         resolution.RollsSelected.ShouldBe(expectedRollsSelected);
         resolution.RollsDiscarded.ShouldBe(expectedRollsDiscarded);

@@ -1,12 +1,12 @@
 ﻿namespace LogSimulator.Checks;
 
 public class AbilityCheckBuilder(
-    string Question,
-    AbilityScore? TestedAbility,
-    int BaseDiceCount,
-    int DiceFaceCount,
-    AdvantageRating AdvantageRating,
-    int Difficulty
+    string question,
+    AbilityScore? testedAbility,
+    int baseDiceCount,
+    int diceFaceCount,
+    AdvantageRating advantageRating,
+    int difficulty
 )
 {
     public const int StandardBaseDiceCount = 2;
@@ -25,40 +25,40 @@ public class AbilityCheckBuilder(
             StandardTestDifficulty);
 
     public AbilityCheckBuilder With(AbilityScore newTestedAbility) => new(
-        Question,
+        question,
         newTestedAbility,
-        BaseDiceCount,
-        DiceFaceCount,
-        AdvantageRating,
-        Difficulty
+        baseDiceCount,
+        diceFaceCount,
+        advantageRating,
+        difficulty
     );
 
     public AbilityCheckBuilder Roll(int newBaseDiceCount) => new(
-        Question,
-        TestedAbility,
+        question,
+        testedAbility,
         newBaseDiceCount,
-        DiceFaceCount,
-        AdvantageRating,
-        Difficulty
+        diceFaceCount,
+        advantageRating,
+        difficulty
     );
 
     public AbilityCheckBuilder D(int newDiceFaceCount) => new(
-        Question,
-        TestedAbility,
-        BaseDiceCount,
+        question,
+        testedAbility,
+        baseDiceCount,
         newDiceFaceCount,
-        AdvantageRating,
-        Difficulty
+        advantageRating,
+        difficulty
     );
 
     public AbilityCheckBuilder With(AdvantageRating newAdvantageRating) =>
         new(
-        Question,
-        TestedAbility,
-        BaseDiceCount,
-        DiceFaceCount,
+        question,
+        testedAbility,
+        baseDiceCount,
+        diceFaceCount,
         newAdvantageRating,
-        Difficulty
+        difficulty
     );
 
     public AbilityCheckBuilder WithAdvantage(int magnitude) => With(new AdvantageRating(magnitude));
@@ -66,23 +66,28 @@ public class AbilityCheckBuilder(
     public AbilityCheckBuilder WithDisadvantage(int magnitude) => With(new AdvantageRating(-magnitude));
 
     public AbilityCheckBuilder AgainstDifficulty(int newDifficulty) => new(
-        Question,
-        TestedAbility,
-        BaseDiceCount,
-        DiceFaceCount,
-        AdvantageRating,
+        question,
+        testedAbility,
+        baseDiceCount,
+        diceFaceCount,
+        advantageRating,
         newDifficulty
     );
+
+    public AbilityCheckResolution.ByRolling ResolveWith(params int[] rolls)
+    {
+        return AbilityCheckResolution.ByRolling.CreateFrom(Create(), rolls);
+    }
 
     public AbilityCheckRequest Create()
     {
         return new AbilityCheckRequest(
-            Question,
-            TestedAbility,
-            BaseDiceCount,
-            DiceFaceCount,
-            AdvantageRating,
-            Difficulty
+            question,
+            testedAbility,
+            baseDiceCount,
+            diceFaceCount,
+            advantageRating,
+            difficulty
         );
     }
 
