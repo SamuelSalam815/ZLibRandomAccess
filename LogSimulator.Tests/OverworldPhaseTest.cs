@@ -1,4 +1,6 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using JetBrains.Annotations;
+using LogSimulator.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shouldly;
 
@@ -30,5 +32,21 @@ public class OverworldPhaseTest
             .NextGamePhase
             .ShouldNotBeNull()
             .ShouldNotBeOfType<GameOverPhase>();
+    }
+
+    [TestMethod]
+    public void TestLogger()
+    {
+        var logger = new GameEventLogger();
+        var random = new Random();
+
+        var progress = new OverworldPhase().ProgressGame(diceSize => random.Next(1, diceSize));
+
+        foreach (var @event in progress.GameEvents)
+        {
+            @event.LogEvent(logger);
+        }
+
+        ;
     }
 }

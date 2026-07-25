@@ -1,3 +1,5 @@
-﻿namespace LogSimulator;
+﻿using LogSimulator.Logging;
 
-public record GameProgress(GamePhase? NextGamePhase, List<GameEventDescription> GameEvents);
+namespace LogSimulator;
+
+public record GameProgress(GamePhase? NextGamePhase, List<IDescribableGameEvent> GameEvents);

@@ -1,14 +1,12 @@
-﻿namespace LogSimulator.Rolls;
+﻿using LogSimulator.Logging;
 
-public sealed record AutomaticCheckedRollResolution(CheckedRollRequest Request, bool DidSucceed) : IRollResolution
+namespace LogSimulator.Rolls;
+
+public sealed record AutomaticCheckedRollResolution(CheckedRollRequest Request, bool IsSuccess) : IDescribableGameEvent
 {
-    public bool IsSuccess() => DidSucceed;
-
-    public GameEventDescription GetDescription()
+    public void LogEvent(GameEventLogger logger)
     {
-        var result = new GameEventDescription();
-        result.AddLine("Testing '{0}'...", Request.Question);
-        result.AddLine(DidSucceed ? "Automatically passed test!" : "Automatically failed test!");
-        return result;
+        logger.Log("Automatically resolved question!");
+        CheckedRollResolution.LogQuestionResolution(IsSuccess, Request.Question, logger);
     }
 }

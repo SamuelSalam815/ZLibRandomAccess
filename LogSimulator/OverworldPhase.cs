@@ -6,14 +6,14 @@ public record OverworldPhase : GamePhase
 {
     public override GameProgress ProgressGame(DieRollGenerator dieRollGenerator)
     {
-        var resolution = CheckedRollBuilder
-            .Test("Will the Hero survive the Overworld Phase?")
-            .Create()
+        var resolution = RollBuilder
+            .StandardRoll()
+            .WithAdvantage()
+            .AgainstStandardDifficulty("Will the Hero survive the Overworld Phase?")
             .ResolveWith(dieRollGenerator);
-        var description = resolution.GetDescription();
 
         return resolution.IsSuccess()
-            ? new GameProgress(this, [description])
-            : new GameProgress(new GameOverPhase(), [description]);
+            ? new GameProgress(this, [resolution])
+            : new GameProgress(new GameOverPhase(), [resolution]);
     }
 }
