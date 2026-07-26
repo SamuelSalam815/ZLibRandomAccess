@@ -4,7 +4,7 @@ public record RollRequest(
     int BaseDiceCount,
     int DiceFaceCount,
     AdvantageRating AdvantageRating,
-    AbilityScore? TestedAbility
+    RollModifierCollection RollModifiers
 )
 {
     public bool IsAdvantaged => AdvantageRating.IsAdvantaged;

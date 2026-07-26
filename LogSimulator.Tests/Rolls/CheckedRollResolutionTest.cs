@@ -25,8 +25,7 @@ public class CheckedRollResolutionTest
             .D(4)
             .WithAdvantage(advantage)
             .AgainstDifficulty(difficulty, TestQuestion)
-            .ResolveWith(rolls)
-            .IsSuccess()
+            .ResolveWith(rolls).IsSuccess
             .ShouldBeTrue();
     }
 
@@ -42,8 +41,7 @@ public class CheckedRollResolutionTest
             .D(4)
             .WithAdvantage(advantage)
             .AgainstDifficulty(difficulty, TestQuestion)
-            .ResolveWith(rolls)
-            .IsSuccess()
+            .ResolveWith(rolls).IsSuccess
             .ShouldBeFalse();
     }
 }

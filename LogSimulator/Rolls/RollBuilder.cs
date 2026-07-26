@@ -1,10 +1,12 @@
-﻿namespace LogSimulator.Rolls;
+﻿using LogSimulator.ChacterSpec;
+
+namespace LogSimulator.Rolls;
 
 public class RollBuilder(
     int baseDiceCount,
     int diceFaceCount,
     AdvantageRating advantageRating,
-    AbilityScore? testedAbility)
+    RollModifierCollection rollModifiers)
 {
     public const int StandardBaseDiceCount = 2;
 
@@ -16,7 +18,7 @@ public class RollBuilder(
         StandardBaseDiceCount,
         StandardDiceFaceCount,
         AdvantageRating.Zero,
-        null
+        RollModifierCollection.Empty
     );
 
     public static RollBuilder Roll(int baseDiceCount) =>
@@ -24,32 +26,35 @@ public class RollBuilder(
             baseDiceCount,
             StandardDiceFaceCount,
             AdvantageRating.Zero,
-            null);
+            RollModifierCollection.Empty);
 
-    public RollBuilder Using(AbilityScore newTestedAbility) => new(
-        baseDiceCount,
-        diceFaceCount,
-        advantageRating,
-        newTestedAbility);
+    public RollBuilder Using(AbilityScore testedAbility) => Plus(testedAbility.Modifier);
+
+    public RollBuilder Plus(RollModifier modifier) =>
+        new(
+            baseDiceCount,
+            diceFaceCount,
+            advantageRating,
+            rollModifiers.Add(modifier));
 
     public RollBuilder SetBaseDiceCount(int newBaseDiceCount) => new(
         newBaseDiceCount,
         diceFaceCount,
         advantageRating,
-        testedAbility);
+        rollModifiers);
 
     public RollBuilder D(int newDiceFaceCount) => new(
         baseDiceCount,
         newDiceFaceCount,
         advantageRating,
-        testedAbility);
+        rollModifiers);
 
     public RollBuilder With(AdvantageRating newAdvantageRating) =>
         new(
             baseDiceCount,
             diceFaceCount,
             newAdvantageRating,
-            testedAbility);
+            rollModifiers);
 
     public RollBuilder WithAdvantage(int magnitude = 1) => With(new AdvantageRating(magnitude));
 
@@ -62,9 +67,14 @@ public class RollBuilder(
         difficulty,
         CreateRequest());
 
+    public RollResolution ResolveWith(DieRollGenerator dieRollGenerator)
+    {
+        return CreateRequest().ResolveWith(dieRollGenerator);
+    }
+
     public RollResolution ResolveWith(params int[] rolls)
     {
-        return RollResolution.CreateFrom(CreateRequest(), rolls);
+        return CreateRequest().ResolveWith(rolls);
     }
 
     public RollRequest CreateRequest()
@@ -73,7 +83,7 @@ public class RollBuilder(
             baseDiceCount,
             diceFaceCount,
             advantageRating,
-            testedAbility
+            rollModifiers
         );
     }
 }

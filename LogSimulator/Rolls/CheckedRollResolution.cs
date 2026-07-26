@@ -4,7 +4,7 @@ namespace LogSimulator.Rolls;
 
 public sealed record CheckedRollResolution(CheckedRollRequest Request, RollResolution Roll) : IDescribableGameEvent
 {
-    public bool IsSuccess() => Roll.RolledTotal >= Request.Difficulty;
+    public bool IsSuccess => Roll.RolledTotal >= Request.Difficulty;
 
     public static void LogQuestionResolution(bool isAnswerYes, string question, GameEventLogger logger)
     {
@@ -13,9 +13,9 @@ public sealed record CheckedRollResolution(CheckedRollRequest Request, RollResol
 
     public void LogEvent(GameEventLogger logger)
     {
-        LogQuestionResolution(IsSuccess(), Request.Question, logger);
+        LogQuestionResolution(IsSuccess, Request.Question, logger);
         logger.Log(
-            IsSuccess()
+            IsSuccess
                 ? "Rolled value ({0}) beats test difficulty ({1})"
                 : "Rolled value ({0}) fails test difficulty ({1})",
             Roll.RolledTotal,

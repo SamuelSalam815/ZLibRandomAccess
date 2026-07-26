@@ -1,5 +1,6 @@
 ﻿using System;
 using JetBrains.Annotations;
+using LogSimulator.ChacterSpec;
 using LogSimulator.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shouldly;
@@ -10,28 +11,30 @@ namespace LogSimulator.Tests;
 [TestSubject(typeof(OverworldPhase))]
 public class OverworldPhaseTest
 {
+    private Character TestHero() => new("[JimBob]", new StatBlock(6, 8, 4));
+
     [TestMethod]
     [DataRow(3, 6)]
     [DataRow(4, 2)]
-    public void FailingSurvivalCheck_CausesGameOver(int firstRoll, int secondRoll)
+    public void FailingPeacefulRoamingCheck_CausesCombat(int firstRoll, int secondRoll)
     {
-        new OverworldPhase()
+        new OverworldPhase(TestHero())
             .ProgressGame(DieRollBuilder.Provide(firstRoll, secondRoll))
             .NextGamePhase
             .ShouldNotBeNull()
-            .ShouldBeOfType<GameOverPhase>();
+            .ShouldBeOfType<CombatPhase>();
     }
 
     [TestMethod]
     [DataRow(5,5)]
     [DataRow(6,6)]
-    public void PassingSurvivalCheck_ContinuesTheGame(int firstRoll, int secondRoll)
+    public void PassingPeacfulRoamingCheck_StaysInTheOverworld(int firstRoll, int secondRoll)
     {
-        new OverworldPhase()
+        new OverworldPhase(TestHero())
             .ProgressGame(DieRollBuilder.Provide(firstRoll, secondRoll))
             .NextGamePhase
             .ShouldNotBeNull()
-            .ShouldNotBeOfType<GameOverPhase>();
+            .ShouldBeOfType<OverworldPhase>();
     }
 
     [TestMethod]
@@ -40,12 +43,22 @@ public class OverworldPhaseTest
         var logger = new GameEventLogger();
         var random = new Random();
 
-        var progress = new OverworldPhase().ProgressGame(diceSize => random.Next(1, diceSize));
-
-        foreach (var @event in progress.GameEvents)
+        GamePhase currentGamePhase = new OverworldPhase(TestHero());
+        GameProgress progress;
+        do
         {
-            @event.LogEvent(logger);
-        }
+            progress = currentGamePhase.ProgressGame(diceSize => random.Next(1, diceSize));
+            foreach (var @event in progress.GameEvents)
+            {
+                @event.LogEvent(logger);
+            }
+
+            if (progress.NextGamePhase is { } nextGamePhase)
+            {
+                currentGamePhase = nextGamePhase;
+            }
+        } while (progress.NextGamePhase is not null);
+
 
         ;
     }

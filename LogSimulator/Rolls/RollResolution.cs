@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Runtime.Intrinsics.X86;
 using LogSimulator.Logging;
 
 namespace LogSimulator.Rolls;
@@ -66,8 +67,7 @@ public sealed record RollResolution : IDescribableGameEvent
             .Select(roll => roll.Value)
             .ToArray();
 
-        var abilityModifier = request.TestedAbility?.Value ?? 0;
-        var rolledTotal = selectedRolls.Sum() + abilityModifier;
+        var rolledTotal = selectedRolls.Sum() + request.RollModifiers.Total;
 
         return new RollResolution(
             request,
@@ -77,27 +77,19 @@ public sealed record RollResolution : IDescribableGameEvent
             rolledTotal);
     }
 
+    private string StringWithSign(int number) => number >= 0 ? $"+{number}" : number.ToString();
+
     public void LogEvent(GameEventLogger logger)
     {
-        var modifier = Request.TestedAbility?.Value ?? 0;
-        var modifierString = modifier >= 0 ? $"+{modifier}" : modifier.ToString();
+        var totalModifier = Request.RollModifiers.Total;
         logger.Log(
             "Rolled a total of {0} using {1}d{2}{3} with {4} advantage",
             RolledTotal,
             Request.BaseDiceCount,
             Request.DiceFaceCount,
-            modifierString,
+            StringWithSign(totalModifier),
             Request.AdvantageRating.Value);
 
-        if (Request.TestedAbility is {Value: var abilityModifier, Name: var abilityName})
-        {
-            logger.Log("Added {0} to total from '{1}' ability score", abilityModifier, abilityName);
-        }
-        else
-        {
-            abilityModifier = 0;
-            logger.Log("Modifier is {0} from the roll having no associated ability", abilityModifier);
-        }
 
         if (RollsDiscarded.Length > 0)
         {
@@ -119,11 +111,23 @@ public sealed record RollResolution : IDescribableGameEvent
             logger.Log("Dice Rolls: [{0}]", string.Join(", ", RollsWithRerolls));
             logger.Log("Discarded Rolls: [{0}]", string.Join(", ", RollsDiscarded));
             logger.Log("Chosen Rolls: [{0}]", string.Join(", ", RollsSelected));
-            logger.Log("Final total: {0} + {1} = {2}", RollsSelected.Sum(), abilityModifier, RolledTotal);
-            return;
         }
 
-        logger.Log("Dice Rolls: [{0}]", string.Join(", ", RollsSelected));
-        logger.Log("Final total: {0} + {1} = {2}", RollsSelected.Sum(), abilityModifier, RolledTotal);
+        logger.Log("Raw Dice Sum: [{0}] = {1}", string.Join(" + ", RollsSelected), RollsSelected.Sum());
+
+        if (Request.RollModifiers.Set.IsEmpty)
+        {
+            logger.Log("No modifiers were applied (modifier={0})", totalModifier);
+        }
+        else
+        {
+            foreach (var (modifierName, modifierValue) in Request.RollModifiers.Set)
+            {
+                logger.Log("Added {0} to total from '{1}' modifier", StringWithSign(modifierValue), modifierName);
+            }
+            logger.Log("Total modifier: {0}", StringWithSign(totalModifier));
+        }
+
+        logger.Log("Final total: {0} + {1} = {2}", RollsSelected.Sum(), totalModifier, RolledTotal);
     }
 }
