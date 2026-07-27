@@ -1,4 +1,6 @@
-﻿namespace LogSimulator.Tests;
+﻿using System;
+
+namespace LogSimulator.Tests;
 
 public record DieRollBuilder(int[] FixedRolls, DieRollGenerator TerminalGenerator)
 {
@@ -7,7 +9,7 @@ public record DieRollBuilder(int[] FixedRolls, DieRollGenerator TerminalGenerato
 
     public DieRollBuilder ThenRepeat(int roll) => this with { TerminalGenerator = _ => roll };
 
-    public static DieRollBuilder Provide(params int[] fixedRolls) => new(fixedRolls, _ => 0);
+    public static DieRollBuilder Provide(params int[] fixedRolls) => new(fixedRolls, _ => throw new ArgumentException("Ran out of fixed die rolls to provide!"));
 
     public static implicit operator DieRollGenerator(DieRollBuilder builder)
     {

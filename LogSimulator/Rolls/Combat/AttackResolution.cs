@@ -23,8 +23,8 @@ public record AttackResolution(
             return new GameEventDescription(
                 $"{Request.Attacker.Name}'s strike against {Request.Defender.Name} missed! ({DamageInflicted} damage)",
                 [
-                    DescribeDefenseRoll(),
-                    DescribeHitRoll()
+                    DefenseRoll.DescribeEvent(),
+                    HitRoll.DescribeEvent()
                 ]);
         }
 
@@ -33,35 +33,18 @@ public record AttackResolution(
             return new GameEventDescription(
                 $"{Request.Attacker.Name}'s [CRITICAL] strike against {Request.Defender.Name} inflicted {DamageInflicted} damage!",
                 [
-                    DescribeDefenseRoll(),
-                    DescribeHitRoll(),
-                    DescribeDamageRoll(DamageRoll)
+                    DefenseRoll.DescribeEvent(),
+                    HitRoll.DescribeEvent(),
+                    DamageRoll.DescribeEvent()
                 ]);
         }
 
         return new GameEventDescription(
             $"{Request.Attacker.Name}'s strike against {Request.Defender.Name} inflicted {DamageInflicted} damage!",
             [
-                DescribeDefenseRoll(),
-                DescribeHitRoll(),
-                DescribeDamageRoll(DamageRoll)
+                DefenseRoll.DescribeEvent(),
+                HitRoll.DescribeEvent(),
+                DamageRoll.DescribeEvent()
             ]);
-    }
-
-    private GameEventDescription DescribeHitRoll()
-    {
-        return HitRoll.DescribeEvent();
-    }
-
-    private GameEventDescription DescribeDefenseRoll()
-    {
-        var defenseDescription = DefenseRoll.DescribeEvent();
-        return defenseDescription with { Description = "Rolling Evasion: " + defenseDescription.Description };
-    }
-
-    private GameEventDescription DescribeDamageRoll(RollResolution damageRoll)
-    {
-        var damageDescription = damageRoll.DescribeEvent();
-        return damageDescription with { Description = "Rolling Damage: " + damageDescription.Description };
     }
 }

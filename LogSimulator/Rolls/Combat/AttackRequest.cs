@@ -7,7 +7,7 @@ public record AttackRequest(Character Attacker, Character Defender)
     public AttackResolution ResolveWith(DieRollGenerator rollGenerator)
     {
         var defenseRoll = RollBuilder
-            .For("Combat Evasion")
+            .For($"{Defender.Name}'s Combat Evasion")
             .Roll(1)
             .D(6)
             .Plus(Defender.Agility)
@@ -27,7 +27,7 @@ public record AttackRequest(Character Attacker, Character Defender)
             return new AttackResolution(this, defenseRoll, hitRoll, null);
         }
 
-        var damageRoll = RollBuilder.For("Damage").Roll(1).D(6).Plus(Attacker.Prowess);
+        var damageRoll = RollBuilder.For($"{Attacker.Name}'s Damage").Roll(1).D(6).Plus(Attacker.Prowess);
         if (IsHitRollCritical(hitRoll))
         {
             const string modifierName = "Critical Hit Bonus";

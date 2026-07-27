@@ -16,31 +16,32 @@ public class OverworldPhaseTest
     private Character TestHero() => new("_JimBob_", new StatBlock(6, 5, 4));
 
     [TestMethod]
-    [DataRow(3, 6)]
-    [DataRow(4, 2)]
-    public void FailingPeacefulRoamingCheck_CausesCombat(int firstRoll, int secondRoll)
+    [DataRow(new[] { 3, 4})]
+    [DataRow(new[] { 4, 2})]
+    public void FailingPeacefulRoamingCheck_CausesCombat(int[] rollsToProvide)
     {
         new OverworldPhase(TestHero())
-            .ProgressGame(DieRollBuilder.Provide(firstRoll, secondRoll))
+            .ProgressGame(DieRollBuilder.Provide(rollsToProvide).ThenRepeat(1))
             .NextGamePhase
             .ShouldNotBeNull()
             .ShouldBeOfType<CombatPhase>();
     }
 
     [TestMethod]
-    [DataRow(5,5)]
-    [DataRow(6,6)]
-    public void PassingPeacfulRoamingCheck_StaysInTheOverworld(int firstRoll, int secondRoll)
+    [DataRow(new[] { 4, 5})]
+    [DataRow(new[] { 6, 5})]
+    public void PassingPeacefulRoamingCheck_StaysInTheOverworld(int[] rollsToProvide)
     {
         new OverworldPhase(TestHero())
-            .ProgressGame(DieRollBuilder.Provide(firstRoll, secondRoll))
+            .ProgressGame(DieRollBuilder.Provide(rollsToProvide).ThenRepeat(1))
             .NextGamePhase
             .ShouldNotBeNull()
             .ShouldBeOfType<OverworldPhase>();
     }
 
     [TestMethod]
-    public void TestLogger()
+    [Ignore]
+    public void SimulateGame()
     {
         var eventDescriptions = new List<GameEventDescription>();
         var random = new Random();

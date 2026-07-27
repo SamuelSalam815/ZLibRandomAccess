@@ -43,7 +43,7 @@ public record RollBuilder
         AdvantageRating.Zero,
         ModifierCollection.Empty,
         ModifierCollection.Empty,
-        string.Empty);
+        null);
 
 
     public RollBuilder Roll(int newBaseDiceCount) => this with {BaseDiceCount = newBaseDiceCount};

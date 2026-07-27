@@ -13,6 +13,8 @@ public record RollRequest(
     public bool IsDisadvantaged => AdvantageRating.IsDisadvantaged;
     public int TotalNumberOfDiceRequested => BaseDiceCount + BaseDiceCountModifiers.Total + AdvantageRating.AdditionalDice;
 
+    public int NumberOfDiceToKeep => BaseDiceCount + BaseDiceCountModifiers.Total;
+
     public RollResolution ResolveWith(DieRollGenerator dieRollGenerator)
     {
         var rolls = new int[TotalNumberOfDiceRequested];

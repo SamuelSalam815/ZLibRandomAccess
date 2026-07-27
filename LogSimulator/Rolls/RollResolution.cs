@@ -56,13 +56,13 @@ public sealed record RollResolution : IDescribableGameEvent
         }
 
         var selectedRolls = orderedRolls
-            .Take(request.BaseDiceCount)
+            .Take(request.NumberOfDiceToKeep)
             .OrderBy(roll => roll.Index)
             .Select(roll => roll.Value)
             .ToArray();
 
         var discardedRolls = orderedRolls
-            .Skip(request.BaseDiceCount)
+            .Skip(request.NumberOfDiceToKeep)
             .OrderBy(roll => roll.Index)
             .Select(roll => roll.Value)
             .ToArray();
@@ -101,7 +101,7 @@ public sealed record RollResolution : IDescribableGameEvent
         }
 
         stringBuilder.Append(" using ")
-            .Append(Request.BaseDiceCount)
+            .Append(Request.NumberOfDiceToKeep)
             .Append('d')
             .Append(Request.DiceFaceCount);
 
@@ -165,7 +165,7 @@ public sealed record RollResolution : IDescribableGameEvent
 
             modifierDescription
                 .Append(modifierValue)
-                .Append($" to number of dice rolled from modifier '{modifierName}'");
+                .Append($" dice to the final roll from modifier '{modifierName}'");
 
             yield return modifierDescription.ToString();
         }

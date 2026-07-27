@@ -1,5 +1,6 @@
 ﻿using LogSimulator.ChacterSpec;
 using LogSimulator.Rolls;
+using LogSimulator.Rolls.Combat;
 
 namespace LogSimulator;
 
@@ -20,12 +21,7 @@ public record OverworldPhase(Character Hero) : GamePhase
         }
 
         var slime = new Character("Slime", new StatBlock(3,3,3));
-        var combatBegin = new CombatBegin(
-            Hero,
-            slime,
-            CombatBegin.RollVitality(Hero.Fortitude.Value, dieRollGenerator),
-            CombatBegin.RollVitality(slime.Fortitude.Value, dieRollGenerator)
-        );
+        var combatBegin = new InitiateCombatRequest(Hero, slime).ResolveWith(dieRollGenerator);
         return new GameProgress(CombatPhase.CreateFrom(combatBegin), [avoidRandomEncounterRoll, combatBegin]);
     }
 }

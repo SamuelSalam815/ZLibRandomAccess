@@ -9,13 +9,13 @@ public record CombatPhase(
     int HeroVitality,
     int AdversaryVitality) : GamePhase
 {
-    public static CombatPhase CreateFrom(CombatBegin combatBegin)
+    public static CombatPhase CreateFrom(InitiateCombatResolution initiateCombatResolution)
     {
         return new CombatPhase(
-            combatBegin.Hero,
-            combatBegin.Adversary,
-            combatBegin.HeroFortitudeRoll.RolledTotal,
-            combatBegin.AdversaryFortitudeRoll.RolledTotal);
+            initiateCombatResolution.Request.Hero,
+            initiateCombatResolution.Request.Adversary,
+            initiateCombatResolution.HeroFortitudeRoll.RolledTotal,
+            initiateCombatResolution.AdversaryFortitudeRoll.RolledTotal);
     }
 
     public override GameProgress ProgressGame(DieRollGenerator dieRollGenerator)
