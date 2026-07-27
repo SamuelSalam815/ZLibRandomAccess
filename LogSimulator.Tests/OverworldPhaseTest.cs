@@ -13,7 +13,7 @@ namespace LogSimulator.Tests;
 [TestSubject(typeof(OverworldPhase))]
 public class OverworldPhaseTest
 {
-    private Character TestHero() => new("_JimBob_", new StatBlock(6, 5, 4));
+    private Character TestHero() => new("_JimBob_", new StatBlock(6, 5, 5));
 
     private GameState TestGameState() => new(TestHero());
 
@@ -42,10 +42,11 @@ public class OverworldPhaseTest
     }
 
     [TestMethod]
-    [Ignore]
+    // [Ignore]
     public void SimulateGame()
     {
-        var games = new List<List<GameEventDescription>>();
+        var gameLogs = new List<List<GameEventDescription>>();
+        var terminalGamePhases  = new List<GamePhase>();
         var random = new Random();
 
         GamePhase currentGamePhase;
@@ -56,7 +57,7 @@ public class OverworldPhaseTest
             var eventDescriptions = new List<GameEventDescription>();
             do
             {
-                progress = currentGamePhase.ProgressGame(diceSize => random.Next(1, diceSize));
+                progress = currentGamePhase.ProgressGame(diceSize => random.Next(1, diceSize + 1));
                 eventDescriptions.AddRange(progress.GameEvents.Select(e => e.DescribeEvent()));
 
                 if (progress.NextGamePhase is { } nextGamePhase)
@@ -65,8 +66,9 @@ public class OverworldPhaseTest
                 }
             } while (progress.NextGamePhase is not null);
 
-            games.Add(eventDescriptions);
-        } while (currentGamePhase.GameState is not { FinalBossDefeated: true, NumberOfLimitBreaks: 2 });
+            gameLogs.Add(eventDescriptions);
+            terminalGamePhases.Add(currentGamePhase);
+        } while (currentGamePhase.GameState is {NumberOfLimitBreaks: <= 1 });
 
         ;
     }

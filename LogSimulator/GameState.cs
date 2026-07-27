@@ -2,6 +2,7 @@
 
 namespace LogSimulator;
 
+// TODO: maintain a record of all describable game events
 public record GameState(
     Character Hero,
     int NumberOfCombatsCompleted = 0,

@@ -10,9 +10,10 @@ public record LimitBreakResolution(GameState GameState, CheckedRollResolution Li
     public static LimitBreakResolution CreateFrom(GameState gameState, DieRollGenerator dieRollGenerator)
     {
         var hero = gameState.Hero;
-        var limitBreakRoll = RollBuilder.RollFor(6)
+        var limitBreakRoll = RollBuilder.RollFor(5)
             .D(6)
-            .AgainstDifficulty(36, $"Will {hero.Name} break their limits?")
+            .WithAdvantage()
+            .AgainstDifficulty(27, $"Will {hero.Name} activate [LIMIT BREAK]?")
             .ResolveWith(dieRollGenerator);
 
         if (!limitBreakRoll.IsSuccess)
@@ -23,9 +24,9 @@ public record LimitBreakResolution(GameState GameState, CheckedRollResolution Li
         var limitBrokenHero = hero with
         {
             Stats = new StatBlock(
-                hero.Fortitude.Value + 6,
-                hero.Agility.Value + 6,
-                hero.Prowess.Value + 6
+                hero.Fortitude.Value + 3,
+                hero.Agility.Value + 3,
+                hero.Prowess.Value + 3
             )
         };
 
@@ -38,10 +39,6 @@ public record LimitBreakResolution(GameState GameState, CheckedRollResolution Li
 
     public GameEventDescription DescribeEvent()
     {
-        return new GameEventDescription(
-            IsSuccess
-                ? $"[LIMIT BREAK] {GameState.Hero.Name} rises again with renewd vigor!"
-                : $"{GameState.Hero.Name} fails to overcome their limits...",
-            [LimitBreakRoll.DescribeEvent()]);
+        return LimitBreakRoll.DescribeEvent();
     }
 };

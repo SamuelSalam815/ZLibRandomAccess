@@ -7,7 +7,7 @@ public record OverworldPhase(GameState GameState) : GamePhase(GameState)
 {
     public override GameProgress ProgressGame(DieRollGenerator dieRollGenerator)
     {
-        if (GameState.NumberOfCombatsCompleted >= 9)
+        if (GameState.NumberOfCombatsCompleted >= 36)
         {
             return FinalConfrontation(dieRollGenerator);
         }
