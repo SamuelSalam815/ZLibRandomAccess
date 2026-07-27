@@ -4,9 +4,8 @@ namespace LogSimulator.Rolls;
 
 public sealed record AutomaticCheckedRollResolution(CheckedRollRequest Request, bool IsSuccess) : IDescribableGameEvent
 {
-    public void LogEvent(GameEventLogger logger)
+    public GameEventDescription DescribeEvent()
     {
-        logger.Log("Automatically resolved question!");
-        CheckedRollResolution.LogQuestionResolution(IsSuccess, Request.Question, logger);
+        return $"Automatically resolved '{Request.Question}' to {(IsSuccess ? "YES" : "NO")}";
     }
 }

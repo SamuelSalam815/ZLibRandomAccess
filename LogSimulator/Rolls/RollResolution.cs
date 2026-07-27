@@ -1,5 +1,5 @@
 ﻿using System.Collections.Immutable;
-using System.Runtime.Intrinsics.X86;
+using System.Text;
 using LogSimulator.Logging;
 
 namespace LogSimulator.Rolls;
@@ -7,22 +7,22 @@ namespace LogSimulator.Rolls;
 public sealed record RollResolution : IDescribableGameEvent
 {
     public RollRequest Request { get; }
-    public ImmutableArray<int> RollsWithRerolls { get; }
+    public ImmutableArray<int> RollPool { get; }
     public ImmutableArray<int> RollsSelected { get; }
-    public ImmutableArray<int> RollsDiscarded { get; }
+    public ImmutableArray<int> RollsPruned { get; }
     public int RolledTotal { get; }
 
     private RollResolution(
         RollRequest request,
-        ImmutableArray<int> rollsWithRerolls,
+        ImmutableArray<int> rollPool,
         ImmutableArray<int> rollsSelected,
-        ImmutableArray<int> rollsDiscarded,
+        ImmutableArray<int> rollsPruned,
         int rolledTotal)
     {
         Request = request;
-        RollsWithRerolls = rollsWithRerolls;
+        RollPool = rollPool;
         RollsSelected = rollsSelected;
-        RollsDiscarded = rollsDiscarded;
+        RollsPruned = rollsPruned;
         RolledTotal = rolledTotal;
     }
 
@@ -67,7 +67,7 @@ public sealed record RollResolution : IDescribableGameEvent
             .Select(roll => roll.Value)
             .ToArray();
 
-        var rolledTotal = selectedRolls.Sum() + request.RollModifiers.Total;
+        var rolledTotal = selectedRolls.Sum() + request.TotalRollModifiers.Total;
 
         return new RollResolution(
             request,
@@ -77,57 +77,111 @@ public sealed record RollResolution : IDescribableGameEvent
             rolledTotal);
     }
 
-    private string StringWithSign(int number) => number >= 0 ? $"+{number}" : number.ToString();
-
-    public void LogEvent(GameEventLogger logger)
+    public GameEventDescription DescribeEvent()
     {
-        var totalModifier = Request.RollModifiers.Total;
-        logger.Log(
-            "Rolled a total of {0} using {1}d{2}{3} with {4} advantage",
-            RolledTotal,
-            Request.BaseDiceCount,
-            Request.DiceFaceCount,
-            StringWithSign(totalModifier),
-            Request.AdvantageRating.Value);
+        return new GameEventDescription(
+            GetPrimaryDescription(),
+            [
+                ..GetBaseDiceCountModifierDescriptions(),
+                ..GetRawRollDescription(),
+                ..GetTotalRollModifierDescriptions()
+            ]);
+    }
 
+    private string GetPrimaryDescription()
+    {
+        var stringBuilder = new StringBuilder();
+        stringBuilder
+            .Append("Rolled ")
+            .Append(RolledTotal);
 
-        if (RollsDiscarded.Length > 0)
+        if (Request.QuantityName is { } namedQuantity)
         {
-            logger.Log("Rolling {0} additional dice due to advantage rating ({1})", Request.AdvantageRating.AdditionalDice,  Request.AdvantageRating.Value);
+            stringBuilder.Append(" for ").Append(namedQuantity);
+        }
+
+        stringBuilder.Append(" using ")
+            .Append(Request.BaseDiceCount)
+            .Append('d')
+            .Append(Request.DiceFaceCount);
+
+        if (!Request.TotalRollModifiers.IsEmpty)
+        {
+            if (Request.TotalRollModifiers.Total >= 0)
+            {
+                stringBuilder.Append('+');
+            }
+
+            stringBuilder.Append(Request.TotalRollModifiers.Total);
         }
 
         if (Request.IsAdvantaged)
         {
-            logger.Log("Positive advantage rating causes the top {0} dice rolls to be used in the final total", Request.BaseDiceCount);
+            stringBuilder.Append(" with advantage");
         }
 
         if (Request.IsDisadvantaged)
         {
-            logger.Log("Negative advantage rating (disadvantage) causes the bottom {0} dice rolls to be used in the final total", Request.BaseDiceCount);
+            stringBuilder.Append(" with disadvantage");
         }
 
-        if (RollsDiscarded.Length > 0)
+        if (Request.AdvantageRating.AdditionalDice > 1)
         {
-            logger.Log("Dice Rolls: [{0}]", string.Join(", ", RollsWithRerolls));
-            logger.Log("Discarded Rolls: [{0}]", string.Join(", ", RollsDiscarded));
-            logger.Log("Chosen Rolls: [{0}]", string.Join(", ", RollsSelected));
+            stringBuilder.Append(' ').Append(Request.AdvantageRating.AdditionalDice);
         }
 
-        logger.Log("Raw Dice Sum: [{0}] = {1}", string.Join(" + ", RollsSelected), RollsSelected.Sum());
+        return stringBuilder.ToString();
+    }
 
-        if (Request.RollModifiers.Set.IsEmpty)
+    private IEnumerable<GameEventDescription> GetTotalRollModifierDescriptions()
+    {
+        foreach (var (modifierName, modifierValue) in Request.TotalRollModifiers.Set)
         {
-            logger.Log("No modifiers were applied (modifier={0})", totalModifier);
+            var modifierDescription = new StringBuilder()
+                .Append("Added ");
+            if (modifierValue >= 0)
+            {
+                modifierDescription.Append('+');
+            }
+
+            modifierDescription
+                .Append(modifierValue)
+                .Append($" to final roll from modifier '{modifierName}'");
+
+            yield return modifierDescription.ToString();
+        }
+    }
+
+    private IEnumerable<GameEventDescription> GetBaseDiceCountModifierDescriptions()
+    {
+        foreach (var (modifierName, modifierValue) in Request.BaseDiceCountModifiers.Set)
+        {
+            var modifierDescription = new StringBuilder()
+                .Append("Added ");
+            if (modifierValue >= 0)
+            {
+                modifierDescription.Append('+');
+            }
+
+            modifierDescription
+                .Append(modifierValue)
+                .Append($" to number of dice rolled from modifier '{modifierName}'");
+
+            yield return modifierDescription.ToString();
+        }
+    }
+
+    private IEnumerable<GameEventDescription> GetRawRollDescription()
+    {
+        if (Request.IsAdvantaged || Request.IsDisadvantaged)
+        {
+            yield return $"Roll pool: [{string.Join(", ", RollPool)}]";
+            yield return $"Rolls pruned: [{string.Join(", ", RollsPruned)}]";
+            yield return $"Rolls selected: [{string.Join(" + ", RollsSelected)}] = {RollsSelected.Sum()}";
         }
         else
         {
-            foreach (var (modifierName, modifierValue) in Request.RollModifiers.Set)
-            {
-                logger.Log("Added {0} to total from '{1}' modifier", StringWithSign(modifierValue), modifierName);
-            }
-            logger.Log("Total modifier: {0}", StringWithSign(totalModifier));
+            yield return $"Rolled: [{string.Join(" + ", RollsSelected)}] = {RollsSelected.Sum()}";
         }
-
-        logger.Log("Final total: {0} + {1} = {2}", RollsSelected.Sum(), totalModifier, RolledTotal);
     }
 }

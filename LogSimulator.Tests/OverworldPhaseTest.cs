@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Annotations;
 using LogSimulator.ChacterSpec;
 using LogSimulator.Logging;
@@ -11,7 +13,7 @@ namespace LogSimulator.Tests;
 [TestSubject(typeof(OverworldPhase))]
 public class OverworldPhaseTest
 {
-    private Character TestHero() => new("[JimBob]", new StatBlock(6, 8, 4));
+    private Character TestHero() => new("_JimBob_", new StatBlock(6, 5, 4));
 
     [TestMethod]
     [DataRow(3, 6)]
@@ -40,7 +42,7 @@ public class OverworldPhaseTest
     [TestMethod]
     public void TestLogger()
     {
-        var logger = new GameEventLogger();
+        var eventDescriptions = new List<GameEventDescription>();
         var random = new Random();
 
         GamePhase currentGamePhase = new OverworldPhase(TestHero());
@@ -48,10 +50,7 @@ public class OverworldPhaseTest
         do
         {
             progress = currentGamePhase.ProgressGame(diceSize => random.Next(1, diceSize));
-            foreach (var @event in progress.GameEvents)
-            {
-                @event.LogEvent(logger);
-            }
+            eventDescriptions.AddRange(progress.GameEvents.Select(e => e.DescribeEvent()));
 
             if (progress.NextGamePhase is { } nextGamePhase)
             {

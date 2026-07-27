@@ -9,7 +9,8 @@ public record OverworldPhase(Character Hero) : GamePhase
     {
         var avoidRandomEncounterRoll = RollBuilder
             .StandardRoll()
-            .WithAdvantage()
+            .WithAdvantage(2)
+            .Plus(new Modifier("Diminished Agility", Hero.Agility.Value / 2))
             .AgainstStandardDifficulty($"Can {Hero.Name} roam the overworld in peace?")
             .ResolveWith(dieRollGenerator);
 

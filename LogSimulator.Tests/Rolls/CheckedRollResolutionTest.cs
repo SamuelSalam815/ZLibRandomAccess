@@ -21,7 +21,7 @@ public class CheckedRollResolutionTest
     public void RollingAboveTheDifficulty_ShouldSucceed(int[] rolls, int difficulty, int advantage)
     {
         RollBuilder
-            .Roll(3)
+            .RollFor(3)
             .D(4)
             .WithAdvantage(advantage)
             .AgainstDifficulty(difficulty, TestQuestion)
@@ -37,7 +37,7 @@ public class CheckedRollResolutionTest
     public void RollingBelowTheDifficulty_ShouldFail(int[] rolls, int difficulty, int advantage)
     {
         RollBuilder
-            .Roll(3)
+            .RollFor(3)
             .D(4)
             .WithAdvantage(advantage)
             .AgainstDifficulty(difficulty, TestQuestion)

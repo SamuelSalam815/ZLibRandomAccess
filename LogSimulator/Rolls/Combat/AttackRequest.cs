@@ -7,14 +7,16 @@ public record AttackRequest(Character Attacker, Character Defender)
     public AttackResolution ResolveWith(DieRollGenerator rollGenerator)
     {
         var defenseRoll = RollBuilder
+            .For("Combat Evasion")
             .Roll(1)
             .D(6)
-            .Using(Defender.Agility)
-            .Plus(new RollModifier("Defender Bonus", 3))
+            .Plus(Defender.Agility)
+            .Plus(new Modifier("Defender Bonus", 3))
             .ResolveWith(rollGenerator);
+
         var hitRoll = RollBuilder
             .StandardRoll()
-            .Using(Attacker.Prowess)
+            .Plus(Attacker.Prowess)
             .AgainstDifficulty(
                 defenseRoll.RolledTotal,
                 $"Will {Attacker.Name} successfully land a blow on {Defender.Name}?")
@@ -25,12 +27,11 @@ public record AttackRequest(Character Attacker, Character Defender)
             return new AttackResolution(this, defenseRoll, hitRoll, null);
         }
 
-        var damageRoll = RollBuilder.Roll(1).D(6).Using(Attacker.Prowess);
+        var damageRoll = RollBuilder.For("Damage").Roll(1).D(6).Plus(Attacker.Prowess);
         if (IsHitRollCritical(hitRoll))
         {
-            damageRoll = damageRoll
-                .SetBaseDiceCount(2)
-                .Plus(new RollModifier("Critical Hit", 6));
+            const string modifierName = "Critical Hit Bonus";
+            damageRoll = damageRoll.ModifyDiceCount(new Modifier(modifierName, 1)).Plus(new Modifier(modifierName, 6));
         }
 
         return new AttackResolution(this, defenseRoll, hitRoll, damageRoll.ResolveWith(rollGenerator));

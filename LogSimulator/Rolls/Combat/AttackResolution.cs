@@ -9,31 +9,59 @@ public record AttackResolution(
     RollResolution? DamageRoll
 ) : IDescribableGameEvent
 {
+    public bool IsMiss => !IsHit;
+    public bool IsHit => HitRoll.IsSuccess;
+
     public bool IsCriticalHit => AttackRequest.IsHitRollCritical(HitRoll);
 
     public int DamageInflicted => DamageRoll?.RolledTotal ?? 0;
 
-    public void LogEvent(GameEventLogger logger)
+    public GameEventDescription DescribeEvent()
     {
-        logger.Log("{0}'s evasion gave them a difficulty to hit of {1}", Request.Defender.Name, DefenseRoll.RolledTotal);
-        DefenseRoll.LogEvent(logger);
-        HitRoll.LogEvent(logger);
         if (DamageRoll is null)
         {
-            logger.Log("The strike was evaded!");
+            return new GameEventDescription(
+                $"{Request.Attacker.Name}'s strike against {Request.Defender.Name} missed! ({DamageInflicted} damage)",
+                [
+                    DescribeDefenseRoll(),
+                    DescribeHitRoll()
+                ]);
         }
-        else
+
+        if (IsCriticalHit)
         {
-            logger.Log("Hit confirmed!");
-            if (IsCriticalHit)
-            {
-                logger.Log("Critical!");
-            }
-
-            logger.Log("Rolling for damage...");
-            DamageRoll.LogEvent(logger);
-
-            logger.Log("{0} dealt {1} damage to {2}!", Request.Attacker.Name, DamageRoll.RolledTotal, Request.Defender.Name);
+            return new GameEventDescription(
+                $"{Request.Attacker.Name}'s [CRITICAL] strike against {Request.Defender.Name} inflicted {DamageInflicted} damage!",
+                [
+                    DescribeDefenseRoll(),
+                    DescribeHitRoll(),
+                    DescribeDamageRoll(DamageRoll)
+                ]);
         }
+
+        return new GameEventDescription(
+            $"{Request.Attacker.Name}'s strike against {Request.Defender.Name} inflicted {DamageInflicted} damage!",
+            [
+                DescribeDefenseRoll(),
+                DescribeHitRoll(),
+                DescribeDamageRoll(DamageRoll)
+            ]);
+    }
+
+    private GameEventDescription DescribeHitRoll()
+    {
+        return HitRoll.DescribeEvent();
+    }
+
+    private GameEventDescription DescribeDefenseRoll()
+    {
+        var defenseDescription = DefenseRoll.DescribeEvent();
+        return defenseDescription with { Description = "Rolling Evasion: " + defenseDescription.Description };
+    }
+
+    private GameEventDescription DescribeDamageRoll(RollResolution damageRoll)
+    {
+        var damageDescription = damageRoll.DescribeEvent();
+        return damageDescription with { Description = "Rolling Damage: " + damageDescription.Description };
     }
 }

@@ -2,5 +2,5 @@
 
 public interface IDescribableGameEvent
 {
-    public void LogEvent(GameEventLogger logger);
+    public GameEventDescription DescribeEvent();
 }

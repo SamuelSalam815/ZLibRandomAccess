@@ -11,15 +11,20 @@ public sealed record CheckedRollResolution(CheckedRollRequest Request, RollResol
         logger.Log("Resolved '{0}' to {1}!", question, isAnswerYes ? "YES" : "NO");
     }
 
-    public void LogEvent(GameEventLogger logger)
+    public GameEventDescription DescribeEvent()
     {
-        LogQuestionResolution(IsSuccess, Request.Question, logger);
-        logger.Log(
-            IsSuccess
-                ? "Rolled value ({0}) beats test difficulty ({1})"
-                : "Rolled value ({0}) fails test difficulty ({1})",
-            Roll.RolledTotal,
-            Request.Difficulty);
-        Roll.LogEvent(logger);
+        return new GameEventDescription(
+            $"{Request.Question} {(IsSuccess ? "YES" : "NO")}",
+            [
+                string.Format(
+                    IsSuccess
+                        ? "Rolled value ({0}) beats test difficulty ({1})"
+                        : "Rolled value ({0}) fails test difficulty ({1})",
+                    Roll.RolledTotal,
+                    Request.Difficulty
+                ),
+                Roll.DescribeEvent()
+            ]
+        );
     }
 }

@@ -4,24 +4,29 @@ using LogSimulator.Rolls;
 
 namespace LogSimulator;
 
+// TODO: adhere to 'Request, Resolution' pattern here
+
 public record CombatBegin(Character Hero, Character Adversary, RollResolution HeroFortitudeRoll, RollResolution AdversaryFortitudeRoll) : IDescribableGameEvent
 {
     public static RollResolution RollVitality(int fortitudeValue, DieRollGenerator  dieRollGenerator)
     {
-        var baseVitalityModifier = new RollModifier("Base Vitality", (int)Math.Floor(fortitudeValue * 1.5));
+        var baseVitalityModifier = new Modifier("Base Vitality", (int)Math.Floor(fortitudeValue * 1.5));
         return RollBuilder
+            .For("Combat Vitality")
             .Roll(fortitudeValue)
             .D(3)
             .Plus(baseVitalityModifier)
             .ResolveWith(dieRollGenerator);
     }
 
-    public void LogEvent(GameEventLogger logger)
+    public GameEventDescription DescribeEvent()
     {
-        logger.Log("Combat between '{0}' and '{1}' initiated! Determining combat resilience..", Hero.Name, Adversary.Name);
-        logger.Log("{0}'s initial combat vitality is determined to be {1}!", Hero.Name, HeroFortitudeRoll.RolledTotal);
-        HeroFortitudeRoll.LogEvent(logger);
-        logger.Log("{0}'s initial combat vitality is determined to be {1}!", Adversary.Name, AdversaryFortitudeRoll.RolledTotal);
-        AdversaryFortitudeRoll.LogEvent(logger);
+        return new GameEventDescription(
+            $"{Hero.Name} begins battle with {HeroFortitudeRoll.RolledTotal} vitality and {Adversary.Name} begins battle with {AdversaryFortitudeRoll.RolledTotal} vitality!",
+            [
+                HeroFortitudeRoll.DescribeEvent(),
+                AdversaryFortitudeRoll.DescribeEvent()
+            ]
+        );
     }
 }

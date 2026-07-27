@@ -4,13 +4,14 @@ public record RollRequest(
     int BaseDiceCount,
     int DiceFaceCount,
     AdvantageRating AdvantageRating,
-    RollModifierCollection RollModifiers
-)
+    ModifierCollection TotalRollModifiers,
+    ModifierCollection BaseDiceCountModifiers,
+    string? QuantityName)
 {
     public bool IsAdvantaged => AdvantageRating.IsAdvantaged;
 
     public bool IsDisadvantaged => AdvantageRating.IsDisadvantaged;
-    public int TotalNumberOfDiceRequested => BaseDiceCount + AdvantageRating.AdditionalDice;
+    public int TotalNumberOfDiceRequested => BaseDiceCount + BaseDiceCountModifiers.Total + AdvantageRating.AdditionalDice;
 
     public RollResolution ResolveWith(DieRollGenerator dieRollGenerator)
     {

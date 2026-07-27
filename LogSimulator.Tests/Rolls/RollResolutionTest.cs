@@ -24,7 +24,7 @@ public class RollResolutionTest
     {
         var rolls = Enumerable.Repeat(2, numberOfRolls).ToArray();
         AssertThrows(() => RollBuilder
-            .Roll(3)
+            .RollFor(3)
             .D(4)
             .WithDisadvantage(1)
             .ResolveWith(rolls)
@@ -38,7 +38,7 @@ public class RollResolutionTest
     public void ResolvingWithAnyInvalidRolls_ShouldThrow(int[] rolls)
     {
         AssertThrows(() => RollBuilder
-            .Roll(3)
+            .RollFor(3)
             .D(4)
             .WithDisadvantage(1)
             .ResolveWith(rolls));
@@ -48,13 +48,13 @@ public class RollResolutionTest
     public void ResolvingWithDisadvantage_ShouldDropTheHighestValues()
     {
         var resolution = RollBuilder
-            .Roll(3)
+            .RollFor(3)
             .D(4)
             .WithDisadvantage(2)
             .ResolveWith(3, 2, 1, 4, 4);
 
         resolution.RollsSelected.ShouldBe([3,2,1]);
-        resolution.RollsDiscarded.ShouldBe([4,4]);
+        resolution.RollsPruned.ShouldBe([4,4]);
         resolution.RolledTotal.ShouldBe(6);
     }
 
@@ -62,13 +62,13 @@ public class RollResolutionTest
     public void ResolvingWithAdvantage_ShouldDropTheLowestValues()
     {
         var resolution = RollBuilder
-            .Roll(3)
+            .RollFor(3)
             .D(4)
             .WithAdvantage(2)
             .ResolveWith(1, 1, 4, 4, 4);
 
         resolution.RollsSelected.ShouldBe([4,4,4]);
-        resolution.RollsDiscarded.ShouldBe([1,1]);
+        resolution.RollsPruned.ShouldBe([1,1]);
         resolution.RolledTotal.ShouldBe(12);
     }
 
@@ -82,12 +82,12 @@ public class RollResolutionTest
         int[] expectedRollsDiscarded)
     {
         var resolution = RollBuilder
-            .Roll(3)
+            .RollFor(3)
             .D(4)
             .WithAdvantage(advantage)
             .ResolveWith(rolls);
 
         resolution.RollsSelected.ShouldBe(expectedRollsSelected);
-        resolution.RollsDiscarded.ShouldBe(expectedRollsDiscarded);
+        resolution.RollsPruned.ShouldBe(expectedRollsDiscarded);
     }
 }
