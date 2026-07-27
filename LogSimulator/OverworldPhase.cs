@@ -5,7 +5,7 @@ namespace LogSimulator;
 
 public record OverworldPhase(GameState GameState) : GamePhase(GameState)
 {
-    public override GameProgress ProgressGame(DieRollGenerator dieRollGenerator)
+    public override GamePhase ProgressGame(DieRollGenerator dieRollGenerator)
     {
         if (GameState.NumberOfCombatsCompleted >= 36)
         {
@@ -21,14 +21,14 @@ public record OverworldPhase(GameState GameState) : GamePhase(GameState)
 
         if (avoidRandomEncounterRoll.IsSuccess)
         {
-            return new GameProgress(this, [avoidRandomEncounterRoll]);
+            return this with {GameState = GameState.RecordEvent(avoidRandomEncounterRoll)};
         }
 
         var combatBegin = new InitiateCombatRequest(Hero, Bestiary.Slime).ResolveWith(dieRollGenerator);
-        return new GameProgress(CombatPhase.CreateFrom(GameState, combatBegin), [avoidRandomEncounterRoll, combatBegin]);
+        return CombatPhase.CreateFrom(GameState.RecordEvents(avoidRandomEncounterRoll), combatBegin);
     }
 
-    private GameProgress FinalConfrontation(DieRollGenerator dieRollGenerator)
+    private CombatPhase FinalConfrontation(DieRollGenerator dieRollGenerator)
     {
         var bossEncounterRoll =
             RollBuilder
@@ -39,6 +39,6 @@ public record OverworldPhase(GameState GameState) : GamePhase(GameState)
                 .AutoFail();
 
         var combatBegin = new InitiateCombatRequest(Hero, Bestiary.FinalBoss).ResolveWith(dieRollGenerator);
-        return new GameProgress(CombatPhase.CreateFrom(GameState, combatBegin), [bossEncounterRoll, combatBegin]);
+        return CombatPhase.CreateFrom(GameState.RecordEvents(bossEncounterRoll), combatBegin);
     }
 }

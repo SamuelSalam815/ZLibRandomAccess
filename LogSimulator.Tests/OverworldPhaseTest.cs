@@ -24,7 +24,6 @@ public class OverworldPhaseTest
     {
         new OverworldPhase(TestGameState())
             .ProgressGame(DieRollBuilder.Provide(rollsToProvide).ThenRepeat(1))
-            .NextGamePhase
             .ShouldNotBeNull()
             .ShouldBeOfType<CombatPhase>();
     }
@@ -36,7 +35,6 @@ public class OverworldPhaseTest
     {
         new OverworldPhase(TestGameState())
             .ProgressGame(DieRollBuilder.Provide(rollsToProvide).ThenRepeat(1))
-            .NextGamePhase
             .ShouldNotBeNull()
             .ShouldBeOfType<OverworldPhase>();
     }
@@ -45,7 +43,6 @@ public class OverworldPhaseTest
     // [Ignore]
     public void SimulateGame()
     {
-        var gameLogs = new List<List<GameEventDescription>>();
         var terminalGamePhases  = new List<GamePhase>();
         var random = new Random();
 
@@ -53,23 +50,27 @@ public class OverworldPhaseTest
         do
         {
             currentGamePhase = new OverworldPhase(TestGameState());
-            GameProgress progress;
-            var eventDescriptions = new List<GameEventDescription>();
+            GamePhase? nextGamePhase;
             do
             {
-                progress = currentGamePhase.ProgressGame(diceSize => random.Next(1, diceSize + 1));
-                eventDescriptions.AddRange(progress.GameEvents.Select(e => e.DescribeEvent()));
+                nextGamePhase = currentGamePhase.ProgressGame(diceSize => random.Next(1, diceSize + 1));
 
-                if (progress.NextGamePhase is { } nextGamePhase)
+                if (nextGamePhase is not null)
                 {
                     currentGamePhase = nextGamePhase;
                 }
-            } while (progress.NextGamePhase is not null);
+            } while (nextGamePhase is not null);
 
-            gameLogs.Add(eventDescriptions);
             terminalGamePhases.Add(currentGamePhase);
         } while (currentGamePhase.GameState is {NumberOfLimitBreaks: <= 1 });
 
+        var gameLogs = terminalGamePhases
+            .SelectMany(g => g
+                .GameState
+                .GameEvents
+                .Select(e => e.DescribeEvent())
+                .ToList())
+            .ToList();
         ;
     }
 }

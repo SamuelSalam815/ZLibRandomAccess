@@ -6,5 +6,5 @@ public abstract record GamePhase(GameState GameState)
 {
     public Character Hero => GameState.Hero;
 
-    public abstract GameProgress ProgressGame(DieRollGenerator dieRollGenerator);
+    public abstract GamePhase? ProgressGame(DieRollGenerator dieRollGenerator);
 };

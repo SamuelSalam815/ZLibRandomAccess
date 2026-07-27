@@ -13,7 +13,7 @@ public record LimitBreakResolution(GameState GameState, CheckedRollResolution Li
         var limitBreakRoll = RollBuilder.RollFor(5)
             .D(6)
             .WithAdvantage()
-            .AgainstDifficulty(27, $"Will {hero.Name} activate [LIMIT BREAK]?")
+            .AgainstDifficulty(27, $"Will {hero.Name} [LIMIT BREAK] to fight again with greater capabilities?")
             .ResolveWith(dieRollGenerator);
 
         if (!limitBreakRoll.IsSuccess)
