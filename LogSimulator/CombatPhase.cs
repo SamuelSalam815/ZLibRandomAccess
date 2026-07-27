@@ -1,18 +1,20 @@
 ﻿using LogSimulator.ChacterSpec;
+using LogSimulator.Logging;
 using LogSimulator.Rolls.Combat;
+using LogSimulator.Rolls.LimitBreak;
 
 namespace LogSimulator;
 
 public record CombatPhase(
-    Character Hero,
+    GameState GameState,
     Character Adversary,
     int HeroVitality,
-    int AdversaryVitality) : GamePhase
+    int AdversaryVitality) : GamePhase(GameState)
 {
-    public static CombatPhase CreateFrom(InitiateCombatResolution initiateCombatResolution)
+    public static CombatPhase CreateFrom(GameState gameState, InitiateCombatResolution initiateCombatResolution)
     {
         return new CombatPhase(
-            initiateCombatResolution.Request.Hero,
+            gameState,
             initiateCombatResolution.Request.Adversary,
             initiateCombatResolution.HeroFortitudeRoll.RolledTotal,
             initiateCombatResolution.AdversaryFortitudeRoll.RolledTotal);
@@ -29,15 +31,44 @@ public record CombatPhase(
             AdversaryVitality
         );
 
-        if (combatTurn.IsCombatComplete)
+        var events = new List<IDescribableGameEvent>{combatTurn};
+        if (!combatTurn.IsCombatComplete)
         {
-            return combatTurn.DidHeroWin
-                ? new GameProgress(new OverworldPhase(Hero), [combatTurn])
-                : new GameProgress(new GameOverPhase(), [combatTurn]);
+            return new GameProgress(
+                new CombatPhase(
+                    GameState,
+                    Adversary,
+                    combatTurn.RemainingHeroVitality,
+                    combatTurn.RemainingAdversaryVitality),
+                events);
         }
 
+        if (!combatTurn.DidHeroWin)
+        {
+            return PerformDeathRoll(dieRollGenerator, events);
+        }
+
+        var gameState = GameState.IncrementCombatCounter();
+        return Adversary == Bestiary.FinalBoss
+            ? new GameProgress(new GameOverPhase(gameState with { FinalBossDefeated = true }), events)
+            : new GameProgress(new OverworldPhase(gameState), events);
+
+    }
+
+    private GameProgress PerformDeathRoll(DieRollGenerator dieRollGenerator, List<IDescribableGameEvent> events)
+    {
+        var limitBreak = LimitBreakResolution.CreateFrom(GameState, dieRollGenerator);
+
+        if (!limitBreak.IsSuccess)
+        {
+            return new GameProgress(new GameOverPhase(GameState), [..events, limitBreak]);
+        }
+
+        var beginCombat = new InitiateCombatRequest(limitBreak.GameState.Hero, Adversary).ResolveWith(dieRollGenerator);
+
         return new GameProgress(
-            new CombatPhase(Hero, Adversary, combatTurn.RemainingHeroVitality, combatTurn.RemainingAdversaryVitality),
-            [combatTurn]);
+            CreateFrom(limitBreak.GameState, beginCombat),
+            [..events, limitBreak, beginCombat]
+        );
     }
 }
