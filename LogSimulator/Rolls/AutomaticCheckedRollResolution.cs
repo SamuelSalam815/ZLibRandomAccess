@@ -2,10 +2,11 @@
 
 namespace LogSimulator.Rolls;
 
-public sealed record AutomaticCheckedRollResolution(CheckedRollRequest Request, bool IsSuccess) : IDescribableGameEvent
+public sealed record AutomaticCheckedRollResolution(CheckedRollRequest Request, bool IsSuccess) : ILoggableGameEvent
 {
-    public GameEventDescription DescribeEvent()
+    public GameEventLogTree Log()
     {
-        return $"Automatically resolved '{Request.Question}' to {(IsSuccess ? "YES" : "NO")}";
+        return
+            GameEventLog.RollEvent($"Automatically resolved '{Request.Question}' to {(IsSuccess ? "YES" : "NO")}");
     }
 }

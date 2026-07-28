@@ -7,7 +7,7 @@ public record AttackResolution(
     RollResolution DefenseRoll,
     CheckedRollResolution HitRoll,
     RollResolution? DamageRoll
-) : IDescribableGameEvent
+) : ILoggableGameEvent
 {
     public bool IsMiss => !IsHit;
     public bool IsHit => HitRoll.IsSuccess;
@@ -16,35 +16,25 @@ public record AttackResolution(
 
     public int DamageInflicted => DamageRoll?.RolledTotal ?? 0;
 
-    public GameEventDescription DescribeEvent()
+    public GameEventLogTree Log()
     {
+        string message;
         if (DamageRoll is null)
         {
-            return new GameEventDescription(
-                $"{Request.Attacker.Name}'s strike against {Request.Defender.Name} missed! ({DamageInflicted} damage)",
-                [
-                    DefenseRoll.DescribeEvent(),
-                    HitRoll.DescribeEvent()
-                ]);
+            message =
+                $"{Request.Attacker.Name}'s strike against {Request.Defender.Name}' missed! ({DamageInflicted} damage)";
         }
-
-        if (IsCriticalHit)
+        else
         {
-            return new GameEventDescription(
-                $"{Request.Attacker.Name}'s [CRITICAL] strike against {Request.Defender.Name} inflicted {DamageInflicted} damage!",
-                [
-                    DefenseRoll.DescribeEvent(),
-                    HitRoll.DescribeEvent(),
-                    DamageRoll.DescribeEvent()
-                ]);
+            message = IsCriticalHit
+                ? $"{Request.Attacker.Name}'s [CRITICAL] strike against {Request.Defender.Name} inflicted {DamageInflicted} damage!"
+                : $"{Request.Attacker.Name}'s strike against {Request.Defender.Name} inflicted {DamageInflicted} damage!";
         }
 
-        return new GameEventDescription(
-            $"{Request.Attacker.Name}'s strike against {Request.Defender.Name} inflicted {DamageInflicted} damage!",
-            [
-                DefenseRoll.DescribeEvent(),
-                HitRoll.DescribeEvent(),
-                DamageRoll.DescribeEvent()
-            ]);
+        return GameEventLog
+            .ActionEvent(message)
+            .Add(DefenseRoll)
+            .Add(HitRoll)
+            .MaybeAdd(DamageRoll);
     }
 }

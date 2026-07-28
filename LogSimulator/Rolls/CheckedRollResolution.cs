@@ -2,29 +2,14 @@
 
 namespace LogSimulator.Rolls;
 
-public sealed record CheckedRollResolution(CheckedRollRequest Request, RollResolution Roll) : IDescribableGameEvent
+public sealed record CheckedRollResolution(CheckedRollRequest Request, RollResolution Roll) : ILoggableGameEvent
 {
     public bool IsSuccess => Roll.RolledTotal >= Request.Difficulty;
 
-    public static void LogQuestionResolution(bool isAnswerYes, string question, GameEventLogger logger)
+    public GameEventLogTree Log()
     {
-        logger.Log("Resolved '{0}' to {1}!", question, isAnswerYes ? "YES" : "NO");
-    }
-
-    public GameEventDescription DescribeEvent()
-    {
-        return new GameEventDescription(
-            $"{Request.Question} {(IsSuccess ? "YES" : "NO")}",
-            [
-                string.Format(
-                    IsSuccess
-                        ? "Rolled value ({0}) beats test difficulty ({1})"
-                        : "Rolled value ({0}) fails test difficulty ({1})",
-                    Roll.RolledTotal,
-                    Request.Difficulty
-                ),
-                Roll.DescribeEvent()
-            ]
-        );
+        return GameEventLog.RollEvent($"{Request.Question} {(IsSuccess ? "YES" : "NO")}")
+        .AddDirectChild(GameEventLog.RollEvent($"Rolled value ({Roll.RolledTotal}) {(IsSuccess ? "beats" : "fails")} test difficulty ({Request.Difficulty})"))
+        .AddDirectChild(Roll.Log());
     }
 }

@@ -4,7 +4,7 @@ using LogSimulator.Logging;
 
 namespace LogSimulator.Rolls;
 
-public sealed record RollResolution : IDescribableGameEvent
+public sealed record RollResolution : ILoggableGameEvent
 {
     public RollRequest Request { get; }
     public ImmutableArray<int> RollPool { get; }
@@ -77,15 +77,12 @@ public sealed record RollResolution : IDescribableGameEvent
             rolledTotal);
     }
 
-    public GameEventDescription DescribeEvent()
+    public GameEventLogTree Log()
     {
-        return new GameEventDescription(
-            GetPrimaryDescription(),
-            [
-                ..GetBaseDiceCountModifierDescriptions(),
-                ..GetRawRollDescription(),
-                ..GetTotalRollModifierDescriptions()
-            ]);
+        return GameEventLog.RollEvent(GetPrimaryDescription())
+            .AddDirectChildren(LogDiceCountModifiers())
+            .AddDirectChildren(LogDiceSum())
+            .AddDirectChildren(LogRolledTotalModifiers());
     }
 
     private string GetPrimaryDescription()
@@ -133,7 +130,7 @@ public sealed record RollResolution : IDescribableGameEvent
         return stringBuilder.ToString();
     }
 
-    private IEnumerable<GameEventDescription> GetTotalRollModifierDescriptions()
+    private IEnumerable<GameEventLogTree> LogRolledTotalModifiers()
     {
         foreach (var (modifierName, modifierValue) in Request.TotalRollModifiers.Set)
         {
@@ -148,11 +145,11 @@ public sealed record RollResolution : IDescribableGameEvent
                 .Append(modifierValue)
                 .Append($" to final roll from modifier '{modifierName}'");
 
-            yield return modifierDescription.ToString();
+            yield return GameEventLog.RollEvent(modifierDescription.ToString());
         }
     }
 
-    private IEnumerable<GameEventDescription> GetBaseDiceCountModifierDescriptions()
+    private IEnumerable<GameEventLogTree> LogDiceCountModifiers()
     {
         foreach (var (modifierName, modifierValue) in Request.BaseDiceCountModifiers.Set)
         {
@@ -167,21 +164,21 @@ public sealed record RollResolution : IDescribableGameEvent
                 .Append(modifierValue)
                 .Append($" dice to the final roll from modifier '{modifierName}'");
 
-            yield return modifierDescription.ToString();
+            yield return GameEventLog.RollEvent(modifierName);
         }
     }
 
-    private IEnumerable<GameEventDescription> GetRawRollDescription()
+    private IEnumerable<GameEventLogTree> LogDiceSum()
     {
         if (Request.IsAdvantaged || Request.IsDisadvantaged)
         {
-            yield return $"Roll pool: [{string.Join(", ", RollPool)}]";
-            yield return $"Rolls pruned: [{string.Join(", ", RollsPruned)}]";
-            yield return $"Rolls selected: [{string.Join(" + ", RollsSelected)}] = {RollsSelected.Sum()}";
+            yield return GameEventLog.RollEvent($"Roll pool: [{string.Join(", ", RollPool)}]");
+            yield return GameEventLog.RollEvent($"Rolls pruned: [{string.Join(", ", RollsPruned)}]");
+            yield return GameEventLog.RollEvent($"Rolls selected: [{string.Join(" + ", RollsSelected)}] = {RollsSelected.Sum()}");
         }
         else
         {
-            yield return $"Rolled: [{string.Join(" + ", RollsSelected)}] = {RollsSelected.Sum()}";
+            yield return GameEventLog.RollEvent($"Rolled: [{string.Join(" + ", RollsSelected)}] = {RollsSelected.Sum()}");
         }
     }
 }

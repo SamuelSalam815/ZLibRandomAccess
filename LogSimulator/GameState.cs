@@ -4,23 +4,20 @@ using LogSimulator.Logging;
 
 namespace LogSimulator;
 
-// TODO: maintain a record of all describable game events
 public record GameState(
     Character Hero,
-    ImmutableList<IDescribableGameEvent> GameEvents,
+    GameEventLogTree GameEventLog,
     int NumberOfCombatsCompleted = 0,
     int NumberOfLimitBreaks = 0,
     bool FinalBossDefeated = false
     )
 {
-    public GameState(Character hero) : this(hero, [])
-    {
-    }
-
     public GameState IncrementCombatCounter() => this with { NumberOfCombatsCompleted = NumberOfCombatsCompleted + 1 };
 
-    public GameState RecordEvent(IDescribableGameEvent @event) => this with { GameEvents = GameEvents.Add(@event) };
-    public GameState RecordEvents(params IDescribableGameEvent[] events)
+    public GameState RecordEvent(ILoggableGameEvent @event) => this with { GameEventLog = GameEventLog.Add(@event) };
+    public GameState RecordEvent(GameEventLogTree @event) => this with { GameEventLog = GameEventLog.Add(@event) };
+
+    public GameState RecordEvents(params ILoggableGameEvent[] events)
     {
         return events.Aggregate(this, (current, @event) => current.RecordEvent(@event));
     }

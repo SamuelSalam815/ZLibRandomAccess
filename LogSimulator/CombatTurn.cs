@@ -10,7 +10,7 @@ public record CombatTurn(
     AttackResolution HeroAttack,
     AttackResolution AdversaryAttack,
     int InitialHeroVitality,
-    int InitialAdversaryVitality) : IDescribableGameEvent
+    int InitialAdversaryVitality) : ILoggableGameEvent
 {
     public int RemainingHeroVitality => InitialHeroVitality - AdversaryAttack.DamageInflicted;
     public int RemainingAdversaryVitality => InitialAdversaryVitality - HeroAttack.DamageInflicted;
@@ -19,7 +19,7 @@ public record CombatTurn(
     public bool IsCombatComplete => DidHeroWin || DidAdversaryWin;
 
 
-    public GameEventDescription DescribeEvent()
+    public GameEventLogTree Log()
     {
         string battlePrefix;
         if (IsCombatComplete)
@@ -33,13 +33,11 @@ public record CombatTurn(
             battlePrefix = "Blows were exchanged in combat... ";
         }
 
-        return new GameEventDescription(
+        return GameEventLog.TurnEvent(
             battlePrefix +
-            $"{Hero.Name}'s Vitality [{InitialHeroVitality} -> {RemainingHeroVitality}]; {Adversary.Name}'s Vitality [{InitialAdversaryVitality} -> {RemainingAdversaryVitality}]",
-            [
-                HeroAttack.DescribeEvent(),
-                AdversaryAttack.DescribeEvent()
-            ]
-        );
+            $"{Hero.Name}'s Vitality [{InitialHeroVitality} -> {RemainingHeroVitality}]; {Adversary.Name}'s Vitality [{InitialAdversaryVitality} -> {RemainingAdversaryVitality}]"
+        )
+        .Add(HeroAttack)
+        .Add(AdversaryAttack);
     }
 };

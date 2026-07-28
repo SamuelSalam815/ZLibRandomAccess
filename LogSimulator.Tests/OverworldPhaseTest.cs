@@ -15,7 +15,7 @@ public class OverworldPhaseTest
 {
     private Character TestHero() => new("_JimBob_", new StatBlock(6, 5, 5));
 
-    private GameState TestGameState() => new(TestHero());
+    private GameState TestGameState() => new(TestHero(), GameEventLog.GlobalEvent("Game event log initialized!"));
 
     [TestMethod]
     [DataRow(new[] { 3, 4})]
@@ -43,13 +43,19 @@ public class OverworldPhaseTest
     // [Ignore]
     public void SimulateGame()
     {
+        GameEventLogTree? globalEventLog = null;
         var terminalGamePhases  = new List<GamePhase>();
         var random = new Random();
 
         GamePhase currentGamePhase;
         do
         {
-            currentGamePhase = new OverworldPhase(TestGameState());
+            var newGame = TestGameState();
+            if (globalEventLog != null)
+            {
+                newGame = newGame with { GameEventLog = globalEventLog };
+            }
+            currentGamePhase = OverworldPhase.NewGame(newGame);
             GamePhase? nextGamePhase;
             do
             {
@@ -62,15 +68,9 @@ public class OverworldPhaseTest
             } while (nextGamePhase is not null);
 
             terminalGamePhases.Add(currentGamePhase);
+            globalEventLog = currentGamePhase.GameState.GameEventLog;
         } while (currentGamePhase.GameState is {NumberOfLimitBreaks: <= 1 });
 
-        var gameLogs = terminalGamePhases
-            .SelectMany(g => g
-                .GameState
-                .GameEvents
-                .Select(e => e.DescribeEvent())
-                .ToList())
-            .ToList();
         ;
     }
 }

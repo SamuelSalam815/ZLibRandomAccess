@@ -3,7 +3,7 @@ using LogSimulator.Logging;
 
 namespace LogSimulator.Rolls.LimitBreak;
 
-public record LimitBreakResolution(GameState GameState, CheckedRollResolution LimitBreakRoll) : IDescribableGameEvent
+public record LimitBreakResolution(GameState GameState, CheckedRollResolution LimitBreakRoll) : ILoggableGameEvent
 {
     public bool IsSuccess => LimitBreakRoll.IsSuccess;
 
@@ -37,8 +37,8 @@ public record LimitBreakResolution(GameState GameState, CheckedRollResolution Li
         }, limitBreakRoll);
     }
 
-    public GameEventDescription DescribeEvent()
+    public GameEventLogTree Log()
     {
-        return LimitBreakRoll.DescribeEvent();
+        return LimitBreakRoll.Log();
     }
 };

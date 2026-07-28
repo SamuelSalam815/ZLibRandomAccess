@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using LogSimulator.Logging;
+﻿using LogSimulator.Logging;
 
 namespace LogSimulator;
 
@@ -9,24 +8,13 @@ public record GameOverPhase : GamePhase
     {
     }
 
-    private class GameOverEvent(GameState gameState) : IDescribableGameEvent
-    {
-        public GameEventDescription DescribeEvent()
-        {
-            var message = gameState.FinalBossDefeated
-                ? $"{gameState.Hero.Name} beat the final boss after {gameState.NumberOfCombatsCompleted} encounters and {gameState.NumberOfLimitBreaks} limit breaks!"
-                : $"{gameState.Hero.Name} was defeated after {gameState.NumberOfCombatsCompleted} encounters and {gameState.NumberOfLimitBreaks} limit breaks!";
-
-            return new GameEventDescription(
-                message,
-                gameState.GameEvents.Select(e => e.DescribeEvent()).ToImmutableList());
-        }
-    }
-
     public static GameOverPhase CreateFrom(GameState gameState)
     {
-        var gameOverEvent =  new GameOverEvent(gameState);
-        return new GameOverPhase(gameState with {GameEvents = [gameOverEvent]});
+        var message = gameState.FinalBossDefeated
+            ? $"{gameState.Hero.Name} beat the final boss after completing {gameState.NumberOfCombatsCompleted} encounters and performing {gameState.NumberOfLimitBreaks} limit breaks!"
+            : $"{gameState.Hero.Name} was defeated after completing {gameState.NumberOfCombatsCompleted} encounters and performing {gameState.NumberOfLimitBreaks} limit breaks!";
+
+        return new GameOverPhase(gameState.RecordEvent(GameEventLog.GameEvent(message)));
     }
 
     public bool DidWin => GameState.FinalBossDefeated;

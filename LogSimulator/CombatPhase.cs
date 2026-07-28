@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+﻿using System.Text;
 using LogSimulator.ChacterSpec;
 using LogSimulator.Logging;
 using LogSimulator.Rolls.Combat;
@@ -12,16 +12,16 @@ public record CombatPhase(
     Character Adversary,
     int HeroVitality,
     int AdversaryVitality,
-    ImmutableList<IDescribableGameEvent> CombatEvents) : GamePhase(GameState)
+    int LimitBreakCount) : GamePhase(GameState)
 {
-    public static CombatPhase CreateFrom(GameState gameState, InitiateCombatResolution initiateCombatResolution)
+    public static CombatPhase CreateFrom(GameState gameState, InitiateCombatResolution initiateCombatResolution, int limitBreakCount = 0)
     {
         return new CombatPhase(
-            gameState,
+            gameState.RecordEvent(initiateCombatResolution),
             initiateCombatResolution.Request.Adversary,
             initiateCombatResolution.HeroFortitudeRoll.RolledTotal,
             initiateCombatResolution.AdversaryFortitudeRoll.RolledTotal,
-            [initiateCombatResolution]);
+            limitBreakCount);
     }
 
     public override GamePhase? ProgressGame(DieRollGenerator dieRollGenerator)
@@ -34,59 +34,71 @@ public record CombatPhase(
             HeroVitality,
             AdversaryVitality
         );
-        var updatedCombatEvents = CombatEvents.Add(combatTurn);
+        var updatedGameState = GameState.RecordEvent(combatTurn);
 
         if (!combatTurn.IsCombatComplete)
         {
             return new CombatPhase(
-                    GameState,
+                    updatedGameState,
                     Adversary,
                     combatTurn.RemainingHeroVitality,
                     combatTurn.RemainingAdversaryVitality,
-                    updatedCombatEvents);
+                    LimitBreakCount);
         }
 
         if (!combatTurn.DidHeroWin)
         {
-            return PerformDeathRoll(dieRollGenerator, updatedCombatEvents);
+            return PerformDeathRoll(dieRollGenerator);
         }
 
-        var updatedGameState = GameState
+        updatedGameState = updatedGameState
             .IncrementCombatCounter()
-            .RecordEvent(new EndOfCombatEvent(true, Hero, Adversary, updatedCombatEvents));
+            .RecordEvent(SummarizeCombat(true));
 
         return Adversary == Bestiary.FinalBoss
             ? GameOverPhase.CreateFrom(updatedGameState with { FinalBossDefeated = true })
             : new OverworldPhase(updatedGameState);
+    }
 
+    private GameEventLog SummarizeCombat(bool didHeroWin)
+    {
+        var message = new StringBuilder();
+        if (didHeroWin)
+        {
+            message.Append($"{Hero.Name} defeated {Adversary.Name} in combat");
+        }
+        else
+        {
+            message.Append($"{Adversary.Name} defeated {Hero.Name} in combat");
+        }
+
+        if (LimitBreakCount == 1)
+        {
+            message.Append($" after {Hero.Name} activated [LIMIT BREAK]!");
+        }
+
+        if (LimitBreakCount > 1)
+        {
+            message.Append($" after {Hero.Name} activated [LIMIT BREAK] {LimitBreakCount} times!");
+        }
+
+        return GameEventLog.GamePhaseEvent(message.ToString());
     }
 
     private GamePhase PerformDeathRoll(
-        DieRollGenerator dieRollGenerator,
-        ImmutableList<IDescribableGameEvent> updatedCombatEvents)
+        DieRollGenerator dieRollGenerator)
     {
         var limitBreak = LimitBreakResolution.CreateFrom(GameState, dieRollGenerator);
-        updatedCombatEvents = updatedCombatEvents.Add(limitBreak);
+        var updatedGameState = limitBreak.GameState.RecordEvent(limitBreak);
 
         if (!limitBreak.IsSuccess)
         {
-            var endOfCombatEvent = new EndOfCombatEvent(false, limitBreak.GameState.Hero, Adversary, updatedCombatEvents);
-            return GameOverPhase.CreateFrom(limitBreak.GameState.RecordEvent(endOfCombatEvent));
+            return GameOverPhase.CreateFrom(updatedGameState.RecordEvent(SummarizeCombat(false)));
         }
 
         var beginCombat = new InitiateCombatRequest(limitBreak.GameState.Hero, Adversary).ResolveWith(dieRollGenerator);
+        updatedGameState = updatedGameState.RecordEvent(beginCombat);
 
-        return CreateFrom(limitBreak.GameState, beginCombat) with {CombatEvents = CombatEvents.Add(limitBreak).Add(beginCombat)};
-    }
-
-    private class EndOfCombatEvent(bool didHeroWin, Character hero, Character adversary, ImmutableList<IDescribableGameEvent> combatEvents) : IDescribableGameEvent
-    {
-        public GameEventDescription DescribeEvent()
-        {
-            return new GameEventDescription(didHeroWin
-                ? $"{hero.Name} defeated {adversary.Name} in combat!"
-                : $"{adversary.Name} defeated {hero.Name} in combat!",
-                combatEvents.Select(e => e.DescribeEvent()).ToImmutableList());
-        }
+        return CreateFrom(updatedGameState, beginCombat, LimitBreakCount + 1);
     }
 }

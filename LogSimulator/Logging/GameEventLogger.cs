@@ -1,23 +1,43 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using JetBrains.Annotations;
 
 namespace LogSimulator.Logging;
 
-public record GameEventLogger(List<string> EventDetails)
+public abstract record GameEventLogger
 {
-    public GameEventLogger() : this([])
+    [MustUseReturnValue]
+    public abstract GameEventLogTree Add(GameEventLogTree log);
+
+    [MustUseReturnValue]
+    public GameEventLogTree AddDirectChild(GameEventLogTree log)
     {
+        var tree = AsTree();
+        return tree with { ChildEvents = tree.ChildEvents.Add(log) };
     }
 
-    public GameEventLogger Log(string eventInfo)
+    [MustUseReturnValue]
+    public GameEventLogTree AddDirectChildren(IEnumerable<GameEventLogTree> logs)
     {
-        EventDetails.Add(eventInfo + '\n');
-        return this;
+        return logs.Aggregate(AsTree(), (current, next) => current.AddDirectChild(next));
     }
 
-    public GameEventLogger Log(
-        [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string unformattedEventInfo,
-        params object[] substitutions)
+    [MustUseReturnValue]
+    public abstract GameEventLogTree AsTree();
+
+    [MustUseReturnValue]
+    public GameEventLogTree Add(ILoggableGameEvent @event)
     {
-        return Log(string.Format(unformattedEventInfo, substitutions));
+        return Add(@event.Log());
     }
-};
+
+    [MustUseReturnValue]
+    public GameEventLogTree MaybeAdd(ILoggableGameEvent? @event)
+    {
+        return MaybeAdd(@event?.Log());
+    }
+
+    [MustUseReturnValue]
+    public GameEventLogTree MaybeAdd(GameEventLogTree? log)
+    {
+        return log is null ? AsTree() : Add(log);
+    }
+}
