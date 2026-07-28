@@ -25,7 +25,9 @@ public record OverworldPhase(GameState GameState, int AdventureCounter = 0) : Ga
 
     private GameEventLogTree SummarizeOverworldPhase(Character adversary)
     {
-        return GameEventLog.GamePhaseEvent($"{Hero.Name} roamed for {AdventureCounter} rounds before encountering {adversary.Name}!");
+        return GameEventLog
+            .GamePhaseEvent($"{Hero.Name} roamed for {AdventureCounter} rounds before encountering {adversary.Name}!")
+            .FlagAsSummary();
     }
 
     private bool ContinueAdventure(

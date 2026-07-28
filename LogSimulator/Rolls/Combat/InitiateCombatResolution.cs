@@ -6,7 +6,7 @@ public record InitiateCombatResolution(InitiateCombatRequest Request, RollResolu
 {
     public GameEventLogTree Log()
     {
-        return GameEventLog.ActionEvent(
+        return GameEventLog.CombatActionEvent(
                 $"{Request.Hero.Name} begins battle with {HeroFortitudeRoll.RolledTotal} vitality and {Request.Adversary.Name} begins battle with {AdversaryFortitudeRoll.RolledTotal} vitality!"
             )
             .Add(HeroFortitudeRoll)

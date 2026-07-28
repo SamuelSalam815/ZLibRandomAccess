@@ -5,7 +5,7 @@ namespace LogSimulator.Logging;
 public abstract record GameEventLogger
 {
     [MustUseReturnValue]
-    public abstract GameEventLogTree Add(GameEventLogTree log);
+    public abstract GameEventLogTree Add(GameEventLogTree newLogTree);
 
     [MustUseReturnValue]
     public GameEventLogTree AddDirectChild(GameEventLogTree log)

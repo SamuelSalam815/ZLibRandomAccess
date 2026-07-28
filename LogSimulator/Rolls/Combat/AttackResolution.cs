@@ -32,7 +32,7 @@ public record AttackResolution(
         }
 
         return GameEventLog
-            .ActionEvent(message)
+            .CombatActionEvent(message)
             .Add(DefenseRoll)
             .Add(HitRoll)
             .MaybeAdd(DamageRoll);
