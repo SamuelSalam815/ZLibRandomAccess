@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 
 namespace LogSimulator.Logging;
 
-public record GameEventLogTree(GameEventLog Log, ImmutableList<GameEventLogTree> ChildEvents) : GameEventLogger
+public record GameEventLogTree(GameEventLog Log, ImmutableList<GameEventLogTree> ChildEvents, bool AcceptingChildren = true) : GameEventLogger
 {
     public virtual bool Equals(GameEventLogTree? other)
     {
@@ -27,9 +27,9 @@ public record GameEventLogTree(GameEventLog Log, ImmutableList<GameEventLogTree>
     [MustUseReturnValue]
     public override GameEventLogTree Add(GameEventLogTree newLogTree)
     {
-        if (Log.IsSummary)
+        if (!AcceptingChildren)
         {
-            throw new ArgumentException("Cannot imply the structure of logs added to a summary log!");
+            throw new InvalidOperationException("Cannot add a log to a log tree that is not accepting child logs!");
         }
 
         if (newLogTree.Log.EventScope <= Log.EventScope)
@@ -37,12 +37,6 @@ public record GameEventLogTree(GameEventLog Log, ImmutableList<GameEventLogTree>
             throw new ArgumentException(
                 "Attempting to add a log that would be a sibling or parent to the current log! " +
                 "The given log cannot be added at this level because this operation would require access to the existing parent log");
-        }
-
-        if (newLogTree.Log.IsSummary && !newLogTree.ChildEvents.IsEmpty)
-        {
-            throw new ArgumentException(
-                "Attempting to add a summary log that already has child logs. This operation is forbidden");
         }
 
         if (ChildEvents.IsEmpty)
@@ -53,37 +47,12 @@ public record GameEventLogTree(GameEventLog Log, ImmutableList<GameEventLogTree>
         var lastChildIndex = ChildEvents.Count - 1;
         var lastChild = ChildEvents[lastChildIndex];
 
-        if (newLogTree.Log.IsSummary)
+        if (!lastChild.AcceptingChildren || newLogTree.Log.EventScope <= lastChild.Log.EventScope)
         {
-            return AddNewSummaryLog(newLogTree, lastChild, lastChildIndex);
-        }
-
-        if (newLogTree.Log.EventScope <= lastChild.Log.EventScope)
-        {
-            return this with {ChildEvents = ChildEvents.Add(newLogTree)};
+            return this with { ChildEvents = ChildEvents.Add(newLogTree) };
         }
 
         return this with { ChildEvents = ChildEvents.SetItem(lastChildIndex, lastChild.Add(newLogTree)) };
-    }
-
-    private GameEventLogTree AddNewSummaryLog(GameEventLogTree newLogTree, GameEventLogTree lastChild, int lastChildIndex)
-    {
-        if (lastChild.Log.EventScope != newLogTree.Log.EventScope)
-        {
-            throw new ArgumentException(
-                "Cannot add a summary log when the last sibling log is not at the same scope!");
-        }
-
-        if (lastChild.Log.IsSummary)
-        {
-            throw new ArgumentException(
-                "Cannot add a summary log when the last sibling log is already a summary!");
-        }
-
-        return this with
-        {
-            ChildEvents = ChildEvents.SetItem(lastChildIndex, lastChild with {Log = newLogTree.Log})
-        };
     }
 
     public override GameEventLogTree AsTree() => this;

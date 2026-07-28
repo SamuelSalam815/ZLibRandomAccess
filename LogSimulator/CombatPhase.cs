@@ -6,7 +6,6 @@ using LogSimulator.Rolls.LimitBreak;
 
 namespace LogSimulator;
 
-// TODO: Simplify control flow here
 public record CombatPhase(
     GameState GameState,
     Character Adversary,
@@ -82,7 +81,7 @@ public record CombatPhase(
             message.Append($" after {Hero.Name} activated [LIMIT BREAK] {LimitBreakCount} times!");
         }
 
-        return GameEventLog.GamePhaseEvent(message.ToString()).FlagAsSummary();
+        return GameEventLog.GamePhaseEvent(message.ToString()).DisallowChildLogs();
     }
 
     private GamePhase PerformDeathRoll(

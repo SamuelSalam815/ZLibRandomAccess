@@ -93,13 +93,23 @@ public class GameEventLogTreeTest
     }
 
     [TestMethod]
-    public void AddingToASummaryLog_ShouldThrow()
+    public void AddingToALogThatIsNotAcceptingChildren_ShouldThrow()
     {
         var logToAdd = GameEventLog.CombatActionEvent("Strike Again!");
 
-        var action = () => GameEventLog.TurnEvent("Turn Over!").FlagAsSummary().Add(logToAdd);
+        var action = () => GameEventLog.TurnEvent("Turn Over!").DisallowChildLogs().Add(logToAdd);
 
         action.ShouldThrow<Exception>();
+    }
+
+    [TestMethod]
+    public void AddingLogWithNarrowerScopeWhenLastLogAcceptsNoChildren_ShouldAddLogAsSibling()
+    {
+        var innerLog = GameEventLog.GamePhaseEvent("Completed 10 quests during game phase!").DisallowChildLogs();
+        var outerLog = GameEventLog.GameEvent("Game Begin!").Add(innerLog);
+        var logToAdd = GameEventLog.TurnEvent("Turn Begin");
+
+        outerLog.Add(logToAdd).ChildEvents.Last().ShouldBe(logToAdd);
     }
 
     [TestMethod]
@@ -114,72 +124,4 @@ public class GameEventLogTreeTest
         outerLog.Add(logToAdd).ChildEvents.ShouldBe([expectedNesting]);
     }
 
-    [TestMethod]
-    public void AddingSummaryLog_ShouldIntegrateRecentLowerLevelLogsAsChildren()
-    {
-        var dayLog = GameEventLog.GamePhaseEvent("Day Begin")
-            .Add(GameEventLog.TurnEvent("Roamed the Overworld"))
-            .Add(GameEventLog.TurnEvent("Roamed the Overworld"))
-            .Add(GameEventLog.TurnEvent("Combat initiated!"));
-
-        var globalLog = GameEventLog
-            .GlobalEvent("Initial Log!")
-            .Add(dayLog);
-
-        var summaryLog = GameEventLog.GamePhaseEvent("Roamed the Overworld twice before combat was initiated!")
-            .FlagAsSummary();
-
-        var expectedNesting = summaryLog.AddDirectChildren(dayLog.ChildEvents);
-
-        var updatedGlobalLog = globalLog.Add(summaryLog);
-
-        updatedGlobalLog.ChildEvents.ShouldBe([expectedNesting]);
-    }
-
-    [TestMethod]
-    public void AddingSummaryLogWithChildren_ShouldThrow()
-    {
-        var dayLog = GameEventLog.GamePhaseEvent("Day Begin")
-            .FlagAsSummary()
-            .AddDirectChildren(
-                [GameEventLog.TurnEvent("Roamed the Overworld"),
-                GameEventLog.TurnEvent("Roamed the Overworld"),
-                GameEventLog.TurnEvent("Combat initiated!")]
-            );
-
-        var action = () => GameEventLog.GlobalEvent("Initial Log!").Add(dayLog);
-
-        action.ShouldThrow<Exception>();
-    }
-
-    [TestMethod]
-    public void AddingSummaryLogWithoutEquivalentScopeSibling_ShouldThrow()
-    {
-        var combatSummary =
-            GameEventLog.GlobalEvent("Initial Log!")
-                .Add(GameEventLog.TurnEvent("Took 0 damage in combat"))
-                .Add(GameEventLog.TurnEvent("Took 3 damage in combat"))
-                .Add(GameEventLog.TurnEvent("Took 8 damage in combat"));
-
-        var action = () => combatSummary.Add(GameEventLog.GamePhaseEvent("Was defeated in combat after 3 rounds").FlagAsSummary());
-
-        action.ShouldThrow<Exception>();
-    }
-
-    [TestMethod]
-    public void AddingSummaryLogWhenSiblingIsAlreadyASummary_ShouldThrow()
-    {
-        var combatSummaryLog = GameEventLog.GamePhaseEvent("Was defeated in combat after 3 rounds").FlagAsSummary();
-        var combatLog =
-            GameEventLog.GlobalEvent("Initial Log!")
-                .Add(GameEventLog.GamePhaseEvent("Combat with Skeleton begun!"))
-                .Add(GameEventLog.TurnEvent("Took 0 damage in combat"))
-                .Add(GameEventLog.TurnEvent("Took 3 damage in combat"))
-                .Add(GameEventLog.TurnEvent("Took 8 damage in combat"))
-                .Add(combatSummaryLog);
-
-        var action = () => combatLog.Add(combatSummaryLog);
-
-        action.ShouldThrow<Exception>();
-    }
 }

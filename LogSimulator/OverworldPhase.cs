@@ -10,12 +10,12 @@ public record OverworldPhase(GameState GameState, int AdventureCounter = 0) : Ga
 {
     public static OverworldPhase NewGame(GameState gameState)
     {
-        return new OverworldPhase(gameState);
+        return new OverworldPhase(gameState.RecordEvent(GameEventLog.GameEvent("Started a new game!")));
     }
 
     public override GamePhase ProgressGame(DieRollGenerator dieRollGenerator)
     {
-        if (ContinueAdventure(dieRollGenerator, out var updatedGameState, out var combatInitiation))
+        if (TryContinueAdventure(dieRollGenerator, out var updatedGameState, out var combatInitiation))
         {
             return this with { GameState = updatedGameState, AdventureCounter = AdventureCounter + 1 };
         }
@@ -27,20 +27,24 @@ public record OverworldPhase(GameState GameState, int AdventureCounter = 0) : Ga
     {
         return GameEventLog
             .GamePhaseEvent($"{Hero.Name} roamed for {AdventureCounter} rounds before encountering {adversary.Name}!")
-            .FlagAsSummary();
+            .DisallowChildLogs();
     }
 
-    private bool ContinueAdventure(
+    private bool TryContinueAdventure(
         DieRollGenerator dieRollGenerator,
         out GameState updatedGameState,
         [NotNullWhen(false)] out InitiateCombatResolution? combatBegin)
     {
+        updatedGameState = AdventureCounter == 0
+            ? GameState.RecordEvent(GameEventLog.GamePhaseEvent($"{Hero.Name} started to roam the Overworld!"))
+            : GameState;
+
         var randomEncounterRollBuilder = RollBuilder
             .StandardRoll()
             .WithAdvantage(2)
             .Plus(new Modifier("Diminished Agility", Hero.Agility.Value / 2));
 
-        if (GameState.NumberOfCombatsCompleted >= 36)
+        if (updatedGameState.NumberOfCombatsCompleted >= 36)
         {
             var bossEncounterRoll =
                 randomEncounterRollBuilder
@@ -49,7 +53,7 @@ public record OverworldPhase(GameState GameState, int AdventureCounter = 0) : Ga
 
             var finalBoss = Bestiary.FinalBoss;
             combatBegin = new InitiateCombatRequest(Hero, finalBoss).ResolveWith(dieRollGenerator);
-            updatedGameState = GameState
+            updatedGameState = updatedGameState
                 .RecordEvent(bossEncounterRoll)
                 .RecordEvent(SummarizeOverworldPhase(finalBoss));
             return false;
@@ -59,7 +63,7 @@ public record OverworldPhase(GameState GameState, int AdventureCounter = 0) : Ga
             .AgainstStandardDifficulty($"Can {Hero.Name} roam the overworld in peace?")
             .ResolveWith(dieRollGenerator);
 
-        updatedGameState = GameState.RecordEvent(avoidRandomEncounterRoll);
+        updatedGameState = updatedGameState.RecordEvent(avoidRandomEncounterRoll);
 
         if (avoidRandomEncounterRoll.IsSuccess)
         {

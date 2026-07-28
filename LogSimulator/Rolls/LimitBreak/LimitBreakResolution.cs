@@ -24,9 +24,9 @@ public record LimitBreakResolution(GameState GameState, CheckedRollResolution Li
         var limitBrokenHero = hero with
         {
             Stats = new StatBlock(
-                hero.Fortitude.Value + 3,
-                hero.Agility.Value + 3,
-                hero.Prowess.Value + 3
+                hero.Fortitude.Value + 2,
+                hero.Agility.Value + 2,
+                hero.Prowess.Value + 2
             )
         };
 

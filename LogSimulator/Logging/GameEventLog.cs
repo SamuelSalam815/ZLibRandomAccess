@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 
 namespace LogSimulator.Logging;
 
-public record GameEventLog(EventScope EventScope, string Description, bool IsSummary) : GameEventLogger
+public record GameEventLog(EventScope EventScope, string Description) : GameEventLogger
 {
     [MustUseReturnValue]
     public static GameEventLog Log(
@@ -12,11 +12,11 @@ public record GameEventLog(EventScope EventScope, string Description, bool IsSum
         string log,
         params object?[] args)
     {
-        return new GameEventLog(eventScope, string.Format(log, args), false);
+        return new GameEventLog(eventScope, string.Format(log, args));
     }
 
     [MustUseReturnValue]
-    public GameEventLogTree FlagAsSummary() => this with { IsSummary = true };
+    public GameEventLogTree DisallowChildLogs() => AsTree() with {AcceptingChildren = false};
 
     [MustUseReturnValue]
     public static GameEventLog GlobalEvent(
