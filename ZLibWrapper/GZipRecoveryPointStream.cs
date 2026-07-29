@@ -1,11 +1,19 @@
-﻿using ZLibBindings.Constants;
+﻿using System.Threading.Channels;
+using ZLibBindings.Constants;
 
 namespace ZLibWrapper;
 
-public class GZipRecoveryPointStream(Stream stream, bool leaveOpen, long? byteOffsetRecoveryPointInterval) : Stream
+public class GZipRecoveryPointStream(
+    Stream stream,
+    bool leaveOpen = false,
+    long? byteOffsetRecoveryPointInterval = null) : Stream
 {
+    public event Action<RecoveryPointOffset>? RecoveryPointWritten;
+    public event Action? StreamClosed;
+
     private bool _isDisposed;
 
+    private long _totalBytesWritten = 0;
     private long _bytesWrittenSinceLastRecoveryPoint = 0;
 
     private readonly ZLibDeflateStreamWithRecoveryPoints _deflateStream = new(
@@ -20,6 +28,7 @@ public class GZipRecoveryPointStream(Stream stream, bool leaveOpen, long? byteOf
     {
         _deflateStream.Flush();
         _bytesWrittenSinceLastRecoveryPoint = 0;
+        RecoveryPointWritten?.Invoke(new RecoveryPointOffset(_totalBytesWritten, _deflateStream.Position));
     }
 
     public override int Read(byte[] buffer, int offset, int count) => _deflateStream.Read(buffer, offset, count);
@@ -32,6 +41,7 @@ public class GZipRecoveryPointStream(Stream stream, bool leaveOpen, long? byteOf
     {
         _deflateStream.Write(buffer, offset, count);
         _bytesWrittenSinceLastRecoveryPoint += count;
+        _totalBytesWritten += count;
         if (_bytesWrittenSinceLastRecoveryPoint >= byteOffsetRecoveryPointInterval)
         {
             WriteRecoveryPoint();
@@ -56,7 +66,7 @@ public class GZipRecoveryPointStream(Stream stream, bool leaveOpen, long? byteOf
         }
 
         _deflateStream.Dispose();
-
         _isDisposed = true;
+        StreamClosed?.Invoke();
     }
 }

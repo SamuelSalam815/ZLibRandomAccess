@@ -1,5 +1,9 @@
-﻿using System.IO.Compression;
+﻿using System.Globalization;
+using System.IO.Compression;
+using CsvHelper;
+using CsvHelper.Configuration;
 using JetBrains.Annotations;
+using LogSimulator.Appliction.AccessPointWriting;
 using LogSimulator.ChacterSpec;
 using LogSimulator.Logging;
 using ZLibWrapper;
@@ -42,21 +46,32 @@ class Program
         return File.Open(fileInfo.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.Read);
     }
 
+    private static void SetUpRecoveryPointWriting(GZipRecoveryPointStream recoveryPointStream, FileInfo destinationFile)
+    {
+        var accessPointFile = destinationFile.FullName + ".recovery_offsets.csv";
+        var accessPointFileStream = OpenFileStream(new FileInfo(accessPointFile));
+        var csvWriter = new CsvWriter(new StreamWriter(accessPointFileStream), CultureInfo.InvariantCulture);
+        csvWriter.Context.RegisterClassMap<RecoveryPointOffsetCsvMap>();
+        recoveryPointStream.RecoveryPointWritten += csvWriter.WriteRecord;
+        recoveryPointStream.StreamClosed += csvWriter.Dispose;
+    }
+
     [MustDisposeResource]
     private static StreamWriter GetOutputStream(FileOutputs outputs)
     {
         var controlGZipStream = new GZipStream(OpenFileStream(outputs.ControlOutput), CompressionMode.Compress);
-        var zlibGZipStream = new GZipRecoveryPointStream(OpenFileStream(outputs.OutputUsingZlib), false, null);
+        var zlibGZipStream = new GZipRecoveryPointStream(OpenFileStream(outputs.OutputUsingZlib));
         const long megabyte = 1024 * 1024;
-        var zlibGZipStreamWithRecoverPoints = new GZipRecoveryPointStream(
+        var zlibGZipStreamWithRecoveryPoints = new GZipRecoveryPointStream(
             OpenFileStream(outputs.OutputUsingZlibWithRecoveryPoints),
             false,
             10 * megabyte);
+        SetUpRecoveryPointWriting(zlibGZipStreamWithRecoveryPoints, outputs.OutputUsingZlibWithRecoveryPoints);
         var broadcastStream = new BroadcastStream(
         [
             new SubscribedStream(controlGZipStream, false),
             new SubscribedStream(zlibGZipStream, false),
-            new SubscribedStream(zlibGZipStreamWithRecoverPoints, false),
+            new SubscribedStream(zlibGZipStreamWithRecoveryPoints, false),
         ]);
         return new StreamWriter(broadcastStream);
     }
@@ -64,7 +79,7 @@ class Program
     static void Main(string[] args)
     {
         var outputFiles = GetOutputFilePaths(DateTime.Now);
-        const int targetGameSimCount = 60_000;
+        const int targetGameSimCount = 150_000;
 
         Console.WriteLine(
             "Writing logs to '{0}' until {1:N0} games have been simulated!",
@@ -74,7 +89,7 @@ class Program
         using var outputStream = GetOutputStream(outputFiles);
         var random = new Random((int)DateTime.UtcNow.Ticks);
         var initialHero = new Character("Hero X", new StatBlock(6, 5, 5));
-        var progressLogger = new GameSimTally(50, 60);
+        var progressLogger = new GameSimTally(100, 60);
         for (int gameIndex = 0; gameIndex < targetGameSimCount; gameIndex++)
         {
             var startingTime = new DateTimeOffset(2025, 05, 5, 12, 48, 30, TimeSpan.Zero);
@@ -96,7 +111,7 @@ class Program
 
             finalGameState = finalGameState.RecordEvent(GameEventLog.GlobalEvent($"Completed game sim index {gameIndex}"));
 
-            outputStream.Write(finalGameState.GameEventLog);
+            outputStream.WriteLine(finalGameState.GameEventLog);
             progressLogger.MarkGameSimulated();
 
             if (IsRareGameState(currentGamePhase.GameState))
@@ -108,6 +123,6 @@ class Program
 
     private static bool IsRareGameState(GameState gameState)
     {
-        return gameState is {NumberOfLimitBreaks: > 1, FinalBossDefeated: false};
+        return gameState is {NumberOfLimitBreaks: > 1};
     }
 }
