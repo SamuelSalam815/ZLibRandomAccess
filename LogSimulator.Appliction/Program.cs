@@ -90,7 +90,8 @@ class Program
         var random = new Random((int)DateTime.UtcNow.Ticks);
         var initialHero = new Character("Hero X", new StatBlock(6, 5, 5));
         var progressLogger = new GameSimTally(100, 60);
-        for (int gameIndex = 0; gameIndex < targetGameSimCount; gameIndex++)
+        Console.WriteLine(progressLogger.TallyLegend);
+        for (var gameIndex = 0; gameIndex < targetGameSimCount; gameIndex++)
         {
             var startingTime = new DateTimeOffset(2025, 05, 5, 12, 48, 30, TimeSpan.Zero);
             var startingGameState = new GameState(initialHero, new GameEventLogs(startingTime));
