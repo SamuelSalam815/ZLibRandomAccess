@@ -2,6 +2,7 @@
 using JetBrains.Annotations;
 using LogSimulator.ChacterSpec;
 using LogSimulator.Logging;
+using ZLibWrapper;
 
 namespace LogSimulator.Appliction;
 
@@ -9,34 +10,55 @@ class Program
 {
     private static readonly DirectoryInfo OutputDirectory = new DirectoryInfo("C:\\Temp");
 
-    private record FileOutputs(FileInfo ControlOutput, FileInfo OutputWithRecoveryPoints);
+    private record FileOutputs(
+        FileInfo ControlOutput,
+        FileInfo OutputUsingZlib,
+        FileInfo OutputUsingZlibWithRecoveryPoints);
 
-    private static FileOutputs GetOutputFilePaths()
+    private static FileOutputs GetOutputFilePaths(DateTime outputTimestamp)
     {
         return new FileOutputs(
             new FileInfo(
                 Path.Join(
                     OutputDirectory.FullName,
-                    $"{DateTime.Now:yyyy-MM-ddTHH.mm.ss} SimulatedLogs.log.gz")),
+                    $"{outputTimestamp:yyyy-MM-ddTHH.mm.ss} SimulatedLogs BCL Compression.log.gz")),
             new FileInfo(
                 Path.Join(
                     OutputDirectory.FullName,
-                    $"{DateTime.Now:yyyy-MM-ddTHH.mm.ss} SimulatedLogs with Recovery Points.log.gz")));
+                    $"{outputTimestamp:yyyy-MM-ddTHH.mm.ss} SimulatedLogs zlib Compression.log.gz")),
+            new FileInfo(
+                Path.Join(
+                    OutputDirectory.FullName,
+                    $"{outputTimestamp:yyyy-MM-ddTHH.mm.ss} SimulatedLogs zlib Compression with Recovery Points.log.gz")));
+    }
+
+    private static FileStream OpenFileStream(FileInfo fileInfo)
+    {
+        return File.Open(fileInfo.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.Read);
     }
 
     [MustDisposeResource]
     private static StreamWriter GetOutputStream(FileOutputs outputs)
     {
-        outputs.ControlOutput.Directory?.Create();
-        var controlFile = File.Open(outputs.ControlOutput.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.Read);
-        // TODO: construct stream that write recovery points at a fixed byte offset interval to the recovery point file path
-        var compressionStream = new GZipStream(controlFile, CompressionMode.Compress);
-        return new StreamWriter(compressionStream);
+        var controlGZipStream = new GZipStream(OpenFileStream(outputs.ControlOutput), CompressionMode.Compress);
+        var zlibGZipStream = new GZipRecoveryPointStream(OpenFileStream(outputs.OutputUsingZlib), false, null);
+        const long megabyte = 1024 * 1024;
+        var zlibGZipStreamWithRecoverPoints = new GZipRecoveryPointStream(
+            OpenFileStream(outputs.OutputUsingZlibWithRecoveryPoints),
+            false,
+            10 * megabyte);
+        var broadcastStream = new BroadcastStream(
+        [
+            new SubscribedStream(controlGZipStream, false),
+            new SubscribedStream(zlibGZipStream, false),
+            new SubscribedStream(zlibGZipStreamWithRecoverPoints, false),
+        ]);
+        return new StreamWriter(broadcastStream);
     }
 
     static void Main(string[] args)
     {
-        var outputFiles = GetOutputFilePaths();
+        var outputFiles = GetOutputFilePaths(DateTime.Now);
         const int targetRareEventCount = 3;
 
         Console.WriteLine(

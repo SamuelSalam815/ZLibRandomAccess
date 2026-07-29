@@ -20,4 +20,9 @@ internal class ZLibDeflateStreamWithRecoveryPoints : ZLibDeflateStream
     {
         Flush(ZFlushValue.Z_FULL_FLUSH);
     }
+
+    public void NonRecoveryPointFlush()
+    {
+        base.Flush();
+    }
 }

@@ -46,7 +46,7 @@ public record CombatPhase(
 
         if (!combatTurn.DidHeroWin)
         {
-            return PerformDeathRoll(dieRollGenerator);
+            return PerformDeathRoll(updatedGameState, dieRollGenerator);
         }
 
         updatedGameState = updatedGameState
@@ -83,10 +83,9 @@ public record CombatPhase(
         return GameEventLog.GamePhaseEvent(message.ToString()).DisallowChildLogs();
     }
 
-    private GamePhase PerformDeathRoll(
-        DieRollGenerator dieRollGenerator)
+    private GamePhase PerformDeathRoll(GameState gameState, DieRollGenerator dieRollGenerator)
     {
-        var limitBreak = LimitBreakResolution.CreateFrom(GameState, dieRollGenerator);
+        var limitBreak = LimitBreakResolution.CreateFrom(gameState, dieRollGenerator);
         var updatedGameState = limitBreak.GameState.RecordEvent(limitBreak);
 
         if (!limitBreak.IsSuccess)
