@@ -17,7 +17,7 @@ public record AttackResolution(
 
     public int DamageInflicted => DamageRoll?.RolledTotal ?? 0;
 
-    public GameEventLogTree Log()
+    public IEnumerable<GameEventLog> Log()
     {
         string message;
         if (DamageRoll is null)
@@ -32,10 +32,21 @@ public record AttackResolution(
                 : $"{Request.Attacker.Name}'s strike against {Request.Defender.Name} inflicted {DamageInflicted} damage!";
         }
 
-        return GameEventLog
-            .CombatActionEvent(message)
-            .Add(DefenseRoll)
-            .Add(HitRoll)
-            .MaybeAdd(DamageRoll);
+        yield return GameEventLog.CombatActionEvent(message);
+
+        foreach (var log in DefenseRoll.Log())
+        {
+            yield return log;
+        }
+
+        foreach (var log in HitRoll.Log())
+        {
+            yield return log;
+        }
+
+        foreach (var log in DamageRoll?.Log() ?? [])
+        {
+            yield return log;
+        }
     }
 }

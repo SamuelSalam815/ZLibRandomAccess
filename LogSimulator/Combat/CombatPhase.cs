@@ -58,7 +58,7 @@ public record CombatPhase(
             : new OverworldPhase(updatedGameState);
     }
 
-    private GameEventLogTree SummarizeCombat(bool didHeroWin)
+    private GameEventLog SummarizeCombat(bool didHeroWin)
     {
         var message = new StringBuilder();
         if (didHeroWin)
@@ -80,7 +80,7 @@ public record CombatPhase(
             message.Append($" after {Hero.Name} activated [LIMIT BREAK] {LimitBreakCount} times!");
         }
 
-        return GameEventLog.GamePhaseEvent(message.ToString()).DisallowChildLogs();
+        return GameEventLog.GamePhaseEvent(message.ToString());
     }
 
     private GamePhase PerformDeathRoll(GameState gameState, DieRollGenerator dieRollGenerator)

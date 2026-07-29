@@ -2,5 +2,5 @@
 
 public interface ILoggableGameEvent
 {
-    public GameEventLogTree Log();
+    public IEnumerable<GameEventLog> Log();
 }

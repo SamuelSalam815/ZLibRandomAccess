@@ -8,7 +8,7 @@ namespace LogSimulator.Appliction;
 
 class Program
 {
-    private static readonly DirectoryInfo OutputDirectory = new DirectoryInfo("C:\\Temp");
+    private static readonly DirectoryInfo OutputDirectory = new("C:\\Temp");
 
     private record FileOutputs(
         FileInfo ControlOutput,
@@ -17,23 +17,28 @@ class Program
 
     private static FileOutputs GetOutputFilePaths(DateTime outputTimestamp)
     {
+        var timestampedDirectoryName = $"{outputTimestamp:yyyy-MM-ddTHH.mm.ss}";
         return new FileOutputs(
             new FileInfo(
                 Path.Join(
                     OutputDirectory.FullName,
-                    $"{outputTimestamp:yyyy-MM-ddTHH.mm.ss} SimulatedLogs BCL Compression.log.gz")),
+                    timestampedDirectoryName ,
+                    $"{timestampedDirectoryName} SimulatedLogs BCL Compression.log.gz")),
             new FileInfo(
                 Path.Join(
                     OutputDirectory.FullName,
-                    $"{outputTimestamp:yyyy-MM-ddTHH.mm.ss} SimulatedLogs zlib Compression.log.gz")),
+                    timestampedDirectoryName ,
+                    $"{timestampedDirectoryName} SimulatedLogs zlib Compression.log.gz")),
             new FileInfo(
                 Path.Join(
                     OutputDirectory.FullName,
-                    $"{outputTimestamp:yyyy-MM-ddTHH.mm.ss} SimulatedLogs zlib Compression with Recovery Points.log.gz")));
+                    timestampedDirectoryName ,
+                    $"{timestampedDirectoryName} SimulatedLogs zlib Compression with Recovery Points.log.gz")));
     }
 
     private static FileStream OpenFileStream(FileInfo fileInfo)
     {
+        fileInfo.Directory?.Create();
         return File.Open(fileInfo.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.Read);
     }
 
@@ -59,21 +64,23 @@ class Program
     static void Main(string[] args)
     {
         var outputFiles = GetOutputFilePaths(DateTime.Now);
-        const int targetRareEventCount = 3;
+        const int targetGameSimCount = 60_000;
 
         Console.WriteLine(
-            "Writing logs to '{0}' until {1} 'rare' events have occurred",
+            "Writing logs to '{0}' until {1:N0} games have been simulated!",
             outputFiles,
-            targetRareEventCount);
+            targetGameSimCount);
 
         using var outputStream = GetOutputStream(outputFiles);
         var random = new Random((int)DateTime.UtcNow.Ticks);
         var initialHero = new Character("Hero X", new StatBlock(6, 5, 5));
-        var rareEventCount = 0;
-        var progressLogger = new GameSimTally(50, 120);
-        do
+        var progressLogger = new GameSimTally(50, 60);
+        for (int gameIndex = 0; gameIndex < targetGameSimCount; gameIndex++)
         {
-            GamePhase currentGamePhase = OverworldPhase.NewGame(new GameState(initialHero, GameEventLog.GlobalEvent("Simulating a new game!")));
+            var startingTime = new DateTimeOffset(2025, 05, 5, 12, 48, 30, TimeSpan.Zero);
+            var startingGameState = new GameState(initialHero, new GameEventLogs(startingTime));
+            startingGameState = startingGameState.RecordEvent(GameEventLog.GlobalEvent($"Beginning game sim index {gameIndex}"));
+            GamePhase currentGamePhase = OverworldPhase.NewGame(startingGameState);
             GamePhase? nextGamePhase;
             do
             {
@@ -85,17 +92,18 @@ class Program
                 }
             } while (nextGamePhase is not null);
 
-            outputStream.Write(currentGamePhase.GameState.GameEventLog);
+            var finalGameState = currentGamePhase.GameState;
+
+            finalGameState = finalGameState.RecordEvent(GameEventLog.GlobalEvent($"Completed game sim index {gameIndex}"));
+
+            outputStream.Write(finalGameState.GameEventLog);
             progressLogger.MarkGameSimulated();
 
             if (IsRareGameState(currentGamePhase.GameState))
             {
-                Console.WriteLine();
-                Console.WriteLine("Simulated a rare game!");
-                progressLogger.MakeNextMarkOnNewLine();
-                rareEventCount++;
+                progressLogger.MakeNextMarkSpecial();
             }
-        } while (rareEventCount < targetRareEventCount);
+        }
     }
 
     private static bool IsRareGameState(GameState gameState)

@@ -24,11 +24,10 @@ public record OverworldPhase(GameState GameState, int AdventureCounter = 0) : Ga
         return CombatPhase.CreateFrom(updatedGameState, combatInitiation);
     }
 
-    private GameEventLogTree SummarizeOverworldPhase(Character adversary)
+    private GameEventLog SummarizeOverworldPhase(Character adversary)
     {
-        return GameEventLog
-            .GamePhaseEvent($"{Hero.Name} roamed for {AdventureCounter} rounds before encountering {adversary.Name}!")
-            .DisallowChildLogs();
+        return GameEventLog.GamePhaseEvent(
+            $"{Hero.Name} roamed for {AdventureCounter} rounds before encountering {adversary.Name}!");
     }
 
     private bool TryContinueAdventure(

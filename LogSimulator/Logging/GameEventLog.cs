@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 
 namespace LogSimulator.Logging;
 
-public record GameEventLog(EventScope EventScope, string Description) : GameEventLogger
+public record GameEventLog(EventScope EventScope, string Description)
 {
     [MustUseReturnValue]
     public static GameEventLog Log(
@@ -14,9 +14,6 @@ public record GameEventLog(EventScope EventScope, string Description) : GameEven
     {
         return new GameEventLog(eventScope, string.Format(log, args));
     }
-
-    [MustUseReturnValue]
-    public GameEventLogTree DisallowChildLogs() => AsTree() with {AcceptingChildren = false};
 
     [MustUseReturnValue]
     public static GameEventLog GlobalEvent(
@@ -71,19 +68,6 @@ public record GameEventLog(EventScope EventScope, string Description) : GameEven
     {
         return Log(EventScope.Roll, log, args);
     }
-
-    public static implicit operator GameEventLogTree(GameEventLog log)
-    {
-        return new GameEventLogTree(log, []);
-    }
-
-    [MustUseReturnValue]
-    public override GameEventLogTree Add(GameEventLogTree newLogTree)
-    {
-        return ((GameEventLogTree)this).Add(newLogTree);
-    }
-
-    public override GameEventLogTree AsTree() => this;
 
     public override string ToString()
     {

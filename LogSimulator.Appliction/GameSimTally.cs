@@ -10,6 +10,8 @@ public class GameSimTally(int gamesPerTally, int talliesPerLine)
 
     private int ClumpSize => gamesPerTally * 5;
 
+    private bool _isMarkSpecial;
+
     public void MarkGameSimulated()
     {
         if (_gameSimCount is null || _gameSimCount >= NewLineThreshold)
@@ -23,7 +25,8 @@ public class GameSimTally(int gamesPerTally, int talliesPerLine)
 
         if (_gameSimCount % gamesPerTally == 0)
         {
-            Console.Write('|');
+            Console.Write(_isMarkSpecial ? 'I' : '|');
+            _isMarkSpecial = false;
         }
 
         if (_gameSimCount % ClumpSize == 0)
@@ -32,9 +35,8 @@ public class GameSimTally(int gamesPerTally, int talliesPerLine)
         }
     }
 
-    public void MakeNextMarkOnNewLine()
+    public void MakeNextMarkSpecial()
     {
-        _gameSimCount = NewLineThreshold;
+        _isMarkSpecial = true;
     }
-
 }

@@ -19,7 +19,7 @@ public record CombatTurn(
     public bool IsCombatComplete => DidHeroWin || DidAdversaryWin;
 
 
-    public GameEventLogTree Log()
+    public IEnumerable<GameEventLog> Log()
     {
         string battlePrefix;
         if (IsCombatComplete)
@@ -33,11 +33,19 @@ public record CombatTurn(
             battlePrefix = "Blows were exchanged in combat... ";
         }
 
-        return GameEventLog.TurnEvent(
+        yield return GameEventLog.TurnEvent(
             battlePrefix +
             $"{Hero.Name}'s Vitality [{InitialHeroVitality} -> {RemainingHeroVitality}]; {Adversary.Name}'s Vitality [{InitialAdversaryVitality} -> {RemainingAdversaryVitality}]"
-        )
-        .Add(HeroAttack)
-        .Add(AdversaryAttack);
+        );
+
+        foreach (var log in HeroAttack.Log())
+        {
+            yield return log;
+        }
+
+        foreach (var log in AdversaryAttack.Log())
+        {
+            yield return log;
+        }
     }
 };

@@ -1,12 +1,13 @@
-﻿using LogSimulator.Logging;
+﻿using System.Collections;
+using LogSimulator.Logging;
 
 namespace LogSimulator.Rolls;
 
 public sealed record AutomaticCheckedRollResolution(CheckedRollRequest Request, bool IsSuccess) : ILoggableGameEvent
 {
-    public GameEventLogTree Log()
+    public IEnumerable<GameEventLog> Log()
     {
-        return
+        yield return
             GameEventLog.RollEvent($"Automatically resolved '{Request.Question}' to {(IsSuccess ? "YES" : "NO")}");
     }
 }

@@ -15,7 +15,7 @@ public class OverworldPhaseTest
 {
     private Character TestHero() => new("_JimBob_", new StatBlock(6, 5, 5));
 
-    private GameState TestGameState() => new(TestHero(), GameEventLog.GlobalEvent("Game event log initialized!"));
+    private GameState TestGameState() => new(TestHero(), new GameEventLogs(DateTimeOffset.UtcNow));
 
     [TestMethod]
     [DataRow(new[] { 3, 4})]

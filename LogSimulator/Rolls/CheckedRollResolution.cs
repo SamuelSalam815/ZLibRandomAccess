@@ -6,10 +6,16 @@ public sealed record CheckedRollResolution(CheckedRollRequest Request, RollResol
 {
     public bool IsSuccess => Roll.RolledTotal >= Request.Difficulty;
 
-    public GameEventLogTree Log()
+    public IEnumerable<GameEventLog> Log()
     {
-        return GameEventLog.RollEvent($"{Request.Question} {(IsSuccess ? "YES" : "NO")}")
-        .AddDirectChild(GameEventLog.RollEvent($"Rolled value ({Roll.RolledTotal}) {(IsSuccess ? "beats" : "fails")} test difficulty ({Request.Difficulty})"))
-        .AddDirectChild(Roll.Log());
+        yield return GameEventLog.RollEvent($"{Request.Question} {(IsSuccess ? "YES" : "NO")}");
+        yield return
+            GameEventLog.RollEvent(
+                $"Rolled value ({Roll.RolledTotal}) {(IsSuccess ? "beats" : "fails")} test difficulty ({Request.Difficulty})");
+
+        foreach (var log in Roll.Log())
+        {
+            yield return log;
+        }
     }
 }

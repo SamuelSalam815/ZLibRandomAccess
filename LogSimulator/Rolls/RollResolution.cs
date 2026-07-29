@@ -77,12 +77,25 @@ public sealed record RollResolution : ILoggableGameEvent
             rolledTotal);
     }
 
-    public GameEventLogTree Log()
+    public IEnumerable<GameEventLog> Log()
     {
-        return GameEventLog.RollEvent(GetPrimaryDescription())
-            .AddDirectChildren(LogDiceCountModifiers())
-            .AddDirectChildren(LogDiceSum())
-            .AddDirectChildren(LogRolledTotalModifiers());
+        yield return GameEventLog.RollEvent(GetPrimaryDescription());
+
+        foreach (var log in LogDiceCountModifiers())
+        {
+
+            yield return log;
+        }
+
+        foreach (var log in LogDiceSum())
+        {
+            yield return log;
+        }
+
+        foreach (var log in LogRolledTotalModifiers())
+        {
+            yield return log;
+        }
     }
 
     private string GetPrimaryDescription()
@@ -130,7 +143,7 @@ public sealed record RollResolution : ILoggableGameEvent
         return stringBuilder.ToString();
     }
 
-    private IEnumerable<GameEventLogTree> LogRolledTotalModifiers()
+    private IEnumerable<GameEventLog> LogRolledTotalModifiers()
     {
         foreach (var (modifierName, modifierValue) in Request.TotalRollModifiers.Set)
         {
@@ -149,7 +162,7 @@ public sealed record RollResolution : ILoggableGameEvent
         }
     }
 
-    private IEnumerable<GameEventLogTree> LogDiceCountModifiers()
+    private IEnumerable<GameEventLog> LogDiceCountModifiers()
     {
         foreach (var (modifierName, modifierValue) in Request.BaseDiceCountModifiers.Set)
         {
@@ -168,7 +181,7 @@ public sealed record RollResolution : ILoggableGameEvent
         }
     }
 
-    private IEnumerable<GameEventLogTree> LogDiceSum()
+    private IEnumerable<GameEventLog> LogDiceSum()
     {
         if (Request.IsAdvantaged || Request.IsDisadvantaged)
         {
