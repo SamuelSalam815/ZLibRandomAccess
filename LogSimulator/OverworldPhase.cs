@@ -1,8 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using LogSimulator.ChacterSpec;
+using LogSimulator.Combat;
+using LogSimulator.Combat.Rolls;
 using LogSimulator.Logging;
 using LogSimulator.Rolls;
-using LogSimulator.Rolls.Combat;
 
 namespace LogSimulator;
 

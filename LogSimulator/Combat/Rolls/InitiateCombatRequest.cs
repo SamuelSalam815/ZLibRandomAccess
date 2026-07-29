@@ -1,6 +1,7 @@
 ﻿using LogSimulator.ChacterSpec;
+using LogSimulator.Rolls;
 
-namespace LogSimulator.Rolls.Combat;
+namespace LogSimulator.Combat.Rolls;
 
 public record InitiateCombatRequest(Character Hero, Character Adversary)
 {

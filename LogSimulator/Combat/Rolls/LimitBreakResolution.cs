@@ -1,7 +1,8 @@
 ﻿using LogSimulator.ChacterSpec;
 using LogSimulator.Logging;
+using LogSimulator.Rolls;
 
-namespace LogSimulator.Rolls.LimitBreak;
+namespace LogSimulator.Combat.Rolls;
 
 public record LimitBreakResolution(GameState GameState, CheckedRollResolution LimitBreakRoll) : ILoggableGameEvent
 {

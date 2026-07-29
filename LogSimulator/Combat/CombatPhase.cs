@@ -1,10 +1,9 @@
 ﻿using System.Text;
 using LogSimulator.ChacterSpec;
+using LogSimulator.Combat.Rolls;
 using LogSimulator.Logging;
-using LogSimulator.Rolls.Combat;
-using LogSimulator.Rolls.LimitBreak;
 
-namespace LogSimulator;
+namespace LogSimulator.Combat;
 
 public record CombatPhase(
     GameState GameState,

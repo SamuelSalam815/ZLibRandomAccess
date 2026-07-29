@@ -1,6 +1,6 @@
 ﻿using LogSimulator.ChacterSpec;
 
-namespace LogSimulator;
+namespace LogSimulator.Combat;
 
 public static class Bestiary
 {

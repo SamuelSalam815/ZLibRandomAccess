@@ -1,6 +1,7 @@
 ﻿using LogSimulator.Logging;
+using LogSimulator.Rolls;
 
-namespace LogSimulator.Rolls.Combat;
+namespace LogSimulator.Combat.Rolls;
 
 public record InitiateCombatResolution(InitiateCombatRequest Request, RollResolution HeroFortitudeRoll, RollResolution AdversaryFortitudeRoll) : ILoggableGameEvent
 {

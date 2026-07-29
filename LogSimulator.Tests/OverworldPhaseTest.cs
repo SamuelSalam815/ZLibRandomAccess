@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using LogSimulator.ChacterSpec;
+using LogSimulator.Combat;
 using LogSimulator.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shouldly;
@@ -36,40 +37,5 @@ public class OverworldPhaseTest
             .ProgressGame(DieRollBuilder.Provide(rollsToProvide).ThenRepeat(1))
             .ShouldNotBeNull()
             .ShouldBeOfType<OverworldPhase>();
-    }
-
-    [TestMethod]
-    // [Ignore]
-    public void SimulateGame()
-    {
-        GameEventLogTree? globalEventLog = null;
-        var terminalGamePhases  = new List<GamePhase>();
-        var random = new Random();
-
-        GamePhase currentGamePhase;
-        do
-        {
-            var newGame = TestGameState();
-            if (globalEventLog != null)
-            {
-                newGame = newGame with { GameEventLog = globalEventLog };
-            }
-            currentGamePhase = OverworldPhase.NewGame(newGame);
-            GamePhase? nextGamePhase;
-            do
-            {
-                nextGamePhase = currentGamePhase.ProgressGame(diceSize => random.Next(1, diceSize + 1));
-
-                if (nextGamePhase is not null)
-                {
-                    currentGamePhase = nextGamePhase;
-                }
-            } while (nextGamePhase is not null);
-
-            terminalGamePhases.Add(currentGamePhase);
-            globalEventLog = currentGamePhase.GameState.GameEventLog;
-        } while (currentGamePhase.GameState is {NumberOfLimitBreaks: <= 1 });
-
-        ;
     }
 }

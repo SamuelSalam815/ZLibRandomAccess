@@ -1,8 +1,8 @@
 ﻿using LogSimulator.ChacterSpec;
+using LogSimulator.Combat.Rolls;
 using LogSimulator.Logging;
-using LogSimulator.Rolls.Combat;
 
-namespace LogSimulator;
+namespace LogSimulator.Combat;
 
 public record CombatTurn(
     Character Hero,
