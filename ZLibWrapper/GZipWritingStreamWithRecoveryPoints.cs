@@ -3,7 +3,7 @@ using ZLibBindings.Constants;
 
 namespace ZLibWrapper;
 
-public class GZipRecoveryPointStream(
+public class GZipWritingStreamWithRecoveryPoints(
     Stream stream,
     bool leaveOpen = false,
     long? byteOffsetRecoveryPointInterval = null) : Stream

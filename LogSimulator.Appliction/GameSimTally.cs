@@ -10,7 +10,7 @@ public class GameSimTally(int gamesPerTally, int talliesPerLine)
 
     private const char GroupSeparator = ' ';
 
-    private int? _gameSimCount;
+    private int _gameSimCount;
 
     private int NewLineThreshold => gamesPerTally * talliesPerLine;
 
@@ -31,13 +31,6 @@ public class GameSimTally(int gamesPerTally, int talliesPerLine)
 
     public void MarkGameSimulated()
     {
-        if (_gameSimCount is null || _gameSimCount >= NewLineThreshold)
-        {
-            _gameSimCount = 0;
-            Console.WriteLine();
-            return;
-        }
-
         _gameSimCount++;
 
         if (_gameSimCount % gamesPerTally == 0)
@@ -49,6 +42,12 @@ public class GameSimTally(int gamesPerTally, int talliesPerLine)
         if (_gameSimCount % GamesPerClump == 0)
         {
             Console.Write(GroupSeparator);
+        }
+
+        if (_gameSimCount >= NewLineThreshold)
+        {
+            Console.WriteLine();
+            _gameSimCount = 0;
         }
     }
 

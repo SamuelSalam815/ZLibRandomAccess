@@ -1,7 +1,10 @@
 <Solution>
   <Project Path="ArchiveAccessPointVisualizer/ArchiveAccessPointVisualizer.csproj" />
+  <Project Path="ArchiveViewerBackend.Tests/ArchiveViewerBackend.Tests.csproj" />
   <Project Path="ArchiveViewerBackend/ArchiveViewerBackend.csproj" />
+  <Project Path="Benchmarking.Tests/Benchmarking.Tests.csproj" />
   <Project Path="Benchmarking/Benchmarking.csproj" />
+  <Project Path="LogSimulator.Application.Tests.Integration/LogSimulator.Application.Tests.Integration.csproj" />
   <Project Path="LogSimulator.Application.Tests/LogSimulator.Application.Tests.csproj" />
   <Project Path="LogSimulator.Appliction/LogSimulator.Appliction.csproj" />
   <Project Path="LogSimulator.Tests/LogSimulator.Tests.csproj" />

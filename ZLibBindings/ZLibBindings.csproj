@@ -8,6 +8,7 @@
         <ZlibSourceDir>$(MSBuildThisFileDirectory)..\zlib\</ZlibSourceDir>
         <ZlibBuildDir>$(ZlibSourceDir)build\</ZlibBuildDir>
         <ZlibDll>$(ZlibBuildDir)Release\z.dll</ZlibDll>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
 
     <ItemGroup>

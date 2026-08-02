@@ -15,7 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Benchmarking\Benchmarking.csproj" />
     <ProjectReference Include="..\LogSimulator.Appliction\LogSimulator.Appliction.csproj" />
   </ItemGroup>
   
