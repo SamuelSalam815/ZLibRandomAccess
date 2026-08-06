@@ -2,7 +2,7 @@
 using System.Diagnostics.Contracts;
 using System.Text.RegularExpressions;
 
-namespace ArchiveViewerBackend;
+namespace ArchiveViewerBackend.LineSearch;
 
 public record LineSearchLogic(EncodedString EncodedString, Regex Regex)
 {
@@ -26,7 +26,8 @@ public record LineSearchLogic(EncodedString EncodedString, Regex Regex)
         }
         match = new LineSearchResult(regexMatch.Value, EncodedString.ByteOffsetOf(regexMatch.Index));
 
-        // todo getting byte offset of a given character duplication
         return this with {_currentCharacterOffset = regexMatch.Index + 1};
     }
+
+    public LineSearchLogic SetSearchPattern(Regex searchPattern) => this with { Regex = searchPattern };
 }

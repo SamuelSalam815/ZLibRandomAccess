@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace ArchiveViewerBackend;
+namespace ArchiveViewerBackend.LineSearch;
 
 public record EncodedString(byte[] Bytes, Encoding Encoding, string String)
 {
@@ -11,4 +11,6 @@ public record EncodedString(byte[] Bytes, Encoding Encoding, string String)
     {
         return Encoding.GetByteCount(String[..characterIndex]);
     }
+
+    public override string ToString() => String;
 };

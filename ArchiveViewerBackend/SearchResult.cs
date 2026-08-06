@@ -1,3 +1,3 @@
 ﻿namespace ArchiveViewerBackend;
 
-public record struct SearchResult(long Offset, string Match);
+public record struct SearchResult(int ByteOffset, string Match);

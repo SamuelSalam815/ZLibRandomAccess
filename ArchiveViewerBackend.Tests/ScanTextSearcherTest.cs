@@ -22,10 +22,10 @@ public class ScanTextSearcherTest
 
     private static object[] CreateFirstOccurrenceTestCase(
         [StringSyntax(StringSyntaxAttribute.Regex)] string searchPattern,
-        long expectedByteOffset,
+        int expectedCharacterOffset,
         string text)
     {
-        return [searchPattern, expectedByteOffset, text];
+        return [searchPattern, expectedCharacterOffset, text];
     }
 
     public static IEnumerable<object[]> FirstOccurrenceTestCases()
@@ -38,13 +38,13 @@ public class ScanTextSearcherTest
 
     [TestMethod]
     [DynamicData(nameof(FirstOccurrenceTestCases))]
-    public void ReturnCorrectByteOffset_WhenPatternIsFound(string searchPattern, long expectedByteOffset, string text)
+    public void ReturnCorrectByteOffset_WhenPatternIsFound(string searchPattern, int expectedByteOffset, string text)
     {
         // todo consider if this is duplicated test
         CreateScanTextSearcher(text)
             .FindNext(new Regex(searchPattern))
             .ShouldNotBeNull()
-            .Offset.ShouldBe(expectedByteOffset);
+            .ByteOffset.ShouldBe(expectedByteOffset);
     }
 
     private ScanTextSearcher CreateScanTextSearcher(string text)

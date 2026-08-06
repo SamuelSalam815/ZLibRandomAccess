@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace ArchiveViewerBackend;
+namespace ArchiveViewerBackend.LineSearch;
 
 public class EncodedStringBuilder
 {

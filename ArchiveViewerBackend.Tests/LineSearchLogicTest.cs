@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
+using System.Text.RegularExpressions;
+using ArchiveViewerBackend.LineSearch;
 using JetBrains.Annotations;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shouldly;
@@ -84,4 +86,14 @@ public class LineSearchLogicTest
         actualMatches.ShouldBe(testCase.ExpectedMatches);
     }
 
+    [TestMethod]
+    public void CanChangeSearchPattern()
+    {
+        var newPattern = "World!";
+        _ = new LineSearchLogic(new EncodedStringBuilder("Hello, World!"), "Hello")
+            .SetSearchPattern(new Regex(newPattern))
+            .NextMatch(out var match);
+
+        match.ShouldNotBeNull().MatchText.ShouldBe(newPattern);
+    }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using ArchiveViewerBackend.LineSearch;
 using JetBrains.Annotations;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shouldly;
