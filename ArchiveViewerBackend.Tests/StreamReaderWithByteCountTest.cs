@@ -14,7 +14,7 @@ public class StreamReaderWithByteCountTest
 
     [TestMethod]
     [DataRow("foo bar", 'f')]
-    [DataRow("Hello, World!", 'h')]
+    [DataRow("Hello, World!", 'H')]
     public void PeekReturnsNextCharacter(string input, char nextCharacter)
     {
         new StreamReaderWithByteCount(EncodeWith(input, TestEncoding), TestEncoding)
@@ -24,7 +24,7 @@ public class StreamReaderWithByteCountTest
 
     [TestMethod]
     [DataRow("foo bar", 'f')]
-    [DataRow("Hello, World!", 'h')]
+    [DataRow("Hello, World!", 'H')]
     public void PeekIsIdempotent(string input, char nextCharacter)
     {
         var stream = new StreamReaderWithByteCount(EncodeWith(input, TestEncoding), TestEncoding);

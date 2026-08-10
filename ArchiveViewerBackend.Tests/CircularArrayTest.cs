@@ -129,7 +129,7 @@ public class CircularArrayTest
     [TestMethod]
     [DataRow(new[]{1,2,3,4}, 2, new[]{ 5,6 }, 0, new []{4,5,6})]
     // TODO: add more tests
-    public void WritableSpan_ShouldRepresentSpaceLeftBeforeWrapAround(
+    public void UnusedSpan_ShouldRepresentSpaceLeftBeforeWrapAround(
         int[] itemsToInsert,
         int itemCountToDrop,
         int[] itemsToWriteToSpan,
@@ -139,10 +139,27 @@ public class CircularArrayTest
         var sut = CreateTestArray();
         sut.AddRange(itemsToInsert);
         sut.Drop(itemCountToDrop);
-        itemsToWriteToSpan.CopyTo(sut.GetWritableSpan());
+        itemsToWriteToSpan.CopyTo(sut.GetNextUnusedSpan());
         sut.SimulateAdd(itemsToWriteToSpan.Length);
-        sut.GetWritableSpan().Length.ShouldBe(expectedLengthOfLastWritableSpan);
+        sut.GetNextUnusedSpan().Length.ShouldBe(expectedLengthOfLastWritableSpan);
         sut.ShouldBe(expectedFinalArray);
+    }
+
+    [TestMethod]
+    [DataRow(new int[] {}, new int [] {})]
+    [DataRow(new[] {1,}, new [] {1})]
+    [DataRow(new[] {1,2}, new [] {1,2})]
+    [DataRow(new[] {1,2,3}, new [] {1,2,3})]
+    [DataRow(new[] {1,2,3,4}, new [] {2, 3})]
+    [DataRow(new[] {1,2,3,4,5}, new [] {3})]
+    [DataRow(new[] {1,2,3,4,5,6}, new [] {4,5,6})]
+    public void UsedSpan_ShouldRepresentItemsBeforeAWrapAround(
+        int[] itemsToInsert,
+        int[] expectedUsedSpan)
+    {
+        var sut = CreateTestArray();
+        sut.AddRange(itemsToInsert);
+        sut.GetNextUsedSpan().ToArray().ShouldBe(expectedUsedSpan);
     }
 
     [TestMethod]

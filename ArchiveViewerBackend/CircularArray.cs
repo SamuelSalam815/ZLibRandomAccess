@@ -79,10 +79,12 @@ public class CircularArray<T> : IEnumerable<T>
     }
 
     /// <summary>
-    /// The first of two span representations for this circular array.
-    /// Contains all the elements before the start pointer must wrap around.
+    /// Represents the next contiguous region of this array that is not being used.
+    /// These locations are the ones that will be written to next if there were further calls to <see cref="Add"/>.
+    /// When used with <see cref="SimulateAdd"/>, this methos allows one to directly write to the span
+    /// and then report how many bytes were written.
     /// </summary>
-    public Span<T> GetWritableSpan()
+    public Span<T> GetNextUnusedSpan()
     {
         var startOfSpan = _start + _itemCount;
         var contiguousLength = _buffer.Length - _start;
@@ -92,33 +94,27 @@ public class CircularArray<T> : IEnumerable<T>
     }
 
     /// <summary>
-    /// The second of two span representations for this circular array.
-    /// Contains all the elements after the start pointer has wrapped around.
+    /// Represents the next contiguous region of this array that is being used.
+    /// Allows one to read from this array as if it were a span. If the collection wraps around before listing
+    /// all current items, then the items after wrapping around will not be included.
     /// </summary>
-    /// <returns></returns>
-    public Span<T> GetSecondSpan()
+    public Span<T> GetNextUsedSpan()
     {
-        return _buffer.AsSpan(0, _itemCount - GetWritableSpan().Length);
+        return _buffer.AsSpan(_start, Math.Min(_itemCount, Length - _start));
     }
 
-    public void SimulateAdd(int itemCount)
+    public void SimulateAdd(int additionalItemCount)
     {
-        for (var i = 0; i < itemCount; i++)
+        _end = (_end + additionalItemCount) % _buffer.Length;
+        if (_itemCount + additionalItemCount <= Capacity)
         {
-            SimulateAddOnce();
-        }
-    }
-
-    private void SimulateAddOnce()
-    {
-        _end = (_end + 1) % _buffer.Length;
-        if (_itemCount < Capacity)
-        {
-            _itemCount++;
+            _itemCount += additionalItemCount;
         }
         else
         {
-            _start = (_start + 1) % _buffer.Length;
+            var overflowAmount = _itemCount + additionalItemCount - Capacity;
+            _start = (_start + overflowAmount) % _buffer.Length;
+            _itemCount = Capacity;
         }
     }
 }
