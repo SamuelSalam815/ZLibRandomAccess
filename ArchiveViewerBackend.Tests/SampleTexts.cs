@@ -2,6 +2,8 @@
 
 public static class SampleTexts
 {
+    public const string MixedNewLineStyles = "Mixed\nNew\rLine\r\nStyles\n";
+
     public const string FizzBuzz20 =
         """
         1
