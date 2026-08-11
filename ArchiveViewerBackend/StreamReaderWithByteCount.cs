@@ -5,21 +5,30 @@ namespace ArchiveViewerBackend;
 public class StreamReaderWithByteCount : TextReader
 {
 
-    private readonly CircularArray<byte> _byteBuffer = new(1024);
-    private readonly CircularArray<char> _characterBuffer = new(1024);
+    private readonly CircularArray<byte> _byteBuffer;
+    private readonly CircularArray<char> _characterBuffer;
     private readonly Stream _stream;
     private readonly Decoder _decoder;
     public int NumberOfBytesRead { get; private set; }
-    public int NumberOfCharactersRead { get; private set; }
     private bool _isDisposed;
     private readonly bool _leaveInnerStreamOpen;
 
-    public StreamReaderWithByteCount(Stream stream, Encoding? encoding = null, bool leaveOpen = false)
+    public StreamReaderWithByteCount(Stream stream, int bufferSize = 1024, bool leaveOpen = false) : this(stream, Encoding.Default, bufferSize, leaveOpen)
     {
+    }
+
+    public StreamReaderWithByteCount(Stream stream, Encoding encoding, int bufferSize = 1024, bool leaveOpen = false)
+    {
+        _byteBuffer = new CircularArray<byte>(bufferSize);
+        _characterBuffer = new CircularArray<char>(bufferSize);
         _stream = stream;
         _leaveInnerStreamOpen = leaveOpen;
-        encoding ??= Encoding.Default;
         _decoder = encoding.GetDecoder();
+    }
+
+    public void ResetByteCount()
+    {
+        NumberOfBytesRead = 0;
     }
 
     public override int Peek()
@@ -52,7 +61,6 @@ public class StreamReaderWithByteCount : TextReader
             _decoder.Convert(_byteBuffer.GetNextUsedSpan(), _characterBuffer.GetNextUnusedSpan(), false, out var bytesUsed, out var charsUsed, out _);
             _byteBuffer.Drop(bytesUsed);
             _characterBuffer.SimulateAdd(charsUsed);
-            NumberOfCharactersRead += charsUsed;
         }
     }
 

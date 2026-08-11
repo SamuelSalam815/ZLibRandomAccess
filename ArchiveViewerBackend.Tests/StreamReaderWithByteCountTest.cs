@@ -57,7 +57,17 @@ public class StreamReaderWithByteCountTest
         while (sut.ReadLine() is not null) ;
 
         sut.NumberOfBytesRead.ShouldBe(TestEncoding.GetByteCount(SampleTexts.MixedNewLineStyles));
-        sut.NumberOfCharactersRead.ShouldBe(SampleTexts.MixedNewLineStyles.Length);
+    }
+
+    [TestMethod]
+    public void ResetByteCount_SetsByteCountToZero()
+    {
+        using var sut = new  StreamReaderWithByteCount(EncodeWith(SampleTexts.MixedNewLineStyles, TestEncoding), TestEncoding);
+
+        while (sut.ReadLine() is not null) ;
+        sut.ResetByteCount();
+
+        sut.NumberOfBytesRead.ShouldBe(0);
     }
 
     [TestMethod]
