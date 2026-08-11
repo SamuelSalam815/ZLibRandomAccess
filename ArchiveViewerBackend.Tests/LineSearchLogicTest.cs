@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 using System.Text.RegularExpressions;
 using ArchiveViewerBackend.LineSearch;
 using JetBrains.Annotations;
@@ -71,7 +70,6 @@ public class LineSearchLogicTest
     [Timeout(150)]
     public void CanIterateThroughMultipleMatches(MultipleMatchTestCase testCase)
     {
-        // todo string -> encoded string implicit operator to deduplicate code
         var searchLogic = new LineSearchLogic(new EncodedStringBuilder(testCase.Input), testCase.Regex);
         var actualMatches = new List<LineSearchResult>();
         for (

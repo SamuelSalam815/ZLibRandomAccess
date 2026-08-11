@@ -50,6 +50,22 @@ public class StreamReaderWithByteCountTest
     }
 
     [TestMethod]
+    [DataRow(SampleTexts.FizzBuzz20)]
+    public void ByteCount_OnlyIncreasesAsBytesAreRead(string input)
+    {
+        var sut = new StreamReaderWithByteCount(EncodeWith(input, TestEncoding), TestEncoding);
+
+        var previousByteCount = sut.NumberOfBytesRead;
+
+        while (sut.ReadLine() is not null)
+        {
+            var currentByteCount = sut.NumberOfBytesRead;
+            currentByteCount.ShouldBeGreaterThan(previousByteCount);
+            previousByteCount = currentByteCount;
+        }
+    }
+
+    [TestMethod]
     public void NumberOfBytesAndCharactersRead_IsReportedCorrectlyWhenReadingLineByLine()
     {
         using var sut = new  StreamReaderWithByteCount(EncodeWith(SampleTexts.MixedNewLineStyles, TestEncoding), TestEncoding);

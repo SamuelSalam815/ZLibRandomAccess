@@ -9,15 +9,12 @@ namespace ArchiveViewerBackend;
 /// </summary>
 public class ScanTextSearcher(Stream stream, Encoding encoding, bool leaveOpen = false) : ITextSearcher, IDisposable
 {
-
-    // todo: we need a specialized text reader stream that exposes the number of bytes read
-    //  from the underlying stream, because currently readline does not let us know whether it is
-    //   \r, \n\r, or \n is the line separator - so we cannot know the true byte offset we have read into the stream
-    //    also because of buffering we cannot look at the position of the underlying stream as an indicator - since more than one line may get buffered.
-    private readonly TextReader _reader = new StreamReader(stream, encoding, leaveOpen: leaveOpen);
+    private readonly StreamReaderWithByteCount _reader = new(stream, encoding, leaveOpen: leaveOpen);
     private bool _isDisposed;
-    private int _numBytesRead;
     private LineSearchLogic? _currentLineSearchLogic;
+
+    private int _currentLineByteOffset;
+    private int _nextLineByteOffset;
 
     public ScanTextSearcher(Stream stream, bool leaveOpen = false) : this(stream, Encoding.UTF8, leaveOpen)
     {
@@ -27,7 +24,9 @@ public class ScanTextSearcher(Stream stream, Encoding encoding, bool leaveOpen =
     {
         if (_currentLineSearchLogic is null)
         {
+            _currentLineByteOffset = _nextLineByteOffset;
             var nextLine = _reader.ReadLine();
+            _nextLineByteOffset = _reader.NumberOfBytesRead;
             if (nextLine is null)
             {
                 return null;
@@ -41,24 +40,21 @@ public class ScanTextSearcher(Stream stream, Encoding encoding, bool leaveOpen =
         while (match is null)
         {
             _currentLineSearchLogic = _currentLineSearchLogic.NextMatch(out match);
-            if (match is null)
+            if (match is {} found)
             {
-                _numBytesRead += _currentLineSearchLogic.EncodedString.String.Length;
-                    // todo code duplication
-                var nextLine = _reader.ReadLine();
-                if (nextLine is null)
-                {
-                    return null;
-                }
-
-                _currentLineSearchLogic = new LineSearchLogic(new EncodedStringBuilder(nextLine, encoding), searchPattern);
-
-            }
-            else
-            {
-                return new SearchResult(_numBytesRead + match.Value.ByteOffset, match.Value.MatchText);
+                return new SearchResult(_currentLineByteOffset + found.ByteOffset, found.MatchText);
             }
 
+            // todo code duplication
+            _currentLineByteOffset = _nextLineByteOffset;
+            var nextLine = _reader.ReadLine();
+            _nextLineByteOffset = _reader.NumberOfBytesRead;
+            if (nextLine is null)
+            {
+                return null;
+            }
+
+            _currentLineSearchLogic = new LineSearchLogic(new EncodedStringBuilder(nextLine, encoding), searchPattern);
         }
 
         return null;
@@ -66,7 +62,10 @@ public class ScanTextSearcher(Stream stream, Encoding encoding, bool leaveOpen =
 
     public IEnumerable<SearchResult> FindAll(Regex searchPattern)
     {
-        throw new NotImplementedException();
+        while (FindNext(searchPattern) is { } match)
+        {
+            yield return match;
+        }
     }
 
     protected virtual void Dispose(bool disposing)

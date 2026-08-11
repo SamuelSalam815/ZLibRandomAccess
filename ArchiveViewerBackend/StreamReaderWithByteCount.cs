@@ -8,6 +8,7 @@ public class StreamReaderWithByteCount : TextReader
     private readonly CircularArray<byte> _byteBuffer;
     private readonly CircularArray<char> _characterBuffer;
     private readonly Stream _stream;
+    private readonly Encoding _encoding;
     private readonly Decoder _decoder;
     public int NumberOfBytesRead { get; private set; }
     private bool _isDisposed;
@@ -23,6 +24,7 @@ public class StreamReaderWithByteCount : TextReader
         _characterBuffer = new CircularArray<char>(bufferSize);
         _stream = stream;
         _leaveInnerStreamOpen = leaveOpen;
+        _encoding = encoding;
         _decoder = encoding.GetDecoder();
     }
 
@@ -49,7 +51,6 @@ public class StreamReaderWithByteCount : TextReader
             var byteSpan = _byteBuffer.GetNextUnusedSpan();
             var numBytesRead = _stream.Read(byteSpan);
             _byteBuffer.SimulateAdd(numBytesRead);
-            NumberOfBytesRead += numBytesRead;
             if (numBytesRead < byteSpan.Length)
             {
                 break;
@@ -72,6 +73,7 @@ public class StreamReaderWithByteCount : TextReader
             return -1;
         }
         var result = _characterBuffer[0];
+        NumberOfBytesRead += _encoding.GetByteCount([result]);
         _characterBuffer.Drop();
         return result;
     }

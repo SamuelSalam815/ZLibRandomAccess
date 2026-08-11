@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
@@ -20,35 +21,58 @@ public class ScanTextSearcherTest
         CreateScanTextSearcher(text).FindNext(new Regex(searchPattern)).ShouldBeNull();
     }
 
-    private static object[] CreateFirstOccurrenceTestCase(
-        [StringSyntax(StringSyntaxAttribute.Regex)] string searchPattern,
-        int expectedCharacterOffset,
-        string text)
-    {
-        return [searchPattern, expectedCharacterOffset, text];
-    }
-
-    public static IEnumerable<object[]> FirstOccurrenceTestCases()
-    {
-        // yield return CreateFirstOccurrenceTestCase("Fizz", 4, SampleTexts.FizzBuzz20);
-        // yield return CreateFirstOccurrenceTestCase("Buzz", 15, SampleTexts.FizzBuzz20);
-        // yield return CreateFirstOccurrenceTestCase("4", 12, SampleTexts.FizzBuzz20);
-        yield return CreateFirstOccurrenceTestCase(@"\d", 0, SampleTexts.FizzBuzz20);
-    }
-
     [TestMethod]
     [DynamicData(nameof(FirstOccurrenceTestCases))]
     public void ReturnCorrectByteOffset_WhenPatternIsFound(string searchPattern, int expectedByteOffset, string text)
     {
-        // todo consider if this is duplicated test
         CreateScanTextSearcher(text)
             .FindNext(new Regex(searchPattern))
             .ShouldNotBeNull()
             .ByteOffset.ShouldBe(expectedByteOffset);
     }
 
-    private ScanTextSearcher CreateScanTextSearcher(string text)
+    [TestMethod]
+    [DynamicData(nameof(AllOccurrencesTestCases))]
+    public void ReturnCorrectByteOffsets_WhenAllOccurrencesOfPatternIsFound(string searchPattern, int[] expectedByteOffsets, string text)
+    {
+        CreateScanTextSearcher(text)
+            .FindAll(new Regex(searchPattern))
+            .Select(x => x.ByteOffset)
+            .ToList()
+            .ShouldBe(expectedByteOffsets);
+    }
+
+    public static IEnumerable<object[]> FirstOccurrenceTestCases()
+    {
+        yield return CreateFirstOccurrenceTestCase("Fizz", 6, SampleTexts.FizzBuzz20);
+        yield return CreateFirstOccurrenceTestCase("Buzz", 15, SampleTexts.FizzBuzz20);
+        yield return CreateFirstOccurrenceTestCase("4", 12, SampleTexts.FizzBuzz20);
+        yield return CreateFirstOccurrenceTestCase(@"\d", 0, SampleTexts.FizzBuzz20);
+    }
+
+    public static IEnumerable<object?[]> AllOccurrencesTestCases()
+    {
+        yield return CreateAllOccurrencesTestCase("z", [6,7,13,14], "1\n2\nFizz\n4\nBuzz");
+    }
+
+    private static ScanTextSearcher CreateScanTextSearcher(string text)
     {
         return new ScanTextSearcher(new MemoryStream(Encoding.UTF8.GetBytes(text)));
+    }
+
+    private static object[] CreateFirstOccurrenceTestCase(
+        [StringSyntax(StringSyntaxAttribute.Regex)] string searchPattern,
+        int expectedByteOffset,
+        string text)
+    {
+        return [searchPattern, expectedByteOffset, text];
+    }
+
+    private static object[] CreateAllOccurrencesTestCase(
+        [StringSyntax(StringSyntaxAttribute.Regex)] string searchPattern,
+        int[] expectedByteOffsets,
+        string text)
+    {
+        return [searchPattern, expectedByteOffsets, text];
     }
 }
