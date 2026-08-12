@@ -16,9 +16,7 @@ public class ScanTextSearcher(Stream stream, Encoding encoding, bool leaveOpen =
     private int _currentLineByteOffset;
     private int _nextLineByteOffset;
 
-    public ScanTextSearcher(Stream stream, bool leaveOpen = false) : this(stream, Encoding.UTF8, leaveOpen)
-    {
-    }
+    public int NumberOfBytesRead => _reader.NumberOfBytesRead;
 
     public SearchResult? FindNext(Regex searchPattern)
     {

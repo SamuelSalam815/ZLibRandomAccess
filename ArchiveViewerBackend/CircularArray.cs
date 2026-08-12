@@ -38,9 +38,9 @@ public class CircularArray<T> : IEnumerable<T>
         SimulateAdd(1);
     }
 
-    public void Drop(int count = 1)
+    public void Drop(int dropCount = 1)
     {
-        if (count == 0)
+        if (dropCount == 0)
         {
             return;
         }
@@ -50,13 +50,13 @@ public class CircularArray<T> : IEnumerable<T>
             throw new InvalidOperationException("Cannot drop items from an empty circular array!");
         }
 
-        if (count < 0 || count > Length)
+        if (dropCount < 0 || dropCount > Length)
         {
-            throw new ArgumentOutOfRangeException(nameof(count), count, $"Expected drop count to be in range [0, {Length}]");
+            throw new ArgumentOutOfRangeException(nameof(dropCount), dropCount, $"Expected drop count to be in range [0, {Length}]");
         }
 
-        _start = (_start + count) % _buffer.Length;
-        _itemCount -= count;
+        _start = (_start + dropCount) % _buffer.Length;
+        _itemCount -= dropCount;
     }
 
     public void AddRange(ReadOnlySpan<T> items)
