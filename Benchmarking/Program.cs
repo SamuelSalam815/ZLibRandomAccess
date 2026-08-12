@@ -1,9 +1,11 @@
 ﻿namespace Benchmarking;
 
-class Program
+using BenchmarkDotNet.Running;
+
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
-        Console.WriteLine("Hello, World!");
+        var summary = BenchmarkRunner.Run<Md5VsSha256>();
     }
 }
