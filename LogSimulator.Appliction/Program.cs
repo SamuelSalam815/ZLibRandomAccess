@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.IO.Compression;
+using System.Text;
 using CsvHelper;
 using JetBrains.Annotations;
 using LogSimulator.Appliction.AccessPointWriting;
@@ -39,7 +40,7 @@ public class Program
     }
 
     [MustDisposeResource]
-    private static StreamWriter GetOutputStream()
+    private static Stream GetOutputStream()
     {
         var controlGZipStream = new GZipStream(Create(FilePathFactory.BCLCompressionFile), CompressionMode.Compress);
         var zlibGZipStream = new GZipWritingStreamWithRecoveryPoints(Create(FilePathFactory.ZLibCompressionFile));
@@ -55,54 +56,35 @@ public class Program
             new SubscribedStream(zlibGZipStream, false),
             new SubscribedStream(zlibGZipStreamWithRecoveryPoints, false),
         ]);
-        return new StreamWriter(broadcastStream);
+        return broadcastStream;
     }
 
     static void Main(string[] args)
     {
-        const int targetGameSimCount = 120_000;
+        const int targetMbOfLogsToWrite = 128;
 
         Console.WriteLine(
-            "Writing logs to '{0}' until {1:N0} games have been simulated!",
+            "Writing logs to '{0}' until {1:N0} MB of logs have been compressed!",
             FilePathFactory.TimestampedOutputDirectory.FullName,
-            targetGameSimCount);
+            targetMbOfLogsToWrite);
 
-        using var outputStream = GetOutputStream();
-        var random = new Random((int)DateTime.UtcNow.Ticks);
-        var initialHero = new Character("Hero X", new StatBlock(6, 5, 5));
-        var progressLogger = new GameSimTally(100, 60);
-        Console.WriteLine(progressLogger.TallyLegend);
-        var startingGameTime = new DateTimeOffset(2025, 05, 5, 12, 48, 30, TimeSpan.Zero);
-        for (var gameIndex = 0; gameIndex < targetGameSimCount; gameIndex++)
+        const long targetNumberOfBytesToWrite = targetMbOfLogsToWrite * 1024L * 1024L;
+
+        var sim = new Simulator.LogSimulator();
+        var progressLogger = new GameSimTally(5, 50);
+
+        sim.GameEnded += gameState =>
         {
-            var startingGameState = new GameState(initialHero, new GameEventLogs(startingGameTime));
-            startingGameState = startingGameState.RecordEvent(GameEventLog.GlobalEvent($"Beginning game sim index {gameIndex}"));
-            GamePhase currentGamePhase = OverworldPhase.NewGame(startingGameState);
-            GamePhase? nextGamePhase;
-            do
-            {
-                nextGamePhase = currentGamePhase.ProgressGame(diceSize => random.Next(1, diceSize + 1));
-
-                if (nextGamePhase is not null)
-                {
-                    currentGamePhase = nextGamePhase;
-                }
-            } while (nextGamePhase is not null);
-
-            var finalGameState = currentGamePhase.GameState;
-
-            startingGameTime = finalGameState.GameEventLog.CurrentTime;
-            finalGameState = finalGameState.RecordEvent(GameEventLog.GlobalEvent($"Completed game sim index {gameIndex}"));
-
-            outputStream.WriteLine(finalGameState.GameEventLog);
-
-            if (IsRareGameState(currentGamePhase.GameState))
+            if (IsRareGameState(gameState))
             {
                 progressLogger.MakeNextMarkSpecial();
             }
 
             progressLogger.MarkGameSimulated();
-        }
+        };
+        using var outputStream = GetOutputStream();
+        Console.WriteLine(progressLogger.TallyLegend);
+        sim.SimulateLogs(outputStream, Encoding.Default, targetNumberOfBytesToWrite);
     }
 
     private static bool IsRareGameState(GameState gameState)
