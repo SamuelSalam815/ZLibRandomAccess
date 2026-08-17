@@ -2,7 +2,6 @@
 
 namespace ArchiveViewerBackend;
 
-// TODO: consider deleting
 public class StreamReaderWithByteCountLimit : StreamReaderWithByteCount
 {
     private readonly int? _maximumNumberOfBytesRead;

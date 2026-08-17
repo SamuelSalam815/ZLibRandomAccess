@@ -32,10 +32,16 @@ public class GZipReadingStreamWithRecoveryPoints(
         return _stream.Read(buffer, offset, count);
     }
 
+    public RecoveryPointOffset JumpTo(int offsetIndex)
+    {
+        var recoveryPoint =  RecoveryPointOffsets[offsetIndex];
+        _stream.JumpTo(recoveryPoint.OffsetInCompressedStream);
+        return recoveryPoint;
+    }
+
     public override long Seek(long offset, SeekOrigin origin)
     {
-        // TODO: find closest offest then read and discard the remaining bytes
-        throw new NotImplementedException();
+        throw new NotSupportedException();
     }
 
     public override void SetLength(long value)
@@ -49,7 +55,7 @@ public class GZipReadingStreamWithRecoveryPoints(
     }
 
     public override bool CanRead => _stream.CanRead;
-    public override bool CanSeek => _stream.CanSeek;
+    public override bool CanSeek => false;
     public override bool CanWrite => _stream.CanWrite;
     public override long Length => _stream.Length;
     public override long Position

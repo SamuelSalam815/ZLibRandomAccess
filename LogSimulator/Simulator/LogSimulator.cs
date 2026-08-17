@@ -32,7 +32,7 @@ public class LogSimulator(
         {
             var startingGameState = new GameState(initialHero, new GameEventLogs(startingGameTime));
             startingGameState =
-                startingGameState.RecordEvent(GameEventLog.GlobalEvent($"Beginning game sim index {gameIndex++}"));
+                startingGameState.RecordEvent(GameEventLog.GlobalEvent($"Beginning game sim index {gameIndex}"));
             GamePhase currentGamePhase = OverworldPhase.NewGame(startingGameState);
             GamePhase? nextGamePhase;
             do
@@ -49,7 +49,7 @@ public class LogSimulator(
 
             startingGameTime = finalGameState.GameEventLog.CurrentTime;
             finalGameState =
-                finalGameState.RecordEvent(GameEventLog.GlobalEvent($"Completed game sim index {gameIndex}"));
+                finalGameState.RecordEvent(GameEventLog.GlobalEvent($"Completed game sim index {gameIndex++}"));
 
             GameEnded?.Invoke(finalGameState);
 
