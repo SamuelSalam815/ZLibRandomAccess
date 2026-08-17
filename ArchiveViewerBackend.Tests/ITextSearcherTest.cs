@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
+using ArchiveViewerBackend.TextSearching;
 using JetBrains.Annotations;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shouldly;
@@ -33,7 +34,7 @@ public class TextSearcherTest
     public void FindNextReturnsCorrectByteOffset_WhenPatternIsFound(
         ITextSearcher sut,
         string searchPattern,
-        int expectedByteOffset)
+        long expectedByteOffset)
     {
         sut.FindNext(searchPattern).ShouldNotBeNull().ByteOffset.ShouldBe(expectedByteOffset);
     }
@@ -43,7 +44,7 @@ public class TextSearcherTest
     public void FindNextReturnsCorrectByteOffsetsInOrder_WhenPatternIsFound(
         ITextSearcher sut,
         string searchPattern,
-        int[] expectedByteOffsets)
+        long[] expectedByteOffsets)
     {
         foreach (var expectedByteOffset in expectedByteOffsets)
         {
@@ -58,7 +59,7 @@ public class TextSearcherTest
     public void FindAllReturnsCorrectByteOffsets_WhenPatternIsFound(
         ITextSearcher sut,
         string searchPattern,
-        int[] expectedByteOffsets)
+        long[] expectedByteOffsets)
     {
         sut.FindAll(searchPattern).Select(x => x.ByteOffset).ToList().ShouldBe(expectedByteOffsets);
     }
@@ -68,7 +69,7 @@ public class TextSearcherTest
     public void FindNextReturnsNull_AfterFindAll(
         ITextSearcher sut,
         string searchPattern,
-        int[] expectedByteOffsets)
+        long[] expectedByteOffsets)
     {
         sut.FindAll(searchPattern).Select(x => x.ByteOffset).ToList().ShouldBe(expectedByteOffsets);
         sut.FindNext(searchPattern).ShouldBeNull();
@@ -141,7 +142,7 @@ public class TextSearcherTest
     private static object[] CreateFirstOccurrenceTestCase(
         [StringSyntax(StringSyntaxAttribute.Regex)]
         string searchPattern,
-        int expectedByteOffset)
+        long expectedByteOffset)
     {
         return [searchPattern, expectedByteOffset];
     }
@@ -149,7 +150,7 @@ public class TextSearcherTest
     private static object[] CreateAllOccurrencesTestCase(
         [StringSyntax(StringSyntaxAttribute.Regex)]
         string searchPattern,
-        int[] expectedByteOffsets)
+        long[] expectedByteOffsets)
     {
         return [searchPattern, expectedByteOffsets];
     }

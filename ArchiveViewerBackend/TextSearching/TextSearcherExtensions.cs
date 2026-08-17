@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
-namespace ArchiveViewerBackend;
+namespace ArchiveViewerBackend.TextSearching;
 
 public static class TextSearcherExtensions
 {

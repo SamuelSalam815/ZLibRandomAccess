@@ -2,7 +2,7 @@
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace ArchiveViewerBackend;
+namespace ArchiveViewerBackend.TextSearching;
 
 public class ParallelScanTextSearcher : ITextSearcher, IDisposable
 {

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Text;
+using ArchiveViewerBackend.TextSearching;
 using JetBrains.Annotations;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shouldly;

@@ -2,7 +2,7 @@
 using System.Text.RegularExpressions;
 using ArchiveViewerBackend.LineSearch;
 
-namespace ArchiveViewerBackend;
+namespace ArchiveViewerBackend.TextSearching;
 
 /// <summary>
 /// This search strategy simply scans the given text reader, line by line, for the provided search pattern

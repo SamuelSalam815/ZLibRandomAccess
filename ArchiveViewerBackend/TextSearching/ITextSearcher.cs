@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace ArchiveViewerBackend;
+namespace ArchiveViewerBackend.TextSearching;
 
 public interface ITextSearcher
 {

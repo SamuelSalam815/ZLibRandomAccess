@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using ArchiveViewerBackend.TextSearching;
+using JetBrains.Annotations;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ArchiveViewerBackend.Tests;

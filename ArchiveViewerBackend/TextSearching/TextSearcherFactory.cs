@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using ZLibWrapper;
 
-namespace ArchiveViewerBackend;
+namespace ArchiveViewerBackend.TextSearching;
 
 public static class TextSearcherFactory
 
