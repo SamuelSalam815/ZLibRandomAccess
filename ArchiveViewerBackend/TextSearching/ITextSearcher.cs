@@ -2,7 +2,7 @@
 
 namespace ArchiveViewerBackend.TextSearching;
 
-public interface ITextSearcher
+public interface ITextSearcher : IDisposable
 {
     public SearchResult? FindNext(Regex searchPattern);
 

@@ -5,10 +5,10 @@ using Shouldly;
 namespace Benchmarking.Tests;
 
 [TestClass]
-[TestSubject(typeof(ScanningForTextInGzip))]
-public class ScanningForTextInGzipTest
+[TestSubject(typeof(RegexInGzipStream))]
+public class RegexInGzipStreamTest
 {
-    public TestContext TestContext { get; set; }
+    public TestContext? TestContext { get; set; }
 
     [TestMethod]
     [DataRow("e", false)]
@@ -19,8 +19,8 @@ public class ScanningForTextInGzipTest
     [DataRow("Jimmy was defeated after completing 10 encounters and performing 1 limit breaks", false)]
     public void SearchRegex_MatchesExpectedText(string text, bool shouldMatch)
     {
-        var match = ScanningForTextInGzip.SearchPattern.Match(text);
+        var match = RegexInGzipStream.SearchPattern.Match(text);
         match.Success.ShouldBe(shouldMatch);
-        TestContext.Write("Match Text: '{0}'", match.Value);
+        TestContext?.Write("Match Text: '{0}'", match.Value);
     }
 }

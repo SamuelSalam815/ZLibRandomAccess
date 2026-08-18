@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace ArchiveViewerBackend.TextSearching;
 
-public class ParallelScanTextSearcher : ITextSearcher, IDisposable
+public class ParallelScanTextSearcher : ITextSearcher
 {
     private readonly ImmutableList<WithByteOffset<ScanTextSearcher>> _textSearchers;
 

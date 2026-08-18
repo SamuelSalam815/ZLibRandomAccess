@@ -6,7 +6,7 @@ namespace ZLibWrapper;
 public class GZipWritingStreamWithRecoveryPoints(
     Stream stream,
     bool leaveOpen = false,
-    long? byteOffsetRecoveryPointInterval = null) : Stream
+    long? recoveryPointByteInterval = null) : Stream
 {
     public event Action<RecoveryPointOffset>? RecoveryPointWritten;
     public event Action? StreamClosed;
@@ -42,7 +42,7 @@ public class GZipWritingStreamWithRecoveryPoints(
         _deflateStream.Write(buffer, offset, count);
         _bytesWrittenSinceLastRecoveryPoint += count;
         _totalBytesWritten += count;
-        if (_bytesWrittenSinceLastRecoveryPoint >= byteOffsetRecoveryPointInterval)
+        if (_bytesWrittenSinceLastRecoveryPoint >= recoveryPointByteInterval)
         {
             WriteRecoveryPoint();
         }

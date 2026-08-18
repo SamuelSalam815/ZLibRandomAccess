@@ -7,7 +7,7 @@ namespace ArchiveViewerBackend.TextSearching;
 /// <summary>
 /// This search strategy simply scans the given text reader, line by line, for the provided search pattern
 /// </summary>
-public class ScanTextSearcher(Stream stream, Encoding encoding, bool leaveOpen = false) : ITextSearcher, IDisposable
+public class ScanTextSearcher(Stream stream, Encoding encoding, bool leaveOpen = false) : ITextSearcher
 {
     private readonly StreamReaderWithByteCount _reader = new(stream, encoding, leaveOpen: leaveOpen);
     private bool _isDisposed;
