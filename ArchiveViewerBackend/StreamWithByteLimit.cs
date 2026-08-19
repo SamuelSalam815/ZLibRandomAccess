@@ -34,7 +34,7 @@ public class StreamWithByteLimit : Stream
         }
 
         _byteCount += readCount;
-        return _stream.Read(buffer, offset, readCount);
+        return readCount == 0 ? 0 : _stream.Read(buffer, offset, readCount);
     }
 
     public override long Seek(long offset, SeekOrigin origin)

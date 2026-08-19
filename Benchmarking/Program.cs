@@ -1,5 +1,4 @@
 ﻿using BenchmarkDotNet.Configs;
-using BenchmarkDotNet.Validators;
 
 namespace Benchmarking;
 
@@ -9,6 +8,7 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        var summary = BenchmarkRunner.Run<RegexInGzipStream>();
+        // BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, new DebugInProcessConfig());
+        var summary = BenchmarkRunner.Run<BenchmarkingRegexInGzipStream>();
     }
 }

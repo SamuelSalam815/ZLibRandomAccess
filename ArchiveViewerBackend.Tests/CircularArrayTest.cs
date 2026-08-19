@@ -128,7 +128,20 @@ public class CircularArrayTest
 
     [TestMethod]
     [DataRow(new[]{1,2,3,4}, 2, new[]{ 5,6 }, 0, new []{4,5,6})]
-    // TODO: add more tests
+    [DataRow(new[]{1,2,3,4}, 3, new[]{ 5,6 }, 1, new []{5,6})]
+    [DataRow(new int[0], 0, new int[0], 3, new int[0])]
+    [DataRow(new[]{1}, 0, new int[0], 2, new []{1})]
+    [DataRow(new[]{1, 2}, 0, new int[0], 1, new []{1, 2})]
+    [DataRow(new[]{1,2,3}, 0, new int[0], 0, new []{1,2,3})]
+    [DataRow(new[]{1,2,3,4}, 0, new int[0], 0, new []{2,3,4})]
+    [DataRow(new[]{1,2,3,4,5}, 0, new int[0], 0, new []{3,4, 5})]
+    [DataRow(new[]{1,2,3,4,5,6}, 0, new int[0], 0, new []{4, 5, 6})]
+    [DataRow(new[]{1}, 1, new int[0], 2, new int[0])]
+    [DataRow(new[]{1, 2}, 2, new int[0], 1, new int[0])]
+    [DataRow(new[]{1,2,3}, 3, new int[0], 3, new int[0])]
+    [DataRow(new[]{1,2,3,4}, 3, new int[0], 2, new int[0])]
+    [DataRow(new[]{1,2,3,4,5}, 3, new int[0], 1, new int[0])]
+    [DataRow(new[]{1,2,3,4,5,6}, 3, new int[0], 3, new int[0])]
     public void UnusedSpan_ShouldRepresentSpaceLeftBeforeWrapAround(
         int[] itemsToInsert,
         int itemCountToDrop,
@@ -146,19 +159,26 @@ public class CircularArrayTest
     }
 
     [TestMethod]
-    [DataRow(new int[] {}, new int [] {})]
-    [DataRow(new[] {1,}, new [] {1})]
-    [DataRow(new[] {1,2}, new [] {1,2})]
-    [DataRow(new[] {1,2,3}, new [] {1,2,3})]
-    [DataRow(new[] {1,2,3,4}, new [] {2, 3})]
-    [DataRow(new[] {1,2,3,4,5}, new [] {3})]
-    [DataRow(new[] {1,2,3,4,5,6}, new [] {4,5,6})]
+    [DataRow(new int[] {}, 0, new int [] {})]
+    [DataRow(new[] {1,}, 0, new [] {1})]
+    [DataRow(new[] {1,2}, 0, new [] {1,2})]
+    [DataRow(new[] {1,2,3}, 0, new [] {1,2,3})]
+    [DataRow(new[] {1,2,3,4}, 0, new [] {2, 3})]
+    [DataRow(new[] {1,2,3,4,5}, 0, new [] {3})]
+    [DataRow(new[] {1,2,3,4,5,6}, 0, new [] {4,5,6})]
+    [DataRow(new[] {1,}, 1, new int[] {})]
+    [DataRow(new[] {1,2}, 1, new [] {2})]
+    [DataRow(new[] {1,2,3}, 2, new [] {3})]
+    [DataRow(new[] {1,2,3,4}, 2, new [] {4})]
+    [DataRow(new[] {1,2,3,4,5}, 1, new [] {4, 5})]
     public void UsedSpan_ShouldRepresentItemsBeforeAWrapAround(
         int[] itemsToInsert,
+        int dropCount,
         int[] expectedUsedSpan)
     {
         var sut = CreateTestArray();
         sut.AddRange(itemsToInsert);
+        sut.Drop(dropCount);
         sut.GetNextUsedSpan().ToArray().ShouldBe(expectedUsedSpan);
     }
 

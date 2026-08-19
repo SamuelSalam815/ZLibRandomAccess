@@ -9,7 +9,7 @@ using ZLibWrapper;
 namespace Benchmarking;
 
 [SimpleJob(RunStrategy.Monitoring)]
-public class RegexInGzipStream
+public class BenchmarkingRegexInGzipStream
 {
     [ParamsSource(nameof(ValuesForUncompressedLogMegabyteCount))]
     public int UncompressedLogMegabyteCount { get; set; }
@@ -23,9 +23,11 @@ public class RegexInGzipStream
 
     private const long MegaByte = 1024 * 1024;
 
-    private readonly MemoryStream _compressedData = new();
+    private byte[] _compressedData = [];
     private readonly List<RecoveryPointOffset> _recoveryPointOffsets = [];
     private ITextSearcher? _textSearcher;
+
+    private Stream GetCompressedDataStream() => new MemoryStream(_compressedData, writable: false);
 
     [GlobalSetup(Target = nameof(SystemGzip_FindAll))]
     public void GlobalSetUpSystemGzip()
@@ -56,24 +58,26 @@ public class RegexInGzipStream
     private void GenerateCompressedData(Func<Stream, Stream> compressorFactory)
     {
         var sim = new LogSimulator.Simulator.LogSimulator();
-        using (var compressor = compressorFactory(_compressedData))
+        using var compressedDataStream = new MemoryStream();
+        using (var compressor = compressorFactory(compressedDataStream))
         {
             sim.SimulateLogs(compressor, Encoding, UncompressedLogMegabyteCount * MegaByte);
         }
-        _compressedData.Seek(0, SeekOrigin.Begin);
+
+        _compressedData = compressedDataStream.ToArray();
     }
 
     [IterationSetup(Target = nameof(SystemGzip_FindAll))]
     public void IterationSetUpSystemGzip()
     {
-        var decompressor  = new GZipStream(_compressedData, CompressionMode.Decompress, leaveOpen: true);
+        var decompressor  = new GZipStream(GetCompressedDataStream(), CompressionMode.Decompress);
         _textSearcher = new ScanTextSearcher(decompressor, Encoding);
     }
 
     [IterationSetup(Target = nameof(ZlibGzip_FindAll))]
     public void IterationSetUpZlibGzip()
     {
-        var decompressor  = new GZipReadingStreamWithRecoveryPoints(_compressedData, leaveOpen: true);
+        var decompressor  = new GZipReadingStreamWithRecoveryPoints(GetCompressedDataStream());
         _textSearcher = new ScanTextSearcher(decompressor, Encoding);
     }
 
@@ -82,8 +86,7 @@ public class RegexInGzipStream
     {
         _textSearcher = TextSearcherFactory.CreateParallelTextSearcher(
             () => new GZipReadingStreamWithRecoveryPoints(
-                _compressedData,
-                leaveOpen: true,
+                GetCompressedDataStream(),
                 recoveryPointOffsets: _recoveryPointOffsets),
             _recoveryPointOffsets);
     }
@@ -92,12 +95,6 @@ public class RegexInGzipStream
     public void IterationCleanUp()
     {
         _textSearcher?.Dispose();
-    }
-
-    [GlobalCleanup]
-    public void GlobalCleanUp()
-    {
-        _compressedData.Dispose();
     }
 
     [Benchmark(Baseline = true)]

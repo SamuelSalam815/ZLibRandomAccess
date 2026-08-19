@@ -5,8 +5,8 @@ using Shouldly;
 namespace Benchmarking.Tests;
 
 [TestClass]
-[TestSubject(typeof(RegexInGzipStream))]
-public class RegexInGzipStreamTest
+[TestSubject(typeof(BenchmarkingRegexInGzipStream))]
+public class BenchmarkingRegexInGzipStreamTest
 {
     public TestContext? TestContext { get; set; }
 
@@ -19,7 +19,7 @@ public class RegexInGzipStreamTest
     [DataRow("Jimmy was defeated after completing 10 encounters and performing 1 limit breaks", false)]
     public void SearchRegex_MatchesExpectedText(string text, bool shouldMatch)
     {
-        var match = RegexInGzipStream.SearchPattern.Match(text);
+        var match = BenchmarkingRegexInGzipStream.SearchPattern.Match(text);
         match.Success.ShouldBe(shouldMatch);
         TestContext?.Write("Match Text: '{0}'", match.Value);
     }

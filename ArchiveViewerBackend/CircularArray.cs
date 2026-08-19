@@ -86,8 +86,8 @@ public class CircularArray<T> : IEnumerable<T>
     /// </summary>
     public Span<T> GetNextUnusedSpan()
     {
-        var startOfSpan = _start + _itemCount;
-        var contiguousLength = _buffer.Length - _start;
+        var startOfSpan = (_start + _itemCount) % _buffer.Length;
+        var contiguousLength = _buffer.Length - startOfSpan;
         var remainingCapacity = _buffer.Length - _itemCount;
         var spanLength = Math.Min(contiguousLength, remainingCapacity);
         return _buffer.AsSpan(startOfSpan, spanLength);
@@ -100,7 +100,8 @@ public class CircularArray<T> : IEnumerable<T>
     /// </summary>
     public Span<T> GetNextUsedSpan()
     {
-        return _buffer.AsSpan(_start, Math.Min(_itemCount, Length - _start));
+        var spanLength = Math.Min(_itemCount, _buffer.Length - _start);
+        return _buffer.AsSpan(_start, spanLength);
     }
 
     public void SimulateAdd(int additionalItemCount)
