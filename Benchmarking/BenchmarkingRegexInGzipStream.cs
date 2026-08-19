@@ -11,17 +11,20 @@ namespace Benchmarking;
 [SimpleJob(RunStrategy.Monitoring)]
 public class BenchmarkingRegexInGzipStream
 {
-    [ParamsSource(nameof(ValuesForUncompressedLogMegabyteCount))]
-    public int UncompressedLogMegabyteCount { get; set; }
+    [ParamsSource(nameof(ValuesForUncompressedLogSizeInMegabytes))]
+    public int UncompressedLogSizeInMegabytes { get; set; }
 
-    public static IEnumerable<int> ValuesForUncompressedLogMegabyteCount => [4_096, 8_192, 16_384, 32_768, 65_536];
+    public static IEnumerable<int> ValuesForUncompressedLogSizeInMegabytes => [64, 128, 256, 512, 1024];
 
     public static readonly Regex SearchPattern = new(
         @"after completing \d+ encounters and performing [23456789]\d* limit breaks");
 
     private static readonly Encoding Encoding = Encoding.UTF8;
 
-    private const long MegaByte = 1024 * 1024;
+    private const long KiloByte = 1024;
+    private const long MegaByte = KiloByte * KiloByte;
+    private const long RecoveryPointByteInterval = MegaByte;
+    private const long ParallelZlibGzipOverlapInBytes = 3 * KiloByte;
 
     private byte[] _compressedData = [];
     private readonly List<RecoveryPointOffset> _recoveryPointOffsets = [];
@@ -49,7 +52,7 @@ public class BenchmarkingRegexInGzipStream
             var result = new GZipWritingStreamWithRecoveryPoints(
                 outputStream,
                 leaveOpen: true,
-                recoveryPointByteInterval: MegaByte);
+                RecoveryPointByteInterval);
             result.RecoveryPointWritten += _recoveryPointOffsets.Add;
             return result;
         });
@@ -61,7 +64,7 @@ public class BenchmarkingRegexInGzipStream
         using var compressedDataStream = new MemoryStream();
         using (var compressor = compressorFactory(compressedDataStream))
         {
-            sim.SimulateLogs(compressor, Encoding, UncompressedLogMegabyteCount * MegaByte);
+            sim.SimulateLogs(compressor, Encoding, UncompressedLogSizeInMegabytes * MegaByte);
         }
 
         _compressedData = compressedDataStream.ToArray();
@@ -88,7 +91,8 @@ public class BenchmarkingRegexInGzipStream
             () => new GZipReadingStreamWithRecoveryPoints(
                 GetCompressedDataStream(),
                 recoveryPointOffsets: _recoveryPointOffsets),
-            _recoveryPointOffsets);
+            _recoveryPointOffsets,
+            ParallelZlibGzipOverlapInBytes);
     }
 
     [IterationCleanup]

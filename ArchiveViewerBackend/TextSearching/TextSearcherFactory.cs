@@ -8,19 +8,18 @@ public static class TextSearcherFactory
 {
     public static ParallelScanTextSearcher CreateParallelTextSearcher(
         Func<GZipReadingStreamWithRecoveryPoints> gzipStreamFactory,
-        List<RecoveryPointOffset> recoveryPoints
-    )
+        List<RecoveryPointOffset> recoveryPoints,
+        long parallelStreamOverlapInBytes)
     {
-        return CreateParallelTextSearcher(gzipStreamFactory, recoveryPoints, Encoding.Default);
+        return CreateParallelTextSearcher(gzipStreamFactory, recoveryPoints, Encoding.Default, parallelStreamOverlapInBytes);
     }
 
     public static ParallelScanTextSearcher CreateParallelTextSearcher(
         Func<GZipReadingStreamWithRecoveryPoints> gzipStreamFactory,
         List<RecoveryPointOffset> recoveryPoints,
-        Encoding encoding
-    )
+        Encoding encoding,
+        long parallelStreamOverlapInBytes)
     {
-        const int byteOverlap = 3 * 1024;
         var streams = new List<WithByteOffset<Stream>>();
         for (var i = 0; i < recoveryPoints.Count; i++)
         {
@@ -33,7 +32,7 @@ public static class TextSearcherFactory
                 var segmentLength = recoveryPoints[i + 1].OffsetInUncompressedStream -
                                     uncompressedOffset;
                 streams.Add(
-                    new StreamWithByteLimit(gzipStream, segmentLength + byteOverlap)
+                    new StreamWithByteLimit(gzipStream, segmentLength + parallelStreamOverlapInBytes)
                         .WithByteOffset<Stream>(uncompressedOffset));
             }
             else
