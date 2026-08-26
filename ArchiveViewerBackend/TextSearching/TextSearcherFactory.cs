@@ -9,14 +9,6 @@ public static class TextSearcherFactory
     public static ParallelScanTextSearcher CreateParallelTextSearcher(
         Func<GZipReadingStreamWithRecoveryPoints> gzipStreamFactory,
         List<RecoveryPointOffset> recoveryPoints,
-        long parallelStreamOverlapInBytes)
-    {
-        return CreateParallelTextSearcher(gzipStreamFactory, recoveryPoints, Encoding.Default, parallelStreamOverlapInBytes);
-    }
-
-    public static ParallelScanTextSearcher CreateParallelTextSearcher(
-        Func<GZipReadingStreamWithRecoveryPoints> gzipStreamFactory,
-        List<RecoveryPointOffset> recoveryPoints,
         Encoding encoding,
         long parallelStreamOverlapInBytes)
     {
