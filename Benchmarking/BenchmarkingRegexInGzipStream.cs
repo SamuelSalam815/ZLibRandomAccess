@@ -1,6 +1,7 @@
 ﻿using System.IO.Compression;
 using System.Text;
 using System.Text.RegularExpressions;
+using ArchiveViewerBackend;
 using ArchiveViewerBackend.TextSearching;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
@@ -21,10 +22,8 @@ public class BenchmarkingRegexInGzipStream
 
     private static readonly Encoding Encoding = Encoding.UTF8;
 
-    private const long KiloByte = 1024;
-    private const long MegaByte = KiloByte * KiloByte;
-    private const long RecoveryPointByteInterval = MegaByte;
-    private const long ParallelZlibGzipOverlapInBytes = 3 * KiloByte;
+    private const long RecoveryPointByteInterval = DataSize.MegaByte;
+    private const long ParallelZlibGzipOverlapInBytes = 3 * DataSize.KiloByte;
 
     private byte[] _compressedData = [];
     private readonly List<RecoveryPointOffset> _recoveryPointOffsets = [];
@@ -64,7 +63,7 @@ public class BenchmarkingRegexInGzipStream
         using var compressedDataStream = new MemoryStream();
         using (var compressor = compressorFactory(compressedDataStream))
         {
-            sim.SimulateLogs(compressor, Encoding, UncompressedLogSizeInMegabytes * MegaByte);
+            sim.SimulateLogs(compressor, Encoding, UncompressedLogSizeInMegabytes * DataSize.MegaByte);
         }
 
         _compressedData = compressedDataStream.ToArray();
