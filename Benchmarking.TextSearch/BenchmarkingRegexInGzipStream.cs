@@ -5,6 +5,7 @@ using ArchiveViewerBackend;
 using ArchiveViewerBackend.TextSearching;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
+using LogSimulator.Simulator;
 using ZLibWrapper;
 
 namespace Benchmarking.TextSearch;

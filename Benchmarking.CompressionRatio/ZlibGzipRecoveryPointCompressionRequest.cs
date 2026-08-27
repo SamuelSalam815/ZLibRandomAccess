@@ -1,0 +1,19 @@
+﻿using ZLibBindings.Constants;
+using ZLibWrapper;
+
+namespace Benchmarking.CompressionRatio;
+
+public sealed record ZlibGzipRecoveryPointCompressionRequest(
+    long RecoveryPointByteInterval,
+    ZCompressionLevel CompressionLevel)
+    : CompressionRequest
+{
+    protected override Stream CreateCompressedStream(Stream outputStream)
+    {
+        return new GZipWritingStreamWithRecoveryPoints(
+            outputStream,
+            leaveOpen: true,
+            RecoveryPointByteInterval,
+            CompressionLevel);
+    }
+}

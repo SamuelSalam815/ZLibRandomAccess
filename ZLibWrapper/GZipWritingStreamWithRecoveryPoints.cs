@@ -1,12 +1,12 @@
-﻿using System.Threading.Channels;
-using ZLibBindings.Constants;
+﻿using ZLibBindings.Constants;
 
 namespace ZLibWrapper;
 
 public class GZipWritingStreamWithRecoveryPoints(
     Stream stream,
     bool leaveOpen = false,
-    long? recoveryPointByteInterval = null) : Stream
+    long? recoveryPointByteInterval = null,
+    ZCompressionLevel compressionLevel = ZCompressionLevel.Z_DEFAULT_COMPRESSION) : Stream
 {
     public event Action<RecoveryPointOffset>? RecoveryPointWritten;
     public event Action? StreamClosed;
@@ -19,7 +19,11 @@ public class GZipWritingStreamWithRecoveryPoints(
     private readonly ZLibDeflateStreamWithRecoveryPoints _deflateStream = new(
         stream,
         leaveOpen,
-        new ZLibDeflateConfiguration { WindowBits = ZWindowBits.DefaultWindowSize | ZWindowBits.GZipStream }
+        new ZLibDeflateConfiguration
+        {
+            CompressionLevel = compressionLevel,
+            WindowBits = ZWindowBits.DefaultWindowSize | ZWindowBits.GZipStream
+        }
     );
 
     public override void Flush() => _deflateStream.NonRecoveryPointFlush();

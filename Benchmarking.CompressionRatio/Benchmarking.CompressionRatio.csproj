@@ -7,4 +7,9 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\LogSimulator\LogSimulator.csproj" />
+      <ProjectReference Include="..\ZLibWrapper\ZLibWrapper.csproj" />
+    </ItemGroup>
+
 </Project>
