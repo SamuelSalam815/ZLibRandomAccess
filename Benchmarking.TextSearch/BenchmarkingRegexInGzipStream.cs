@@ -7,7 +7,7 @@ using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
 using ZLibWrapper;
 
-namespace Benchmarking;
+namespace Benchmarking.TextSearch;
 
 [SimpleJob(RunStrategy.Monitoring)]
 public class BenchmarkingRegexInGzipStream

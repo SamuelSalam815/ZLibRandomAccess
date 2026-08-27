@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Benchmarking\Benchmarking.csproj" />
+    <ProjectReference Include="..\Benchmarking.TextSearch\Benchmarking.TextSearch.csproj" />
   </ItemGroup>
   
 </Project>

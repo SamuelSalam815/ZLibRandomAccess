@@ -2,7 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shouldly;
 
-namespace Benchmarking.Tests;
+namespace Benchmarking.TextSearch.Tests;
 
 [TestClass]
 [TestSubject(typeof(BenchmarkingRegexInGzipStream))]

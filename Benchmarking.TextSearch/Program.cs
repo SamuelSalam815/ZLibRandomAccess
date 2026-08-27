@@ -1,6 +1,6 @@
 ﻿using BenchmarkDotNet.Configs;
 
-namespace Benchmarking;
+namespace Benchmarking.TextSearch;
 
 using BenchmarkDotNet.Running;
 
