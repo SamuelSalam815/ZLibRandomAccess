@@ -11,12 +11,15 @@ using ZLibWrapper;
 namespace Benchmarking.TextSearch;
 
 [SimpleJob(RunStrategy.Monitoring)]
+[CsvMeasurementsExporter]
+[RPlotExporter]
 public class BenchmarkingRegexInGzipStream
 {
     [ParamsSource(nameof(ValuesForUncompressedLogSizeInMegabytes))]
     public int UncompressedLogSizeInMegabytes { get; set; }
 
-    public static IEnumerable<int> ValuesForUncompressedLogSizeInMegabytes => [64, 128, 256, 512, 1024];
+    // public static IEnumerable<int> ValuesForUncompressedLogSizeInMegabytes => [512, 2048, 8192];
+    public static IEnumerable<int> ValuesForUncompressedLogSizeInMegabytes => [512];
 
     public static readonly Regex SearchPattern = new(
         @"after completing \d+ encounters and performing [23456789]\d* limit breaks");
