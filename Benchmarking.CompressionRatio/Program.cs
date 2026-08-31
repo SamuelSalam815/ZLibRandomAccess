@@ -1,42 +1,72 @@
 ﻿using System.IO.Compression;
 using LogSimulator.Simulator;
+using OxyPlot;
+using OxyPlot.Axes;
+using OxyPlot.Legends;
+using OxyPlot.Series;
+using OxyPlot.Wpf;
 using ZLibBindings.Constants;
 
 namespace Benchmarking.CompressionRatio;
 
 class Program
 {
-    private const int SampleCount = 5;
+    private const int SampleCount = 3;
 
     static void Main(string[] args)
     {
+        var thread = new Thread(() =>
+        {
+            var plot = PlotCompressionRatios();
+            using var pngStream = new MemoryStream();
+            var pngExporter = new PngExporter {Height = 1200, Width = 1600, Resolution = 180d};
+            pngExporter.Export(plot, pngStream);
+            File.WriteAllBytes("output.png", pngStream.ToArray());
+        });
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+    }
+
+    private static PlotModel PlotCompressionRatios()
+    {
+        var dataSizeAxis = new CategoryAxis
+        {
+            Title = "Uncompressed Data Size",
+            Position = AxisPosition.Left,
+            ItemsSource = new[]
+            {
+                "512 MB",
+                "1 GB",
+                "2 GB",
+                "4 GB",
+                "8 GB",
+            }
+        };
+
         long[] inputDataSizes =
         [
-            DataSize.KiloByte * 64,
-            // DataSize.KiloByte * 128,
-            // DataSize.KiloByte * 256,
-            // DataSize.KiloByte * 512,
-            // DataSize.MegaByte,
-            // DataSize.MegaByte * 2,
-            // DataSize.MegaByte * 4,
-            // DataSize.MegaByte * 8,
+            DataSize.MegaByte * 512,
+            DataSize.MegaByte * 1024,
+            DataSize.MegaByte * 2048,
+            DataSize.MegaByte * 4096,
+            DataSize.MegaByte * 8192,
         ];
 
         CompressionRequest[] compressionRequests =
         [
-            new SystemGzipCompressionRequest(CompressionLevel.Fastest),
             new SystemGzipCompressionRequest(CompressionLevel.Optimal),
             // new SystemGzipCompressionRequest(CompressionLevel.SmallestSize),
-            //
-            // new ZlibGzipCompressionRequest(ZCompressionLevel.Z_DEFAULT_COMPRESSION),
+            // new SystemGzipCompressionRequest(CompressionLevel.Fastest),
+
+            new ZlibGzipCompressionRequest(ZCompressionLevel.Z_DEFAULT_COMPRESSION),
             // new ZlibGzipCompressionRequest(ZCompressionLevel.Z_BEST_COMPRESSION),
             // new ZlibGzipCompressionRequest(ZCompressionLevel.Z_BEST_SPEED),
-            //
-            // new ZlibGzipRecoveryPointCompressionRequest(DataSize.KiloByte, ZCompressionLevel.Z_DEFAULT_COMPRESSION),
+
+            new ZlibGzipRecoveryPointCompressionRequest(DataSize.KiloByte, ZCompressionLevel.Z_DEFAULT_COMPRESSION),
             // new ZlibGzipRecoveryPointCompressionRequest(DataSize.KiloByte, ZCompressionLevel.Z_BEST_COMPRESSION),
             // new ZlibGzipRecoveryPointCompressionRequest(DataSize.KiloByte, ZCompressionLevel.Z_BEST_SPEED),
-            //
-            // new ZlibGzipRecoveryPointCompressionRequest(DataSize.KiloByte * 8, ZCompressionLevel.Z_DEFAULT_COMPRESSION),
+
+            new ZlibGzipRecoveryPointCompressionRequest(DataSize.MegaByte, ZCompressionLevel.Z_DEFAULT_COMPRESSION),
             // new ZlibGzipRecoveryPointCompressionRequest(DataSize.KiloByte * 8, ZCompressionLevel.Z_BEST_COMPRESSION),
             // new ZlibGzipRecoveryPointCompressionRequest(DataSize.KiloByte * 8, ZCompressionLevel.Z_BEST_SPEED),
         ];
@@ -61,14 +91,47 @@ class Program
             }
         }
 
-        foreach (var group in results.GroupBy(result => (result.CompressionRequest, result.InputDataSize)))
+        var plot = new PlotModel
         {
-            Console.WriteLine(group.Key.CompressionRequest);
-            Console.WriteLine("Input data size: {0:N0}", group.Key.InputDataSize);
-            var compressionRatios = group.Select(result => result.CompressionRatio).ToList();
-            var compressionRatioList = string.Join(", ", compressionRatios);
-            Console.WriteLine("Compression ratio: avg {0} [{1}]", compressionRatios.Average(),compressionRatioList);
-            Console.WriteLine();
+            Title =  "Compression Ratio vs Uncompressed Data Size",
+            IsLegendVisible = true,
+            Background = OxyColors.White
+        };
+        plot.Legends.Add(
+            new Legend
+            {
+                LegendPlacement = LegendPlacement.Outside,
+                LegendOrientation = LegendOrientation.Vertical,
+                LegendPosition = LegendPosition.BottomLeft
+            });
+        plot.Axes.Add(
+            new LinearAxis
+            {
+                Title = "Compression Ratio",
+                Position = AxisPosition.Bottom,
+                AbsoluteMinimum = 0,
+                AbsoluteMaximum = 1,
+                Minimum = results.Min(x => x.CompressionRatio),
+            });
+        plot.Axes.Add(dataSizeAxis);
+        foreach (var compressionMethodGroup in results.GroupBy(result => result.CompressionRequest))
+        {
+            var series = new BarSeries
+            {
+                Title = compressionMethodGroup.Key.ToString(),
+                StrokeColor = OxyColors.Black,
+            };
+            var data = compressionMethodGroup
+                .GroupBy(result => result.InputDataSize)
+                .Select(group => (InputDataSize: group.Key,
+                    AvgCompressionRatio: group.Select(x => x.CompressionRatio).Average()))
+                .OrderBy(dataPoint => dataPoint.InputDataSize)
+                .Select(dataPoint => new BarItem() { Value = dataPoint.AvgCompressionRatio });
+            series.Items.AddRange(data);
+
+            plot.Series.Add(series);
         }
+
+        return plot;
     }
 }
