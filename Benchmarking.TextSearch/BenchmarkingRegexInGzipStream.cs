@@ -44,7 +44,7 @@ public class BenchmarkingRegexInGzipStream
 
     private FileInfo ZlibGzipLogFile => new($"{_creationTime} ZlibGzip.gzip");
 
-    private FileInfo ZlibGzipRecoveryLogFile => new($"{_creationTime} ZlibGzipRecovery.gzip");
+    private FileInfo ZlibGzipLogFileWithRecoveryPoints => new($"{_creationTime} ZlibGzipRecovery.gzip");
 
     [MustDisposeResource]
     private static FileStream OpenNew(FileInfo file)
@@ -58,26 +58,17 @@ public class BenchmarkingRegexInGzipStream
         return file.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
     }
 
-    [MustDisposeResource]
-    private static StreamWithDisposeEvent OpenReadAndDeleteOnDisposal(FileInfo file)
-    {
-        var cleanUpStream = new StreamWithDisposeEvent(OpenRead(file));
-
-        cleanUpStream.OnDisposed += file.Delete;
-        return cleanUpStream;
-    }
-
     [GlobalSetup]
     public void GlobalSetUp()
     {
         WriteUncompressedLogFile();
         WriteCompressedLogFiles();
 
-        SystemGzipSearcher = new ScanTextSearcher(new GZipStream(OpenReadAndDeleteOnDisposal(SystemGzipLogFile), CompressionMode.Decompress), Encoding);
-        ZlibGzipSearcher = new ScanTextSearcher(new GZipReadingStreamWithRecoveryPoints(OpenReadAndDeleteOnDisposal(ZlibGzipLogFile)), Encoding);
+        SystemGzipSearcher = new ScanTextSearcher(new GZipStream(OpenRead(SystemGzipLogFile), CompressionMode.Decompress), Encoding);
+        ZlibGzipSearcher = new ScanTextSearcher(new GZipReadingStreamWithRecoveryPoints(OpenRead(ZlibGzipLogFile)), Encoding);
         ZlibGzipParallelSearcher = TextSearcherFactory.CreateParallelTextSearcher(
             () => new GZipReadingStreamWithRecoveryPoints(
-                OpenReadAndDeleteOnDisposal(ZlibGzipLogFile),
+                OpenRead(ZlibGzipLogFileWithRecoveryPoints),
                 recoveryPointOffsets: _recoveryPointOffsets),
             _recoveryPointOffsets,
             ParallelZlibGzipOverlapInBytes);
@@ -92,25 +83,22 @@ public class BenchmarkingRegexInGzipStream
 
     private void WriteCompressedLogFiles()
     {
-        if (!SystemGzipLogFile.Exists)
+        using (var outputStream = OpenNew(SystemGzipLogFile))
         {
-            using var outputStream = OpenNew(SystemGzipLogFile);
             using var logFileStream = LogFile.OpenRead();
             using var compressor = new GZipStream(outputStream, CompressionMode.Compress);
             logFileStream.CopyTo(compressor);
         }
 
-        if (!ZlibGzipLogFile.Exists)
+        using (var outputStream = OpenNew(ZlibGzipLogFile))
         {
-            using var outputStream = OpenNew(ZlibGzipLogFile);
             using var logFileStream = LogFile.OpenRead();
             using var compressor = new GZipWritingStreamWithRecoveryPoints(outputStream);
             logFileStream.CopyTo(compressor);
         }
 
-        if (!ZlibGzipRecoveryLogFile.Exists)
+        using (var outputStream = OpenNew(ZlibGzipLogFileWithRecoveryPoints))
         {
-            using var outputStream = OpenNew(ZlibGzipRecoveryLogFile);
             using var logFileStream = LogFile.OpenRead();
             using var compressor = new GZipWritingStreamWithRecoveryPoints(
                 outputStream,
@@ -118,14 +106,20 @@ public class BenchmarkingRegexInGzipStream
             compressor.RecoveryPointWritten += _recoveryPointOffsets.Add;
             logFileStream.CopyTo(compressor);
         }
+
     }
 
     [GlobalCleanup]
     public void GlobalCleanup()
     {
+        LogFile.Delete();
         SystemGzipSearcher?.Dispose();
         ZlibGzipSearcher?.Dispose();
         ZlibGzipParallelSearcher?.Dispose();
+
+        SystemGzipLogFile.Delete();
+        ZlibGzipLogFile.Delete();
+        ZlibGzipLogFileWithRecoveryPoints.Delete();
     }
 
     [Benchmark(Baseline = true)]
