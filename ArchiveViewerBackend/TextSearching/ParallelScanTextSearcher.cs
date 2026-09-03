@@ -21,6 +21,10 @@ public class ParallelScanTextSearcher : ITextSearcher
                 new ScanTextSearcher(stream.Payload, encoding).WithByteOffset(stream.ByteOffset)
             )
             .ToImmutableList();
+        if (_textSearchers.Count == 0)
+        {
+            throw new ArgumentException("No streams were provided to search!");
+        }
     }
 
     public SearchResult? FindNext(Regex searchPattern)
