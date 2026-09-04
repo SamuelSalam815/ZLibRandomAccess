@@ -94,6 +94,11 @@ public class ParallelScanTextSearcher : ITextSearcher
 
     public IEnumerable<SearchResult> FindAll(Regex searchPattern)
     {
+        if (_textSearcherIndex == _textSearchers.Count)
+        {
+            return [];
+        }
+
         var result = Enumerable
             .Sequence(_textSearcherIndex, _textSearchers.Count - 1, 1)
             .AsParallel()

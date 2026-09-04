@@ -8,6 +8,8 @@ public class StreamWithByteLimit : Stream
 
     private long _byteCount;
 
+    private bool _isDisposed;
+
     public StreamWithByteLimit(Stream stream, long byteLimit)
     {
         if (byteLimit < 0)
@@ -60,5 +62,17 @@ public class StreamWithByteLimit : Stream
     {
         get => _stream.Position;
         set => throw new NotSupportedException();
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+        if (!disposing || _isDisposed)
+        {
+            return;
+        }
+
+        _stream.Dispose();
+        _isDisposed = true;
     }
 }

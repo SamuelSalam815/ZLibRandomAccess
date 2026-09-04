@@ -11,24 +11,21 @@ using ZLibWrapper;
 
 namespace Benchmarking.TextSearch;
 
-[SimpleJob(RunStrategy.Monitoring)]
+// [SimpleJob(RunStrategy.Monitoring)]
 [CsvMeasurementsExporter]
-[ReturnValueValidator(true)]
+// [ReturnValueValidator(true)]
 public class BenchmarkingRegexInGzipStream
 {
-    [ParamsSource(nameof(ValuesForUncompressedLogSizeInMegabytes))]
-    public static int UncompressedLogSizeInMegabytes { get; set; } = 32;
+    // [ParamsSource(nameof(ValuesForUncompressedLogSizeInMegabytes))]
+    public static int UncompressedLogSizeInMegabytes { get; set; } = ValuesForUncompressedLogSizeInMegabytes.First();
 
     // public static IEnumerable<int> ValuesForUncompressedLogSizeInMegabytes => [512, 2048, 8192];
-    public static IEnumerable<int> ValuesForUncompressedLogSizeInMegabytes => [32];
+    public static IEnumerable<int> ValuesForUncompressedLogSizeInMegabytes => [10];
 
     public static readonly Regex SearchPattern = new(
         @"after completing \d+ encounters and performing [23456789]\d* limit breaks");
 
     private static readonly Encoding Encoding = Encoding.UTF8;
-
-    private const long RecoveryPointByteInterval = DataSize.MegaByte;
-    private const long ParallelZlibGzipOverlapInBytes = 3 * DataSize.KiloByte;
 
     private readonly List<RecoveryPointOffset> _recoveryPointOffsets = [];
 
@@ -71,7 +68,7 @@ public class BenchmarkingRegexInGzipStream
                 OpenRead(ZlibGzipLogFileWithRecoveryPoints),
                 recoveryPointOffsets: _recoveryPointOffsets),
             _recoveryPointOffsets,
-            ParallelZlibGzipOverlapInBytes);
+            parallelStreamOverlapInBytes: DataSize.KiloByte);
     }
 
     private void WriteUncompressedLogFile()
@@ -102,7 +99,7 @@ public class BenchmarkingRegexInGzipStream
             using var logFileStream = LogFile.OpenRead();
             using var compressor = new GZipWritingStreamWithRecoveryPoints(
                 outputStream,
-                recoveryPointByteInterval: RecoveryPointByteInterval);
+                recoveryPointByteInterval: DataSize.MegaByte);
             compressor.RecoveryPointWritten += _recoveryPointOffsets.Add;
             logFileStream.CopyTo(compressor);
         }
@@ -123,11 +120,23 @@ public class BenchmarkingRegexInGzipStream
     }
 
     [Benchmark(Baseline = true)]
-    public List<SearchResult> SystemGzip_FindAll() => SystemGzipSearcher!.FindAll(SearchPattern).ToList();
+    public List<SearchResult> SystemGzip_FindAll()
+    {
+        var result = SystemGzipSearcher!.FindAll(SearchPattern).ToList();
+        return result;
+    }
 
     [Benchmark]
-    public List<SearchResult> ZlibGzip_FindAll() => ZlibGzipSearcher!.FindAll(SearchPattern).ToList();
+    public List<SearchResult> ZlibGzip_FindAll()
+    {
+        var result = ZlibGzipSearcher!.FindAll(SearchPattern).ToList();
+        return result;
+    }
 
-    // [Benchmark]
-    // public List<SearchResult> ZlibGzip_Parallel_FindAll() => ZlibGzipParallelSearcher!.FindAll(SearchPattern).ToList();
+    [Benchmark]
+    public List<SearchResult> ZlibGzip_Parallel_FindAll()
+    {
+        var result = ZlibGzipParallelSearcher!.FindAll(SearchPattern).ToList();
+        return result;
+    }
 }
