@@ -11,16 +11,17 @@ using ZLibWrapper;
 
 namespace Benchmarking.TextSearch;
 
-// [SimpleJob(RunStrategy.Monitoring)]
-[CsvMeasurementsExporter]
-// [ReturnValueValidator(true)]
+[SimpleJob(RunStrategy.Monitoring)]
+[CsvExporter]
+[HtmlExporter]
+[PlainExporter]
+[ReturnValueValidator(true)]
 public class BenchmarkingRegexInGzipStream
 {
-    // [ParamsSource(nameof(ValuesForUncompressedLogSizeInMegabytes))]
+    [ParamsSource(nameof(ValuesForUncompressedLogSizeInMegabytes))]
     public static int UncompressedLogSizeInMegabytes { get; set; } = ValuesForUncompressedLogSizeInMegabytes.First();
 
-    // public static IEnumerable<int> ValuesForUncompressedLogSizeInMegabytes => [512, 2048, 8192];
-    public static IEnumerable<int> ValuesForUncompressedLogSizeInMegabytes => [10];
+    public static IEnumerable<int> ValuesForUncompressedLogSizeInMegabytes => [256, 512, 1024];
 
     public static readonly Regex SearchPattern = new(
         @"after completing \d+ encounters and performing [23456789]\d* limit breaks");
@@ -28,10 +29,6 @@ public class BenchmarkingRegexInGzipStream
     private static readonly Encoding Encoding = Encoding.UTF8;
 
     private readonly List<RecoveryPointOffset> _recoveryPointOffsets = [];
-
-    private ScanTextSearcher? SystemGzipSearcher;
-    private ScanTextSearcher? ZlibGzipSearcher;
-    private ParallelScanTextSearcher? ZlibGzipParallelSearcher;
 
     private readonly string _creationTime = DateTime.Now.ToString("yyyy MMMM dd HH.mm.ss zz");
 
@@ -61,14 +58,6 @@ public class BenchmarkingRegexInGzipStream
         WriteUncompressedLogFile();
         WriteCompressedLogFiles();
 
-        SystemGzipSearcher = new ScanTextSearcher(new GZipStream(OpenRead(SystemGzipLogFile), CompressionMode.Decompress), Encoding);
-        ZlibGzipSearcher = new ScanTextSearcher(new GZipReadingStreamWithRecoveryPoints(OpenRead(ZlibGzipLogFile)), Encoding);
-        ZlibGzipParallelSearcher = TextSearcherFactory.CreateParallelTextSearcher(
-            () => new GZipReadingStreamWithRecoveryPoints(
-                OpenRead(ZlibGzipLogFileWithRecoveryPoints),
-                recoveryPointOffsets: _recoveryPointOffsets),
-            _recoveryPointOffsets,
-            parallelStreamOverlapInBytes: DataSize.KiloByte);
     }
 
     private void WriteUncompressedLogFile()
@@ -110,10 +99,6 @@ public class BenchmarkingRegexInGzipStream
     public void GlobalCleanup()
     {
         LogFile.Delete();
-        SystemGzipSearcher?.Dispose();
-        ZlibGzipSearcher?.Dispose();
-        ZlibGzipParallelSearcher?.Dispose();
-
         SystemGzipLogFile.Delete();
         ZlibGzipLogFile.Delete();
         ZlibGzipLogFileWithRecoveryPoints.Delete();
@@ -122,21 +107,29 @@ public class BenchmarkingRegexInGzipStream
     [Benchmark(Baseline = true)]
     public List<SearchResult> SystemGzip_FindAll()
     {
-        var result = SystemGzipSearcher!.FindAll(SearchPattern).ToList();
+        using var textSearcher = new ScanTextSearcher(new GZipStream(OpenRead(SystemGzipLogFile), CompressionMode.Decompress), Encoding);
+        var result = textSearcher!.FindAll(SearchPattern).ToList();
         return result;
     }
 
     [Benchmark]
     public List<SearchResult> ZlibGzip_FindAll()
     {
-        var result = ZlibGzipSearcher!.FindAll(SearchPattern).ToList();
+        using var textSearcher = new ScanTextSearcher(new GZipReadingStreamWithRecoveryPoints(OpenRead(ZlibGzipLogFile)), Encoding);
+        var result = textSearcher!.FindAll(SearchPattern).ToList();
         return result;
     }
 
     [Benchmark]
     public List<SearchResult> ZlibGzip_Parallel_FindAll()
     {
-        var result = ZlibGzipParallelSearcher!.FindAll(SearchPattern).ToList();
+        using var textSearcher = TextSearcherFactory.CreateParallelTextSearcher(
+            () => new GZipReadingStreamWithRecoveryPoints(
+                OpenRead(ZlibGzipLogFileWithRecoveryPoints),
+                recoveryPointOffsets: _recoveryPointOffsets),
+            _recoveryPointOffsets,
+            parallelStreamOverlapInBytes: DataSize.KiloByte);
+        var result = textSearcher!.FindAll(SearchPattern).ToList();
         return result;
     }
 }
