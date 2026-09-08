@@ -1,0 +1,426 @@
+*** BenchmarkingRegexInGzipStream.SystemGzip_FindAll: Job-DRSAZQ(RunStrategy=Monitoring) [UncompressedLogSizeInMegabytes=256] ***
+* Raw *
+WorkloadActual   1: 1 op, 4679516800.00 ns, 4.6795 s/op
+WorkloadActual   2: 1 op, 4548174500.00 ns, 4.5482 s/op
+WorkloadActual   3: 1 op, 3924823400.00 ns, 3.9248 s/op
+WorkloadActual   4: 1 op, 3521225900.00 ns, 3.5212 s/op
+WorkloadActual   5: 1 op, 3633910000.00 ns, 3.6339 s/op
+WorkloadActual   6: 1 op, 3659021700.00 ns, 3.6590 s/op
+WorkloadActual   7: 1 op, 3680812100.00 ns, 3.6808 s/op
+WorkloadActual   8: 1 op, 3672776400.00 ns, 3.6728 s/op
+WorkloadActual   9: 1 op, 3671018800.00 ns, 3.6710 s/op
+WorkloadActual  10: 1 op, 3669993300.00 ns, 3.6700 s/op
+WorkloadResult   1: 1 op, 4679516800.00 ns, 4.6795 s/op
+WorkloadResult   2: 1 op, 4548174500.00 ns, 4.5482 s/op
+WorkloadResult   3: 1 op, 3924823400.00 ns, 3.9248 s/op
+WorkloadResult   4: 1 op, 3521225900.00 ns, 3.5212 s/op
+WorkloadResult   5: 1 op, 3633910000.00 ns, 3.6339 s/op
+WorkloadResult   6: 1 op, 3659021700.00 ns, 3.6590 s/op
+WorkloadResult   7: 1 op, 3680812100.00 ns, 3.6808 s/op
+WorkloadResult   8: 1 op, 3672776400.00 ns, 3.6728 s/op
+WorkloadResult   9: 1 op, 3671018800.00 ns, 3.6710 s/op
+WorkloadResult  10: 1 op, 3669993300.00 ns, 3.6700 s/op
+
+* Statistics for WorkloadActual
+Mean = 3.866 s, StdErr = 0.129 s (3.33%), N = 10, StdDev = 0.407 s
+Min = 3.521 s, Q1 = 3.662 s, Median = 3.672 s, Q3 = 3.864 s, Max = 4.680 s
+IQR = 0.202 s, LowerFence = 3.359 s, UpperFence = 4.167 s
+ConfidenceInterval = [3.250 s; 4.482 s] (CI 99.9%), Margin = 0.616 s (15.93% of Mean)
+Skewness = 1.13, Kurtosis = 2.46, MValue = 2.33
+-------------------- Histogram --------------------
+[3.475 s ; 3.971 s) | @@@@@@@@
+[3.971 s ; 4.366 s) | 
+[4.366 s ; 4.928 s) | @@
+---------------------------------------------------
+
+* Statistics for WorkloadResult
+Mean = 3.866 s, StdErr = 0.129 s (3.33%), N = 10, StdDev = 0.407 s
+Min = 3.521 s, Q1 = 3.662 s, Median = 3.672 s, Q3 = 3.864 s, Max = 4.680 s
+IQR = 0.202 s, LowerFence = 3.359 s, UpperFence = 4.167 s
+ConfidenceInterval = [3.250 s; 4.482 s] (CI 99.9%), Margin = 0.616 s (15.93% of Mean)
+Skewness = 1.13, Kurtosis = 2.46, MValue = 2.33
+-------------------- Histogram --------------------
+[3.475 s ; 3.971 s) | @@@@@@@@
+[3.971 s ; 4.366 s) | 
+[4.366 s ; 4.928 s) | @@
+---------------------------------------------------
+*** BenchmarkingRegexInGzipStream.ZlibGzip_FindAll: Job-DRSAZQ(RunStrategy=Monitoring) [UncompressedLogSizeInMegabytes=256] ***
+* Raw *
+WorkloadActual   1: 1 op, 4949812400.00 ns, 4.9498 s/op
+WorkloadActual   2: 1 op, 4874435800.00 ns, 4.8744 s/op
+WorkloadActual   3: 1 op, 3623013600.00 ns, 3.6230 s/op
+WorkloadActual   4: 1 op, 3651019100.00 ns, 3.6510 s/op
+WorkloadActual   5: 1 op, 3784989500.00 ns, 3.7850 s/op
+WorkloadActual   6: 1 op, 3769155500.00 ns, 3.7692 s/op
+WorkloadActual   7: 1 op, 3793289000.00 ns, 3.7933 s/op
+WorkloadActual   8: 1 op, 3823611700.00 ns, 3.8236 s/op
+WorkloadActual   9: 1 op, 3786951500.00 ns, 3.7870 s/op
+WorkloadActual  10: 1 op, 3781835800.00 ns, 3.7818 s/op
+WorkloadResult   1: 1 op, 4949812400.00 ns, 4.9498 s/op
+WorkloadResult   2: 1 op, 4874435800.00 ns, 4.8744 s/op
+WorkloadResult   3: 1 op, 3623013600.00 ns, 3.6230 s/op
+WorkloadResult   4: 1 op, 3651019100.00 ns, 3.6510 s/op
+WorkloadResult   5: 1 op, 3784989500.00 ns, 3.7850 s/op
+WorkloadResult   6: 1 op, 3769155500.00 ns, 3.7692 s/op
+WorkloadResult   7: 1 op, 3793289000.00 ns, 3.7933 s/op
+WorkloadResult   8: 1 op, 3823611700.00 ns, 3.8236 s/op
+WorkloadResult   9: 1 op, 3786951500.00 ns, 3.7870 s/op
+WorkloadResult  10: 1 op, 3781835800.00 ns, 3.7818 s/op
+
+* Statistics for WorkloadActual
+Mean = 3.984 s, StdErr = 0.156 s (3.92%), N = 10, StdDev = 0.494 s
+Min = 3.623 s, Q1 = 3.772 s, Median = 3.786 s, Q3 = 3.816 s, Max = 4.950 s
+IQR = 0.044 s, LowerFence = 3.707 s, UpperFence = 3.882 s
+ConfidenceInterval = [3.237 s; 4.730 s] (CI 99.9%), Margin = 0.747 s (18.74% of Mean)
+Skewness = 1.23, Kurtosis = 2.59, MValue = 2
+-------------------- Histogram --------------------
+[3.422 s ; 4.024 s) | @@@@@@@@
+[4.024 s ; 4.611 s) | 
+[4.611 s ; 5.251 s) | @@
+---------------------------------------------------
+
+* Statistics for WorkloadResult
+Mean = 3.984 s, StdErr = 0.156 s (3.92%), N = 10, StdDev = 0.494 s
+Min = 3.623 s, Q1 = 3.772 s, Median = 3.786 s, Q3 = 3.816 s, Max = 4.950 s
+IQR = 0.044 s, LowerFence = 3.707 s, UpperFence = 3.882 s
+ConfidenceInterval = [3.237 s; 4.730 s] (CI 99.9%), Margin = 0.747 s (18.74% of Mean)
+Skewness = 1.23, Kurtosis = 2.59, MValue = 2
+-------------------- Histogram --------------------
+[3.422 s ; 4.024 s) | @@@@@@@@
+[4.024 s ; 4.611 s) | 
+[4.611 s ; 5.251 s) | @@
+---------------------------------------------------
+*** BenchmarkingRegexInGzipStream.ZlibGzip_Parallel_FindAll: Job-DRSAZQ(RunStrategy=Monitoring) [UncompressedLogSizeInMegabytes=256] ***
+* Raw *
+WorkloadActual   1: 1 op, 1293616700.00 ns, 1.2936 s/op
+WorkloadActual   2: 1 op, 879591400.00 ns, 879.5914 ms/op
+WorkloadActual   3: 1 op, 860003300.00 ns, 860.0033 ms/op
+WorkloadActual   4: 1 op, 858684200.00 ns, 858.6842 ms/op
+WorkloadActual   5: 1 op, 856306300.00 ns, 856.3063 ms/op
+WorkloadActual   6: 1 op, 846717300.00 ns, 846.7173 ms/op
+WorkloadActual   7: 1 op, 851727500.00 ns, 851.7275 ms/op
+WorkloadActual   8: 1 op, 866961100.00 ns, 866.9611 ms/op
+WorkloadActual   9: 1 op, 833796200.00 ns, 833.7962 ms/op
+WorkloadActual  10: 1 op, 837904400.00 ns, 837.9044 ms/op
+WorkloadResult   1: 1 op, 1293616700.00 ns, 1.2936 s/op
+WorkloadResult   2: 1 op, 879591400.00 ns, 879.5914 ms/op
+WorkloadResult   3: 1 op, 860003300.00 ns, 860.0033 ms/op
+WorkloadResult   4: 1 op, 858684200.00 ns, 858.6842 ms/op
+WorkloadResult   5: 1 op, 856306300.00 ns, 856.3063 ms/op
+WorkloadResult   6: 1 op, 846717300.00 ns, 846.7173 ms/op
+WorkloadResult   7: 1 op, 851727500.00 ns, 851.7275 ms/op
+WorkloadResult   8: 1 op, 866961100.00 ns, 866.9611 ms/op
+WorkloadResult   9: 1 op, 833796200.00 ns, 833.7962 ms/op
+WorkloadResult  10: 1 op, 837904400.00 ns, 837.9044 ms/op
+
+* Statistics for WorkloadActual
+Mean = 898.531 ms, StdErr = 44.101 ms (4.91%), N = 10, StdDev = 139.461 ms
+Min = 833.796 ms, Q1 = 847.970 ms, Median = 857.495 ms, Q3 = 865.222 ms, Max = 1,293.617 ms
+IQR = 17.252 ms, LowerFence = 822.092 ms, UpperFence = 891.099 ms
+ConfidenceInterval = [687.686 ms; 1,109.376 ms] (CI 99.9%), Margin = 210.845 ms (23.47% of Mean)
+Skewness = 2.24, Kurtosis = 6.45, MValue = 2
+-------------------- Histogram --------------------
+[  771.733 ms ;   941.655 ms) | @@@@@@@@@
+[  941.655 ms ; 1,111.576 ms) | 
+[1,111.576 ms ; 1,208.656 ms) | 
+[1,208.656 ms ; 1,378.578 ms) | @
+---------------------------------------------------
+
+* Statistics for WorkloadResult
+Mean = 898.531 ms, StdErr = 44.101 ms (4.91%), N = 10, StdDev = 139.461 ms
+Min = 833.796 ms, Q1 = 847.970 ms, Median = 857.495 ms, Q3 = 865.222 ms, Max = 1,293.617 ms
+IQR = 17.252 ms, LowerFence = 822.092 ms, UpperFence = 891.099 ms
+ConfidenceInterval = [687.686 ms; 1,109.376 ms] (CI 99.9%), Margin = 210.845 ms (23.47% of Mean)
+Skewness = 2.24, Kurtosis = 6.45, MValue = 2
+-------------------- Histogram --------------------
+[  771.733 ms ;   941.655 ms) | @@@@@@@@@
+[  941.655 ms ; 1,111.576 ms) | 
+[1,111.576 ms ; 1,208.656 ms) | 
+[1,208.656 ms ; 1,378.578 ms) | @
+---------------------------------------------------
+*** BenchmarkingRegexInGzipStream.SystemGzip_FindAll: Job-DRSAZQ(RunStrategy=Monitoring) [UncompressedLogSizeInMegabytes=512] ***
+* Raw *
+WorkloadActual   1: 1 op, 8938112300.00 ns, 8.9381 s/op
+WorkloadActual   2: 1 op, 7314620800.00 ns, 7.3146 s/op
+WorkloadActual   3: 1 op, 7421190300.00 ns, 7.4212 s/op
+WorkloadActual   4: 1 op, 7392185600.00 ns, 7.3922 s/op
+WorkloadActual   5: 1 op, 7389637700.00 ns, 7.3896 s/op
+WorkloadActual   6: 1 op, 7464619200.00 ns, 7.4646 s/op
+WorkloadActual   7: 1 op, 7507909800.00 ns, 7.5079 s/op
+WorkloadActual   8: 1 op, 7589365200.00 ns, 7.5894 s/op
+WorkloadActual   9: 1 op, 7477431700.00 ns, 7.4774 s/op
+WorkloadActual  10: 1 op, 7424325100.00 ns, 7.4243 s/op
+WorkloadResult   1: 1 op, 8938112300.00 ns, 8.9381 s/op
+WorkloadResult   2: 1 op, 7314620800.00 ns, 7.3146 s/op
+WorkloadResult   3: 1 op, 7421190300.00 ns, 7.4212 s/op
+WorkloadResult   4: 1 op, 7392185600.00 ns, 7.3922 s/op
+WorkloadResult   5: 1 op, 7389637700.00 ns, 7.3896 s/op
+WorkloadResult   6: 1 op, 7464619200.00 ns, 7.4646 s/op
+WorkloadResult   7: 1 op, 7507909800.00 ns, 7.5079 s/op
+WorkloadResult   8: 1 op, 7589365200.00 ns, 7.5894 s/op
+WorkloadResult   9: 1 op, 7477431700.00 ns, 7.4774 s/op
+WorkloadResult  10: 1 op, 7424325100.00 ns, 7.4243 s/op
+
+* Statistics for WorkloadActual
+Mean = 7.592 s, StdErr = 0.151 s (1.99%), N = 10, StdDev = 0.479 s
+Min = 7.315 s, Q1 = 7.399 s, Median = 7.444 s, Q3 = 7.500 s, Max = 8.938 s
+IQR = 0.101 s, LowerFence = 7.248 s, UpperFence = 7.652 s
+ConfidenceInterval = [6.868 s; 8.316 s] (CI 99.9%), Margin = 0.724 s (9.54% of Mean)
+Skewness = 2.18, Kurtosis = 6.27, MValue = 2
+-------------------- Histogram --------------------
+[7.160 s ; 7.744 s) | @@@@@@@@@
+[7.744 s ; 8.327 s) | 
+[8.327 s ; 8.646 s) | 
+[8.646 s ; 9.230 s) | @
+---------------------------------------------------
+
+* Statistics for WorkloadResult
+Mean = 7.592 s, StdErr = 0.151 s (1.99%), N = 10, StdDev = 0.479 s
+Min = 7.315 s, Q1 = 7.399 s, Median = 7.444 s, Q3 = 7.500 s, Max = 8.938 s
+IQR = 0.101 s, LowerFence = 7.248 s, UpperFence = 7.652 s
+ConfidenceInterval = [6.868 s; 8.316 s] (CI 99.9%), Margin = 0.724 s (9.54% of Mean)
+Skewness = 2.18, Kurtosis = 6.27, MValue = 2
+-------------------- Histogram --------------------
+[7.160 s ; 7.744 s) | @@@@@@@@@
+[7.744 s ; 8.327 s) | 
+[8.327 s ; 8.646 s) | 
+[8.646 s ; 9.230 s) | @
+---------------------------------------------------
+*** BenchmarkingRegexInGzipStream.ZlibGzip_FindAll: Job-DRSAZQ(RunStrategy=Monitoring) [UncompressedLogSizeInMegabytes=512] ***
+* Raw *
+WorkloadActual   1: 1 op, 9462819900.00 ns, 9.4628 s/op
+WorkloadActual   2: 1 op, 7407560700.00 ns, 7.4076 s/op
+WorkloadActual   3: 1 op, 7613165500.00 ns, 7.6132 s/op
+WorkloadActual   4: 1 op, 7613100100.00 ns, 7.6131 s/op
+WorkloadActual   5: 1 op, 7568606300.00 ns, 7.5686 s/op
+WorkloadActual   6: 1 op, 7567793600.00 ns, 7.5678 s/op
+WorkloadActual   7: 1 op, 7579242200.00 ns, 7.5792 s/op
+WorkloadActual   8: 1 op, 7582552300.00 ns, 7.5826 s/op
+WorkloadActual   9: 1 op, 7539744700.00 ns, 7.5397 s/op
+WorkloadActual  10: 1 op, 7575121700.00 ns, 7.5751 s/op
+WorkloadResult   1: 1 op, 9462819900.00 ns, 9.4628 s/op
+WorkloadResult   2: 1 op, 7407560700.00 ns, 7.4076 s/op
+WorkloadResult   3: 1 op, 7613165500.00 ns, 7.6132 s/op
+WorkloadResult   4: 1 op, 7613100100.00 ns, 7.6131 s/op
+WorkloadResult   5: 1 op, 7568606300.00 ns, 7.5686 s/op
+WorkloadResult   6: 1 op, 7567793600.00 ns, 7.5678 s/op
+WorkloadResult   7: 1 op, 7579242200.00 ns, 7.5792 s/op
+WorkloadResult   8: 1 op, 7582552300.00 ns, 7.5826 s/op
+WorkloadResult   9: 1 op, 7539744700.00 ns, 7.5397 s/op
+WorkloadResult  10: 1 op, 7575121700.00 ns, 7.5751 s/op
+
+* Statistics for WorkloadActual
+Mean = 7.751 s, StdErr = 0.191 s (2.47%), N = 10, StdDev = 0.604 s
+Min = 7.408 s, Q1 = 7.568 s, Median = 7.577 s, Q3 = 7.605 s, Max = 9.463 s
+IQR = 0.037 s, LowerFence = 7.512 s, UpperFence = 7.662 s
+ConfidenceInterval = [6.837 s; 8.665 s] (CI 99.9%), Margin = 0.914 s (11.79% of Mean)
+Skewness = 2.24, Kurtosis = 6.46, MValue = 2
+-------------------- Histogram --------------------
+[7.142 s ; 7.879 s) | @@@@@@@@@
+[7.879 s ; 8.615 s) | 
+[8.615 s ; 9.095 s) | 
+[9.095 s ; 9.831 s) | @
+---------------------------------------------------
+
+* Statistics for WorkloadResult
+Mean = 7.751 s, StdErr = 0.191 s (2.47%), N = 10, StdDev = 0.604 s
+Min = 7.408 s, Q1 = 7.568 s, Median = 7.577 s, Q3 = 7.605 s, Max = 9.463 s
+IQR = 0.037 s, LowerFence = 7.512 s, UpperFence = 7.662 s
+ConfidenceInterval = [6.837 s; 8.665 s] (CI 99.9%), Margin = 0.914 s (11.79% of Mean)
+Skewness = 2.24, Kurtosis = 6.46, MValue = 2
+-------------------- Histogram --------------------
+[7.142 s ; 7.879 s) | @@@@@@@@@
+[7.879 s ; 8.615 s) | 
+[8.615 s ; 9.095 s) | 
+[9.095 s ; 9.831 s) | @
+---------------------------------------------------
+*** BenchmarkingRegexInGzipStream.ZlibGzip_Parallel_FindAll: Job-DRSAZQ(RunStrategy=Monitoring) [UncompressedLogSizeInMegabytes=512] ***
+* Raw *
+WorkloadActual   1: 1 op, 2221295800.00 ns, 2.2213 s/op
+WorkloadActual   2: 1 op, 1722538900.00 ns, 1.7225 s/op
+WorkloadActual   3: 1 op, 1723620600.00 ns, 1.7236 s/op
+WorkloadActual   4: 1 op, 1715374000.00 ns, 1.7154 s/op
+WorkloadActual   5: 1 op, 1703902400.00 ns, 1.7039 s/op
+WorkloadActual   6: 1 op, 1727910800.00 ns, 1.7279 s/op
+WorkloadActual   7: 1 op, 1714915900.00 ns, 1.7149 s/op
+WorkloadActual   8: 1 op, 1750071500.00 ns, 1.7501 s/op
+WorkloadActual   9: 1 op, 1761610800.00 ns, 1.7616 s/op
+WorkloadActual  10: 1 op, 1718908000.00 ns, 1.7189 s/op
+WorkloadResult   1: 1 op, 2221295800.00 ns, 2.2213 s/op
+WorkloadResult   2: 1 op, 1722538900.00 ns, 1.7225 s/op
+WorkloadResult   3: 1 op, 1723620600.00 ns, 1.7236 s/op
+WorkloadResult   4: 1 op, 1715374000.00 ns, 1.7154 s/op
+WorkloadResult   5: 1 op, 1703902400.00 ns, 1.7039 s/op
+WorkloadResult   6: 1 op, 1727910800.00 ns, 1.7279 s/op
+WorkloadResult   7: 1 op, 1714915900.00 ns, 1.7149 s/op
+WorkloadResult   8: 1 op, 1750071500.00 ns, 1.7501 s/op
+WorkloadResult   9: 1 op, 1761610800.00 ns, 1.7616 s/op
+WorkloadResult  10: 1 op, 1718908000.00 ns, 1.7189 s/op
+
+* Statistics for WorkloadActual
+Mean = 1.776 s, StdErr = 0.050 s (2.80%), N = 10, StdDev = 0.157 s
+Min = 1.704 s, Q1 = 1.716 s, Median = 1.723 s, Q3 = 1.745 s, Max = 2.221 s
+IQR = 0.028 s, LowerFence = 1.674 s, UpperFence = 1.787 s
+ConfidenceInterval = [1.538 s; 2.014 s] (CI 99.9%), Margin = 0.238 s (13.40% of Mean)
+Skewness = 2.23, Kurtosis = 6.42, MValue = 2
+-------------------- Histogram --------------------
+[1.637 s ; 1.829 s) | @@@@@@@@@
+[1.829 s ; 2.020 s) | 
+[2.020 s ; 2.125 s) | 
+[2.125 s ; 2.317 s) | @
+---------------------------------------------------
+
+* Statistics for WorkloadResult
+Mean = 1.776 s, StdErr = 0.050 s (2.80%), N = 10, StdDev = 0.157 s
+Min = 1.704 s, Q1 = 1.716 s, Median = 1.723 s, Q3 = 1.745 s, Max = 2.221 s
+IQR = 0.028 s, LowerFence = 1.674 s, UpperFence = 1.787 s
+ConfidenceInterval = [1.538 s; 2.014 s] (CI 99.9%), Margin = 0.238 s (13.40% of Mean)
+Skewness = 2.23, Kurtosis = 6.42, MValue = 2
+-------------------- Histogram --------------------
+[1.637 s ; 1.829 s) | @@@@@@@@@
+[1.829 s ; 2.020 s) | 
+[2.020 s ; 2.125 s) | 
+[2.125 s ; 2.317 s) | @
+---------------------------------------------------
+*** BenchmarkingRegexInGzipStream.SystemGzip_FindAll: Job-DRSAZQ(RunStrategy=Monitoring) [UncompressedLogSizeInMegabytes=1024] ***
+* Raw *
+WorkloadActual   1: 1 op, 16757205700.00 ns, 16.7572 s/op
+WorkloadActual   2: 1 op, 14763945300.00 ns, 14.7639 s/op
+WorkloadActual   3: 1 op, 14793447400.00 ns, 14.7934 s/op
+WorkloadActual   4: 1 op, 14705427000.00 ns, 14.7054 s/op
+WorkloadActual   5: 1 op, 14715511800.00 ns, 14.7155 s/op
+WorkloadActual   6: 1 op, 14741706100.00 ns, 14.7417 s/op
+WorkloadActual   7: 1 op, 14630706300.00 ns, 14.6307 s/op
+WorkloadActual   8: 1 op, 14603346800.00 ns, 14.6033 s/op
+WorkloadActual   9: 1 op, 14591926200.00 ns, 14.5919 s/op
+WorkloadActual  10: 1 op, 14700578300.00 ns, 14.7006 s/op
+WorkloadResult   1: 1 op, 16757205700.00 ns, 16.7572 s/op
+WorkloadResult   2: 1 op, 14763945300.00 ns, 14.7639 s/op
+WorkloadResult   3: 1 op, 14793447400.00 ns, 14.7934 s/op
+WorkloadResult   4: 1 op, 14705427000.00 ns, 14.7054 s/op
+WorkloadResult   5: 1 op, 14715511800.00 ns, 14.7155 s/op
+WorkloadResult   6: 1 op, 14741706100.00 ns, 14.7417 s/op
+WorkloadResult   7: 1 op, 14630706300.00 ns, 14.6307 s/op
+WorkloadResult   8: 1 op, 14603346800.00 ns, 14.6033 s/op
+WorkloadResult   9: 1 op, 14591926200.00 ns, 14.5919 s/op
+WorkloadResult  10: 1 op, 14700578300.00 ns, 14.7006 s/op
+
+* Statistics for WorkloadActual
+Mean = 14.900 s, StdErr = 0.207 s (1.39%), N = 10, StdDev = 0.656 s
+Min = 14.592 s, Q1 = 14.648 s, Median = 14.710 s, Q3 = 14.758 s, Max = 16.757 s
+IQR = 0.110 s, LowerFence = 14.483 s, UpperFence = 14.924 s
+ConfidenceInterval = [13.909 s; 15.892 s] (CI 99.9%), Margin = 0.992 s (6.65% of Mean)
+Skewness = 2.23, Kurtosis = 6.44, MValue = 2
+-------------------- Histogram --------------------
+[14.293 s ; 15.092 s) | @@@@@@@@@
+[15.092 s ; 15.891 s) | 
+[15.891 s ; 16.358 s) | 
+[16.358 s ; 17.157 s) | @
+---------------------------------------------------
+
+* Statistics for WorkloadResult
+Mean = 14.900 s, StdErr = 0.207 s (1.39%), N = 10, StdDev = 0.656 s
+Min = 14.592 s, Q1 = 14.648 s, Median = 14.710 s, Q3 = 14.758 s, Max = 16.757 s
+IQR = 0.110 s, LowerFence = 14.483 s, UpperFence = 14.924 s
+ConfidenceInterval = [13.909 s; 15.892 s] (CI 99.9%), Margin = 0.992 s (6.65% of Mean)
+Skewness = 2.23, Kurtosis = 6.44, MValue = 2
+-------------------- Histogram --------------------
+[14.293 s ; 15.092 s) | @@@@@@@@@
+[15.092 s ; 15.891 s) | 
+[15.891 s ; 16.358 s) | 
+[16.358 s ; 17.157 s) | @
+---------------------------------------------------
+*** BenchmarkingRegexInGzipStream.ZlibGzip_FindAll: Job-DRSAZQ(RunStrategy=Monitoring) [UncompressedLogSizeInMegabytes=1024] ***
+* Raw *
+WorkloadActual   1: 1 op, 17192071400.00 ns, 17.1921 s/op
+WorkloadActual   2: 1 op, 15118184400.00 ns, 15.1182 s/op
+WorkloadActual   3: 1 op, 15173396800.00 ns, 15.1734 s/op
+WorkloadActual   4: 1 op, 15226319900.00 ns, 15.2263 s/op
+WorkloadActual   5: 1 op, 15287006000.00 ns, 15.2870 s/op
+WorkloadActual   6: 1 op, 15118806400.00 ns, 15.1188 s/op
+WorkloadActual   7: 1 op, 15189527100.00 ns, 15.1895 s/op
+WorkloadActual   8: 1 op, 15159466300.00 ns, 15.1595 s/op
+WorkloadActual   9: 1 op, 15078351800.00 ns, 15.0784 s/op
+WorkloadActual  10: 1 op, 15313842900.00 ns, 15.3138 s/op
+WorkloadResult   1: 1 op, 17192071400.00 ns, 17.1921 s/op
+WorkloadResult   2: 1 op, 15118184400.00 ns, 15.1182 s/op
+WorkloadResult   3: 1 op, 15173396800.00 ns, 15.1734 s/op
+WorkloadResult   4: 1 op, 15226319900.00 ns, 15.2263 s/op
+WorkloadResult   5: 1 op, 15287006000.00 ns, 15.2870 s/op
+WorkloadResult   6: 1 op, 15118806400.00 ns, 15.1188 s/op
+WorkloadResult   7: 1 op, 15189527100.00 ns, 15.1895 s/op
+WorkloadResult   8: 1 op, 15159466300.00 ns, 15.1595 s/op
+WorkloadResult   9: 1 op, 15078351800.00 ns, 15.0784 s/op
+WorkloadResult  10: 1 op, 15313842900.00 ns, 15.3138 s/op
+
+* Statistics for WorkloadActual
+Mean = 15.386 s, StdErr = 0.202 s (1.31%), N = 10, StdDev = 0.639 s
+Min = 15.078 s, Q1 = 15.129 s, Median = 15.181 s, Q3 = 15.272 s, Max = 17.192 s
+IQR = 0.143 s, LowerFence = 14.915 s, UpperFence = 15.486 s
+ConfidenceInterval = [14.420 s; 16.352 s] (CI 99.9%), Margin = 0.966 s (6.28% of Mean)
+Skewness = 2.22, Kurtosis = 6.4, MValue = 2
+-------------------- Histogram --------------------
+[14.807 s ; 15.585 s) | @@@@@@@@@
+[15.585 s ; 16.364 s) | 
+[16.364 s ; 16.803 s) | 
+[16.803 s ; 17.581 s) | @
+---------------------------------------------------
+
+* Statistics for WorkloadResult
+Mean = 15.386 s, StdErr = 0.202 s (1.31%), N = 10, StdDev = 0.639 s
+Min = 15.078 s, Q1 = 15.129 s, Median = 15.181 s, Q3 = 15.272 s, Max = 17.192 s
+IQR = 0.143 s, LowerFence = 14.915 s, UpperFence = 15.486 s
+ConfidenceInterval = [14.420 s; 16.352 s] (CI 99.9%), Margin = 0.966 s (6.28% of Mean)
+Skewness = 2.22, Kurtosis = 6.4, MValue = 2
+-------------------- Histogram --------------------
+[14.807 s ; 15.585 s) | @@@@@@@@@
+[15.585 s ; 16.364 s) | 
+[16.364 s ; 16.803 s) | 
+[16.803 s ; 17.581 s) | @
+---------------------------------------------------
+*** BenchmarkingRegexInGzipStream.ZlibGzip_Parallel_FindAll: Job-DRSAZQ(RunStrategy=Monitoring) [UncompressedLogSizeInMegabytes=1024] ***
+* Raw *
+WorkloadActual   1: 1 op, 4083053300.00 ns, 4.0831 s/op
+WorkloadActual   2: 1 op, 3966333700.00 ns, 3.9663 s/op
+WorkloadActual   3: 1 op, 3689128000.00 ns, 3.6891 s/op
+WorkloadActual   4: 1 op, 3652447100.00 ns, 3.6524 s/op
+WorkloadActual   5: 1 op, 3487278200.00 ns, 3.4873 s/op
+WorkloadActual   6: 1 op, 3527193600.00 ns, 3.5272 s/op
+WorkloadActual   7: 1 op, 3548757300.00 ns, 3.5488 s/op
+WorkloadActual   8: 1 op, 3579743700.00 ns, 3.5797 s/op
+WorkloadActual   9: 1 op, 3624624300.00 ns, 3.6246 s/op
+WorkloadActual  10: 1 op, 3616994800.00 ns, 3.6170 s/op
+WorkloadResult   1: 1 op, 4083053300.00 ns, 4.0831 s/op
+WorkloadResult   2: 1 op, 3966333700.00 ns, 3.9663 s/op
+WorkloadResult   3: 1 op, 3689128000.00 ns, 3.6891 s/op
+WorkloadResult   4: 1 op, 3652447100.00 ns, 3.6524 s/op
+WorkloadResult   5: 1 op, 3487278200.00 ns, 3.4873 s/op
+WorkloadResult   6: 1 op, 3527193600.00 ns, 3.5272 s/op
+WorkloadResult   7: 1 op, 3548757300.00 ns, 3.5488 s/op
+WorkloadResult   8: 1 op, 3579743700.00 ns, 3.5797 s/op
+WorkloadResult   9: 1 op, 3624624300.00 ns, 3.6246 s/op
+WorkloadResult  10: 1 op, 3616994800.00 ns, 3.6170 s/op
+
+* Statistics for WorkloadActual
+Mean = 3.678 s, StdErr = 0.061 s (1.67%), N = 10, StdDev = 0.194 s
+Min = 3.487 s, Q1 = 3.557 s, Median = 3.621 s, Q3 = 3.680 s, Max = 4.083 s
+IQR = 0.123 s, LowerFence = 3.371 s, UpperFence = 3.865 s
+ConfidenceInterval = [3.384 s; 3.971 s] (CI 99.9%), Margin = 0.294 s (7.99% of Mean)
+Skewness = 1.05, Kurtosis = 2.54, MValue = 2
+-------------------- Histogram --------------------
+[3.470 s ; 3.707 s) | @@@@@@@@
+[3.707 s ; 3.906 s) | 
+[3.906 s ; 4.143 s) | @@
+---------------------------------------------------
+
+* Statistics for WorkloadResult
+Mean = 3.678 s, StdErr = 0.061 s (1.67%), N = 10, StdDev = 0.194 s
+Min = 3.487 s, Q1 = 3.557 s, Median = 3.621 s, Q3 = 3.680 s, Max = 4.083 s
+IQR = 0.123 s, LowerFence = 3.371 s, UpperFence = 3.865 s
+ConfidenceInterval = [3.384 s; 3.971 s] (CI 99.9%), Margin = 0.294 s (7.99% of Mean)
+Skewness = 1.05, Kurtosis = 2.54, MValue = 2
+-------------------- Histogram --------------------
+[3.470 s ; 3.707 s) | @@@@@@@@
+[3.707 s ; 3.906 s) | 
+[3.906 s ; 4.143 s) | @@
+---------------------------------------------------
