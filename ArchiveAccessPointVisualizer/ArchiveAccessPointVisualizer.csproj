@@ -9,4 +9,9 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\LogSimulator\LogSimulator.csproj" />
+    <ProjectReference Include="..\ZLibWrapper\ZLibWrapper.csproj" />
+  </ItemGroup>
+
 </Project>

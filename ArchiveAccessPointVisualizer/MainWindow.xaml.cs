@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Microsoft.Win32;
 
 namespace ArchiveAccessPointVisualizer
 {
@@ -19,6 +20,21 @@ namespace ArchiveAccessPointVisualizer
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new OpenFileDialog();
+            dialog.FileName = "LogFile"; // Default file name
+            dialog.DefaultExt = ".gz"; // Default file extension
+            dialog.Filter = "Compressed Log Files|*.gz;*.gzap"; // Filter files by extension
+
+            if (dialog.ShowDialog() is not true)
+            {
+                return;
+            }
+
+            var filename = dialog.FileName;
         }
     }
 }
