@@ -1,6 +1,12 @@
 ﻿namespace ArchiveAccessPointVisualizer;
 
-public record ProgressReport<T>(T TotalProgress, bool IsFinalReport);
+public record ProgressReport<T>(T TotalProgress, bool IsFinalReport = false)
+{
+    public static implicit operator ProgressReport<T>(T totalProgress)
+    {
+        return new ProgressReport<T>(totalProgress);
+    }
+}
 
 public record PeriodicProgressLogic<T>(
     TimeSpan ProgressCheckInterval,
@@ -11,10 +17,28 @@ public record PeriodicProgressLogic<T>(
     public TimeSpan MinimumDelayBeforeNextReport { get; private init; } = TimeSpan.Zero;
     public bool IsTerminated { get; private init; } = false;
 
-    public PeriodicProgressLogic<T> ProgressIfNeeded(DateTime now)
+    public PeriodicProgressLogic<T> Update(DateTime now)
     {
-        // TODO
-        throw new NotImplementedException();
+        if (IsTerminated)
+        {
+            return this;
+        }
+
+        var timePassed = now - CurrentTime;
+        if (timePassed < MinimumDelayBeforeNextReport)
+        {
+            return this with { MinimumDelayBeforeNextReport = MinimumDelayBeforeNextReport - timePassed };
+        }
+
+        var progressReport = ProgressCheckMethod();
+
+        return this with
+        {
+            CurrentTime = now,
+            CurrentProgress = progressReport.TotalProgress,
+            IsTerminated = progressReport.IsFinalReport,
+            MinimumDelayBeforeNextReport =  ProgressCheckInterval
+        };
     }
 }
 
@@ -33,7 +57,7 @@ public class PeriodicProgressRunner<T> where T : notnull
         {
             cancellationToken.ThrowIfCancellationRequested();
             await Task.Delay(_periodicProgressLogic.MinimumDelayBeforeNextReport, cancellationToken);
-            _periodicProgressLogic = _periodicProgressLogic.ProgressIfNeeded(DateTime.Now);
+            _periodicProgressLogic = _periodicProgressLogic.Update(DateTime.Now);
             progressReporter.Report(_periodicProgressLogic.CurrentProgress);
         }
     }
