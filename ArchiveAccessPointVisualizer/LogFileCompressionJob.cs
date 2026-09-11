@@ -41,19 +41,42 @@ public class LogFileCompressor
         CancellationToken cancellationToken
     )
     {
-        await using var outputFileStream = File.Open(job.OutputFilePath, FileMode.CreateNew, FileAccess.Write, FileShare.Read);
-        await using var recoveryPointFileStream = job.RecoveryPointFilePath is null
+        var outputFileStream = File.Open(job.OutputFilePath, FileMode.CreateNew, FileAccess.Write, FileShare.Read);
+
+        var recoveryPointFileStream = job.RecoveryPointFilePath is null
             ? Stream.Null
             : File.Open(job.RecoveryPointFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-        await using var compressor = new GZipWritingStreamWithRecoveryPoints(outputFileStream, recoveryPointByteInterval: job.RecoveryPointByteInterval);
-        await using var accessPointStream = new RecoveryPointOffsetCsvWriter(recoveryPointFileStream, job.Encoding);
+
+        var compressor = new GZipWritingStreamWithRecoveryPoints(outputFileStream, recoveryPointByteInterval: job.RecoveryPointByteInterval);
+        var accessPointStream = new RecoveryPointOffsetCsvWriter(recoveryPointFileStream, job.Encoding);
         compressor.RecoveryPointWritten += accessPointStream.Write;
+
         var logSim = new LogSimulator.Simulator.LogSimulator();
-        await logSim.SimulateLogsAsync(
-            compressor,
-            job.Encoding,
-            job.RequestedLogSize,
-            numberOfBytesWrittenReporter,
-            cancellationToken);
+        logSim.SimulateLogs(compressor, job.Encoding, job.RequestedLogSize);
+
+        var progressReportingTask = new PeriodicProgressReporter<long>(
+            new PeriodicProgressLogic<long>(
+                TimeSpan.FromMilliseconds(250),
+                () => new ProgressReport<long>(
+                    outputFileStream.Position,
+                    outputFileStream.Position >= job.RequestedLogSize),
+                DateTime.Now,
+                0
+            )).Run(numberOfBytesWrittenReporter, cancellationToken);
+
+        var simulationTask = Task.Run(() => logSim.SimulateLogs(compressor, job.Encoding, job.RequestedLogSize), cancellationToken);
+
+        try
+        {
+            await Task.WhenAll(progressReportingTask, simulationTask);
+        }
+        finally
+        {
+            await accessPointStream.DisposeAsync();
+            await recoveryPointFileStream.DisposeAsync();
+            await compressor.DisposeAsync();
+            await outputFileStream.DisposeAsync();
+        }
     }
+
 }

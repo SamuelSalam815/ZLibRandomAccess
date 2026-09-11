@@ -22,16 +22,6 @@ public class LogSimulator(
     /// </summary>
     public event Action<GameState>? GameEnded;
 
-    public Task SimulateLogsAsync(
-        Stream stream,
-        Encoding encoding,
-        long targetNumberOfBytesToWrite,
-        IProgress<long>? numberOfBytesWrittenReporter = null,
-        CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
     public void SimulateLogs(Stream stream, Encoding encoding, long targetNumberOfBytesToWrite)
     {
         var initialHero = new Character(heroName, new StatBlock(6, 5, 5));

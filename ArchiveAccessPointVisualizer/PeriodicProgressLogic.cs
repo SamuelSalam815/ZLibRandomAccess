@@ -42,11 +42,13 @@ public record PeriodicProgressLogic<T>(
     }
 }
 
-public class PeriodicProgressRunner<T> where T : notnull
+public class PeriodicProgressReporter<T> where T : notnull
 {
     private PeriodicProgressLogic<T> _periodicProgressLogic;
 
-    public PeriodicProgressRunner(PeriodicProgressLogic<T> periodicProgressLogic)
+    // Todo make a better constructor. Specifically the user should not have to provide the current time for the
+    //  periodic progress logic
+    public PeriodicProgressReporter(PeriodicProgressLogic<T> periodicProgressLogic)
     {
         _periodicProgressLogic = periodicProgressLogic;
     }
@@ -55,7 +57,6 @@ public class PeriodicProgressRunner<T> where T : notnull
     {
         while (!_periodicProgressLogic.IsTerminated)
         {
-            cancellationToken.ThrowIfCancellationRequested();
             await Task.Delay(_periodicProgressLogic.MinimumDelayBeforeNextReport, cancellationToken);
             _periodicProgressLogic = _periodicProgressLogic.Update(DateTime.Now);
             progressReporter.Report(_periodicProgressLogic.CurrentProgress);
