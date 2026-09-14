@@ -13,7 +13,7 @@ public class GZipWritingStreamWithRecoveryPoints(
 
     private bool _isDisposed;
 
-    private long _totalBytesWritten = 0;
+    public long TotalBytesWritten { get; private set; }
     private long _bytesWrittenSinceLastRecoveryPoint = 0;
 
     private readonly ZLibDeflateStreamWithRecoveryPoints _deflateStream = new(
@@ -32,7 +32,7 @@ public class GZipWritingStreamWithRecoveryPoints(
     {
         _deflateStream.Flush();
         _bytesWrittenSinceLastRecoveryPoint = 0;
-        RecoveryPointWritten?.Invoke(new RecoveryPointOffset(_totalBytesWritten, _deflateStream.Position));
+        RecoveryPointWritten?.Invoke(new RecoveryPointOffset(TotalBytesWritten, _deflateStream.Position));
     }
 
     public override int Read(byte[] buffer, int offset, int count) => _deflateStream.Read(buffer, offset, count);
@@ -45,7 +45,7 @@ public class GZipWritingStreamWithRecoveryPoints(
     {
         _deflateStream.Write(buffer, offset, count);
         _bytesWrittenSinceLastRecoveryPoint += count;
-        _totalBytesWritten += count;
+        TotalBytesWritten += count;
         if (_bytesWrittenSinceLastRecoveryPoint >= recoveryPointByteInterval)
         {
             WriteRecoveryPoint();
