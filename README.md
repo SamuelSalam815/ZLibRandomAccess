@@ -10,19 +10,8 @@
 
   <p align="center">
     Exploring a feature of the ZLib Library
-<!--
     <br />
-    <a href="https://github.com/othneildrew/Best-README-Template"><strong>Explore the docs »</strong></a>
--->
-    <br />
-    <br />
-    <a href="https://github.com/othneildrew/Best-README-Template">View Benchmarks</a>
-<!--
-    &middot;
-    <a href="https://github.com/othneildrew/Best-README-Template/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
-    &middot;
-    <a href="https://github.com/othneildrew/Best-README-Template/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
--->
+    <a href="#performance">View Benchmarks</a>
   </p>
 </div>
 
@@ -157,7 +146,9 @@ Distributed under the Unlicense License. See `LICENSE.txt` for more information.
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
+The idea for this project was actualy a work item given to me at a previous work place. Obviously I cannot take the code from there, so I implemented the idea here and I am currently expanding upon it.
+
+Here are some of the other resourced I made use of while making this project:
 
 * [THE Best ReadMe template](https://github.com/othneildrew/Best-README-Template)
 * [Google Sheets](https://workspace.google.com/intl/en_uk/products/sheets/)
