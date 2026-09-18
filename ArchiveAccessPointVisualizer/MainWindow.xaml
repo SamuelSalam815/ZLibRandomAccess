@@ -5,20 +5,65 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ArchiveAccessPointVisualizer"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <ProgressBar Name="LogCompressionProgressBar" HorizontalAlignment="Left" Height="27" Margin="97,44,0,0" VerticalAlignment="Top" Width="309"/>
-        <Button Name="CompressLogFileButton" Content="Write Log File" HorizontalAlignment="Left" Margin="10,43,0,0" VerticalAlignment="Top" Height="27" Width="82" Click="CompressLogFileButton_Click"/>
-        <TextBox Name="LogSizeTargetTextBox" HorizontalAlignment="Left" Margin="98,22,0,0" TextWrapping="Wrap" Text="8" VerticalAlignment="Top" Width="47"/>
-        <ComboBox Name="LogSizeUnitComboBox" HorizontalAlignment="Left" Margin="150,22,0,0" VerticalAlignment="Top" Width="42" Height="18" SelectedIndex="1" FontSize="10">
+        Title="MainWindow" Height="450" Width="800"
+        >
+    <Window.Resources>
+        <local:LogGenerationViewModel x:Key="Model"/>
+    </Window.Resources>
+    <Grid DataContext="{StaticResource Model}">
+        <ProgressBar Name="LogCompressionProgressBar" HorizontalAlignment="Left" Height="27" Margin="97,149,0,0" VerticalAlignment="Top" Width="309"/>
+        <Button Name="CompressLogFileButton" Content="Write Log File" HorizontalAlignment="Left" Margin="10,148,0,0" VerticalAlignment="Top" Height="27" Width="82" Click="CompressLogFileButton_Click"/>
+        <TextBox Name="LogSizeTargetTextBox" HorizontalAlignment="Left" Margin="98,127,0,0" TextWrapping="Wrap" Text="8" VerticalAlignment="Top" Width="47"/>
+        <ComboBox Name="LogSizeUnitComboBox" HorizontalAlignment="Left" Margin="150,127,0,0" VerticalAlignment="Top" Width="42" Height="18" SelectedIndex="1" FontSize="10">
             <ComboBoxItem Content="MB"/>
             <ComboBoxItem Content="GB"/>
         </ComboBox>
-        <TextBlock HorizontalAlignment="Left" Height="20" Margin="13,21,0,0" TextWrapping="Wrap" Text="Log Size" VerticalAlignment="Top" Width="76"/>
-        <CheckBox Content="CheckBox" HorizontalAlignment="Left" Height="15" Margin="198,23,0,0" VerticalAlignment="Top" Width="15"/>
-        <TextBlock HorizontalAlignment="Left" Height="15" Margin="218,23,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="200"><Run Text="Compress with recovery "/><Run Text="points"/></TextBlock>
-        <Button Name="CancelButton" Content="❌" HorizontalAlignment="Left" Margin="417,47,0,0" VerticalAlignment="Top" Height="21" Width="21" IsEnabled="False" Click="CancelButton_Click" IsCancel="True"/>
-        <TextBlock Name="CompressionJobStatusTextBlock" HorizontalAlignment="Left" Margin="10,75,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="396"/>
+        <TextBlock Height="20" Margin="13,126,711,0" TextWrapping="Wrap" Text="Log Size" VerticalAlignment="Top"/>
+        <CheckBox
+            Name="ShouldUseRecoveryPointCheckBox"
+            Content="Compress using random access feature"
+            HorizontalAlignment="Left" 
+            Height="16"
+            IsChecked="{Binding Path=ShouldUseRecoveryPoints}"
+            Margin="94,90,0,0" VerticalAlignment="Top" Width="230"/>
+        <Button Name="CancelButton" Content="❌" HorizontalAlignment="Left" Margin="417,152,0,0" VerticalAlignment="Top" Height="21" Width="21" IsEnabled="False" Click="CancelButton_Click" IsCancel="True"/>
+        <TextBlock Name="CompressionJobStatusTextBlock" HorizontalAlignment="Left" Margin="10,180,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="396"/>
+        <TextBlock Name="FormInputErrorTextBlock" HorizontalAlignment="Left" Height="161" Margin="443,32,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="258"/>
+        <TextBox 
+            Name="OutputFileTextBox"
+            HorizontalAlignment="Left"
+            Height="19"
+            Margin="94,10,0,0"
+            TextWrapping="Wrap"
+            Text="{Binding Path=OutputFilePath, UpdateSourceTrigger=PropertyChanged}"
+            VerticalAlignment="Top"
+            Width="309"
+            IsReadOnly="True"/>
+        <TextBlock Height="20" Margin="10,10,714,0" TextWrapping="Wrap" Text="Output File" VerticalAlignment="Top"/>
+        <TextBox
+            HorizontalAlignment="Left"
+            Height="19"
+            Margin="94,35,0,0"
+            TextWrapping="Wrap"
+            Text="{Binding Path=RecoveryPointFilePath, Mode=OneWay}"
+            IsEnabled="{Binding Path=ShouldUseRecoveryPoints, Mode=OneWay}"
+            VerticalAlignment="Top"
+            Width="309"
+            IsReadOnly="True" />
+        <TextBlock Height="20" Margin="10,35,714,0" TextWrapping="Wrap" Text="Metadata File" VerticalAlignment="Top"/>
+        <Button
+            Content="📂"
+            HorizontalAlignment="Left"
+            Margin="408,8,0,0"
+            VerticalAlignment="Top"
+            Click="SeekOutputFilePath"
+            />
+        <Button IsEnabled="{Binding Path=CanUserSpecifyRecoveryPointFilePath, Mode=OneWay}" Content="📂" HorizontalAlignment="Left" Margin="408,33,0,0" VerticalAlignment="Top"
+                Click="SeekRecoveryPointFilePath"/>
+        <CheckBox 
+            IsEnabled="{Binding Path=ShouldUseRecoveryPoints, Mode=OneWay}"
+            Content="Derive metadata file path from output file" HorizontalAlignment="Left" Height="15" Margin="94,65,0,0" VerticalAlignment="Top" Width="245"
+            IsChecked="{Binding Path=ShouldDeriveRecoveryPointFilePath}"/>
 
     </Grid>
 </Window>

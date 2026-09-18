@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Windows;
+using System.Windows.Input;
 using Microsoft.Win32;
 
 namespace ArchiveAccessPointVisualizer;
@@ -11,6 +12,8 @@ namespace ArchiveAccessPointVisualizer;
 /// </summary>
 public partial class MainWindow : Window
 {
+    private LogGenerationViewModel Model => (FindResource("Model") as LogGenerationViewModel)!;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -143,5 +146,37 @@ public partial class MainWindow : Window
     private void CancelButton_Click(object sender, RoutedEventArgs e)
     {
         _logCompressionCancellationTokenSource.Cancel();
+    }
+
+    private void SeekOutputFilePath(object sender, RoutedEventArgs e)
+    {
+        var dialog = new SaveFileDialog()
+        {
+            AddExtension = true,
+            DefaultExt = ".txt.gz",
+            Filter = "Archive|*.gz",
+            Title = "Generate a Log File"
+        };
+
+        if (dialog.ShowDialog() is true)
+        {
+            Model.OutputFilePath = dialog.FileName;
+        }
+    }
+
+    private void SeekRecoveryPointFilePath(object sender, RoutedEventArgs e)
+    {
+        var dialog = new SaveFileDialog()
+        {
+            AddExtension = true,
+            DefaultExt = ".csv",
+            Filter = "Metadata File|*.csv",
+            Title = "Choose the metadata output path"
+        };
+
+        if (dialog.ShowDialog() is true)
+        {
+            Model.UserDefinedRecoveryPointFilePath = dialog.FileName;
+        }
     }
 }

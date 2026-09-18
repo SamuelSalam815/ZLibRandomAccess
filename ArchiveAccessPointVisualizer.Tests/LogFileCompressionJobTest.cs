@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Text;
-using ArchiveAccessPointVisualizer;
 using JetBrains.Annotations;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shouldly;
 
-namespace ArchiveViewerBackend.Tests;
+namespace ArchiveAccessPointVisualizer.Tests;
 
 [TestClass]
 [TestSubject(typeof(LogFileCompressionJob))]
