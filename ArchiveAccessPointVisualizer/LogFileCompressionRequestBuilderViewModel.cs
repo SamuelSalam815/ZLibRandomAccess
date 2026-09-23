@@ -69,6 +69,17 @@ public class LogFileCompressionRequestBuilderViewModel : INotifyPropertyChanged
         get => _requestBuilder.RequestedLogFileSizeString;
         set => UpdateModel(_requestBuilder with { RequestedLogFileSizeString = value });
     }
+    public DataSizeAsUnitString SelectedUnitOfMeasure
+    {
+        get => new(_requestBuilder.LogSizeUnitOfMeasure);
+        set
+        {
+            if (value is not null)
+            {
+                UpdateModel(_requestBuilder with { LogSizeUnitOfMeasure = value.DataSizeUnit });
+            }
+        }
+    }
 
     private static bool BrowseForOutputFile([NotNullWhen(true)]out string? outputFilePath)
     {

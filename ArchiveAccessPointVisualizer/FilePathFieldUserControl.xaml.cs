@@ -53,20 +53,17 @@ public partial class FilePathFieldUserControl : UserControl
         set => SetValue(TextBoxToLabelWidthRatioProperty, value);
     }
 
-    public static readonly DependencyProperty OnButtonClickProperty = DependencyProperty.Register(
-        nameof(OnButtonClick),
-        typeof(EventHandler<RoutedEventArgs>),
-        typeof(FilePathFieldUserControl),
-        new PropertyMetadata(default(EventHandler<RoutedEventArgs>)));
+    // TODO: add dependency property for disabling just the button
 
-    public EventHandler<RoutedEventArgs> OnButtonClick
-    {
-        get => (EventHandler<RoutedEventArgs>)GetValue(OnButtonClickProperty);
-        set => SetValue(OnButtonClickProperty, value);
-    }
+    public event RoutedEventHandler? ButtonClick;
 
     public FilePathFieldUserControl()
     {
         InitializeComponent();
+    }
+
+    private void OnButtonClick(object sender, RoutedEventArgs e)
+    {
+        ButtonClick?.Invoke(sender, e);
     }
 }

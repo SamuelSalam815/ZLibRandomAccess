@@ -8,12 +8,32 @@
              d:DesignHeight="30" d:DesignWidth="300">
     <Grid DataContext="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=local:FilePathFieldUserControl}}">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="{Binding Path=TextBoxToLabelWidthRatio}" />
+            <ColumnDefinition Width="Auto" />
+                <!-- Width="{Binding Path=TextBoxToLabelWidthRatio}" -->
+            <ColumnDefinition 
+                Width="*"
+                />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
-        <Label Content="{Binding Path=Label}" Grid.Column="0"></Label>
-        <TextBox Text="{Binding Path=Value}" IsReadOnly="True" Grid.Column="1"></TextBox>
-        <Button Content="{Binding Path=ButtonLabel}" Click="{Binding Path=OnButtonClick}" Grid.Column="2"></Button>
+        <Label 
+            Content="{Binding Path=Label}" 
+            VerticalAlignment="Center"
+            HorizontalAlignment="Left"
+            Grid.Column="0"/>
+        <TextBox 
+            HorizontalAlignment="Stretch"
+            Text="{Binding Path=Value}" 
+            Height="20" 
+            Margin="5" 
+            IsReadOnly="True" 
+            Grid.Column="1"/>
+        <Button
+            Content="{Binding Path=ButtonLabel}"
+            Click="OnButtonClick"
+            Height="20"
+            Width="20"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Grid.Column="2"/>
     </Grid>
 </UserControl>

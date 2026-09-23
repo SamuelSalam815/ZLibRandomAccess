@@ -22,3 +22,14 @@ public record DataSize(long ByteCount)
         }
     }
 }
+
+public record DataSizeAsUnitString(DataSize DataSizeUnit)
+{
+    public string DisplayString {
+        get
+        {
+            if (DataSizeUnit == DataSize.FromGigaBytes(1)) return "GB";
+            return DataSizeUnit == DataSize.FromMegaBytes(1) ? "MB" : "Custom";
+        }
+    }
+}

@@ -36,9 +36,9 @@
         <TextBlock Name="CompressionJobStatusTextBlock" HorizontalAlignment="Left" Margin="14,220,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="396"/>
         <TextBlock Name="FormInputErrorTextBlock" HorizontalAlignment="Left" Height="161" Margin="443,32,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="258"/>
         <local:FilePathFieldUserControl
-            Margin="13,10,362,377"
+            Margin="7,32,368,366"
             Label="Output File"
-            OnButtonClick="SeekOutputFilePath"
+            ButtonClick="SeekOutputFilePath"
             />
         <TextBox
             HorizontalAlignment="Left"
@@ -57,6 +57,13 @@
             IsEnabled="{Binding Path=ShouldUseRecoveryPoints, Mode=OneWay}"
             Content="Derive metadata file path from output file" HorizontalAlignment="Left" Height="15" Margin="98,105,0,0" VerticalAlignment="Top" Width="245"
             IsChecked="{Binding Path=ShouldDeriveRecoveryPointFilePath}"/>
+        <local:FilePathFieldUserControl
+            Margin="6,0,368,398"
+            Label="Metadata file"
+            ButtonClick="SeekRecoveryPointFilePath"
+            Value="{Binding Path=RecoveryPointFilePath}"
+            IsEnabled="{Binding Path=CanUserSpecifyRecoveryPointFilePath}"
+            />
 
     </Grid>
 </Window>

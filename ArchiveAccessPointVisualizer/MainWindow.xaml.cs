@@ -17,7 +17,7 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         LogSizeUnitComboBox.ItemsSource =
-            LogFileCompressionRequestBuilder.AvailableUnitsOfData.Select(x => new DataSizeWithDisplayString(x));
+            LogFileCompressionRequestBuilder.AvailableUnitsOfData.Select(x => new DataSizeAsUnitString(x));
     }
 
     private CancellationTokenSource _logCompressionCancellationTokenSource = new();
