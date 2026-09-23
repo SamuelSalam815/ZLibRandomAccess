@@ -14,4 +14,9 @@
     <ProjectReference Include="..\ZLibWrapper\ZLibWrapper.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="CompareNETObjects" Version="4.84.0" />
+    <PackageReference Include="ErrorOr" Version="2.1.1" />
+  </ItemGroup>
+
 </Project>
