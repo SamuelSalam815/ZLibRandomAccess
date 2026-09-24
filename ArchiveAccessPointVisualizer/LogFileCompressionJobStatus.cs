@@ -1,4 +1,6 @@
-﻿namespace ArchiveAccessPointVisualizer;
+﻿using ErrorOr;
+
+namespace ArchiveAccessPointVisualizer;
 
 public record LogFileCompressionJobStatus(
     bool IsRunning,
@@ -14,8 +16,23 @@ public record LogFileCompressionJobStatus(
         string.Empty
     );
 
-    public LogFileCompressionJobStatus Accept(LogFileCompressionProgressReport report)
+    public LogFileCompressionJobStatus Accept(ErrorOr<LogFileCompressionProgressReport> reportOrError)
     {
-        throw new NotImplementedException();
+        return reportOrError
+            .Match(
+                report =>
+                    this with
+                    {
+                        IsRunning = !report.IsJobComplete,
+                        NumberOfBytesWritten = report.TotalNumberOfBytesWritten,
+                        Description = report.StatusDescription ?? Description
+                    },
+                error =>
+                    this with
+                    {
+                        IsRunning = false,
+                        Description = string.Join(Environment.NewLine, error.Select(e => e.Description))
+                    }
+            );
     }
 }

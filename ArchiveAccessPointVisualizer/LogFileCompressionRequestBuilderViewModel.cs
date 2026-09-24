@@ -12,7 +12,7 @@ public class LogFileCompressionRequestBuilderViewModel : INotifyPropertyChanged
 {
     private LogFileCompressionRequestBuilder _requestBuilder = new();
 
-    public ErrorOr<LogFileCompressionRequest> Request => _requestBuilder.Request;
+    public ErrorOr<LogFileCompressionRequest> RequestOrError => _requestBuilder.Request;
 
     private readonly CompareLogic _compareLogic = new(new ComparisonConfig
     {

@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using ErrorOr;
 using LogSimulator;
 using ZLibWrapper;
 
@@ -6,15 +7,91 @@ namespace ArchiveAccessPointVisualizer;
 
 public class LogFileCompressionJobRunner(LogFileCompressionRequest request)
 {
-    // TODO: Add a clean up operation in the event of failure
-    public async Task Run(IProgress<LogFileCompressionProgressReport> progress, CancellationToken cancellationToken = default)
+    public async Task Run(
+        IProgress<ErrorOr<LogFileCompressionProgressReport>> progress,
+        CancellationToken cancellationToken = default)
     {
-        await using var outputFileStream = File.Open(request.OutputFilePath, FileMode.CreateNew, FileAccess.Write, FileShare.Read);
+        Stream outputFileStream;
+        Stream recoveryPointFileStream;
+        try
+        {
+            AcquireFileHandles(out outputFileStream, out recoveryPointFileStream);
+        }
+        catch (Exception exception)
+        {
+            progress.Report(Error.Failure(description: exception.Message));
+            return;
+        }
 
-        await using var recoveryPointFileStream = request.RecoveryPointFileDetails is { } recoveryPointFileDetails
+        var didOperationFail = true;
+        try
+        {
+            await DoWork(outputFileStream, recoveryPointFileStream, progress, cancellationToken);
+            didOperationFail = false;
+        }
+        catch (TaskCanceledException)
+        {
+            didOperationFail = true;
+            progress.Report(Error.Failure(description: "User cancelled job"));
+        }
+        catch (Exception exception)
+        {
+            didOperationFail = true;
+            progress.Report(Error.Failure(description: exception.Message));
+        }
+        finally
+        {
+            await outputFileStream.DisposeAsync();
+            await recoveryPointFileStream.DisposeAsync();
+            if (didOperationFail)
+            {
+                DeleteOutputFiles();
+            }
+        }
+    }
+
+    private void DeleteOutputFiles()
+    {
+        TryDelete(request.OutputFilePath);
+        if (request.RecoveryPointFileDetails is { FilePath: var recoveryPointFilePath })
+        {
+            TryDelete(recoveryPointFilePath);
+        }
+    }
+
+    private void TryDelete(string recoveryPointFilePath)
+    {
+        // Intentionally suppress expected errors
+        try
+        {
+            File.Delete(recoveryPointFilePath);
+        }
+        catch (IOException)
+        {
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (NotSupportedException)
+        {
+        }
+    }
+
+    private void AcquireFileHandles(out Stream outputFileStream, out Stream recoveryPointFileStream)
+    {
+        outputFileStream = File.Open(request.OutputFilePath, FileMode.CreateNew, FileAccess.Write, FileShare.Read);
+
+        recoveryPointFileStream = request.RecoveryPointFileDetails is { } recoveryPointFileDetails
             ? File.Open(recoveryPointFileDetails.FilePath, FileMode.CreateNew, FileAccess.Write, FileShare.Read)
             : Stream.Null;
+    }
 
+    private async Task DoWork(
+        Stream outputFileStream,
+        Stream recoveryPointFileStream,
+        IProgress<ErrorOr<LogFileCompressionProgressReport>> progress,
+        CancellationToken cancellationToken = default)
+    {
         await using var compressor = new GZipWritingStreamWithRecoveryPoints(
             outputFileStream,
             recoveryPointByteInterval: request.RecoveryPointFileDetails?.RecoveryPointInterval.ByteCount);
@@ -36,11 +113,12 @@ public class LogFileCompressionJobRunner(LogFileCompressionRequest request)
             () => logSimulator.SimulateLogs(compressor, request.Encoding, request.RequestedLogSize),
             cancellationToken);
 
-        var progressReportingTask = Task.Run(async () =>
+        var progressReportingTask = Task.Run(
+            async () =>
             {
                 while (!simulationTask.IsCompleted)
                 {
-                    await Task.Delay(2000, cancellationToken);
+                    await Task.Delay(250, cancellationToken);
                     string? status = null;
                     if (lastGameSimulated is not null)
                     {
@@ -49,11 +127,11 @@ public class LogFileCompressionJobRunner(LogFileCompressionRequest request)
                         status = logs[randomIndex].Payload.Description;
                     }
 
-                    progress.Report(new LogFileCompressionProgressReport(
-                        compressor.TotalBytesWritten,
-                        request.RequestedLogSize,
-                        status
-                    ));
+                    progress.Report(
+                        new LogFileCompressionProgressReport(
+                            compressor.TotalBytesWritten,
+                            status
+                        ));
                 }
             },
             cancellationToken);
@@ -61,5 +139,7 @@ public class LogFileCompressionJobRunner(LogFileCompressionRequest request)
         await Task.WhenAll(
             progressReportingTask,
             simulationTask);
+
+        progress.Report(new LogFileCompressionProgressReport(request.RequestedLogSize, "Finished writing logs!", true));
     }
 }

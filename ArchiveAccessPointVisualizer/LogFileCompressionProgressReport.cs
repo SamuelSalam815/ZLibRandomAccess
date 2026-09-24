@@ -1,7 +1,7 @@
 ﻿namespace ArchiveAccessPointVisualizer;
 
 public record LogFileCompressionProgressReport(
-    long NumberOfBytesWritten,
-    long TargetNumberOfBytes,
-    string? StatusDescription
+    long TotalNumberOfBytesWritten,
+    string? StatusDescription,
+    bool IsJobComplete = false
 );
