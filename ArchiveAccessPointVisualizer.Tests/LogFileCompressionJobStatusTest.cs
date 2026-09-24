@@ -24,8 +24,8 @@ public class LogFileCompressionJobStatusTest
     public void DescriptionIsNotUpdated_IfProgressDescriptionIsNull()
     {
         const string description = "Foo bar";
-        var sut = LogFileCompressionJobStatus.NotReady with { Description = description };
-        sut.Accept(new LogFileCompressionProgressReport(100, null)).Description.ShouldBe(description);
+        var sut = LogFileCompressionJobStatus.NotReady with { JobStatusDescription = description };
+        sut.Accept(new LogFileCompressionProgressReport(100, null)).JobStatusDescription.ShouldBe(description);
     }
 
     [TestMethod]
@@ -50,7 +50,7 @@ public class LogFileCompressionJobStatusTest
             .Accept(Error.Unauthorized(description: errorMessage));
 
         sut.IsRunning.ShouldBeFalse();
-        sut.Description.ShouldBe(errorMessage);
+        sut.JobStatusDescription.ShouldBe(errorMessage);
     }
 
     [TestMethod]
@@ -58,7 +58,7 @@ public class LogFileCompressionJobStatusTest
     {
         const string description = "Foo bar";
         var sut = LogFileCompressionJobStatus.NotReady;
-        sut.Description.ShouldNotBe(description);
-        sut.Accept(new LogFileCompressionProgressReport(100, description)).Description.ShouldBe(description);
+        sut.JobStatusDescription.ShouldNotBe(description);
+        sut.Accept(new LogFileCompressionProgressReport(100, description)).JobStatusDescription.ShouldBe(description);
     }
 }

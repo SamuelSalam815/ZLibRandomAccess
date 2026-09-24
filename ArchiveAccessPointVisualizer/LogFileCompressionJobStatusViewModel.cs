@@ -52,7 +52,7 @@ public class LogFileCompressionJobStatusViewModel : INotifyPropertyChanged
 
     public bool IsRunning => _jobStatus.IsRunning;
 
-    public string JobStatusDescription => _jobStatus.Description;
+    public string JobStatusDescription => _jobStatus.JobStatusDescription;
 
     public long NumberOfBytesWritten => _jobStatus.NumberOfBytesWritten;
 

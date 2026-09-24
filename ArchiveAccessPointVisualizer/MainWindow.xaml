@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:ArchiveAccessPointVisualizer"
         xmlns:system="clr-namespace:System;assembly=System.Runtime"
         mc:Ignorable="d"
-        Title="Fictitious Log File Generator" Height="200" Width="650">
+        Title="Fictitious Log File Generator" Height="250" Width="650"
+        WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <local:LogFileCompressionRequestBuilderViewModel x:Key="JobRequestModel" />
         <local:LogFileCompressionJobStatusViewModel x:Key="JobStatusModel" />
@@ -123,10 +124,17 @@
                 Click="CancelCompressionJob_Click"
                 IsCancel="True" />
         </Grid>
-        <TextBlock
-            HorizontalAlignment="Stretch"
-            Text="{Binding Path=JobStatusDescription}"
-            Height="20"
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="{Binding Source={StaticResource LabelWidth}}"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock
+                Grid.Column="1"
+                HorizontalAlignment="Left"
+                Text="{Binding Path=JobStatusDescription, UpdateSourceTrigger=PropertyChanged}"
+                Height="20"
             />
+        </Grid>
     </StackPanel>
 </Window>

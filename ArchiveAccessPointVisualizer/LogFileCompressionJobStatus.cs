@@ -6,7 +6,7 @@ public record LogFileCompressionJobStatus(
     bool IsRunning,
     long NumberOfBytesWritten,
     long TargetNumberOfBytes,
-    string Description
+    string JobStatusDescription
 )
 {
     public static readonly LogFileCompressionJobStatus NotReady = new(
@@ -25,13 +25,13 @@ public record LogFileCompressionJobStatus(
                     {
                         IsRunning = !report.IsJobComplete,
                         NumberOfBytesWritten = report.TotalNumberOfBytesWritten,
-                        Description = report.StatusDescription ?? Description
+                        JobStatusDescription = report.StatusDescription ?? JobStatusDescription
                     },
                 error =>
                     this with
                     {
                         IsRunning = false,
-                        Description = string.Join(Environment.NewLine, error.Select(e => e.Description))
+                        JobStatusDescription = string.Join(Environment.NewLine, error.Select(e => e.Description))
                     }
             );
     }
