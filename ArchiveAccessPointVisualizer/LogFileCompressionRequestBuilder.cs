@@ -32,7 +32,7 @@ public record LogFileCompressionRequestBuilder
         {
             if (long.TryParse(RequestedLogFileSizeString, out var requestedLogFileSize))
             {
-                return new DataSize(requestedLogFileSize * LogSizeUnitOfMeasure.ByteCount);
+                return new DataSize(requestedLogFileSize * LogSizeUnitOfMeasure);
             }
 
             return Error.Validation("Could not parse requested file size as an integer!");

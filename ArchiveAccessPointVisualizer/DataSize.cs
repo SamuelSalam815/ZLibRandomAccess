@@ -21,15 +21,6 @@ public record DataSize(long ByteCount)
             return new DataSize(gigaByteCount * 1024 * 1024 * 1024);
         }
     }
-}
 
-public record DataSizeAsUnitString(DataSize DataSizeUnit)
-{
-    public string DisplayString {
-        get
-        {
-            if (DataSizeUnit == DataSize.FromGigaBytes(1)) return "GB";
-            return DataSizeUnit == DataSize.FromMegaBytes(1) ? "MB" : "Custom";
-        }
-    }
+    public static implicit operator long(DataSize size) => size.ByteCount;
 }

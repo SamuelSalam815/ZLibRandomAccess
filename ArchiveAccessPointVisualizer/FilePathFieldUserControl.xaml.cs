@@ -41,19 +41,29 @@ public partial class FilePathFieldUserControl : UserControl
         set => SetValue(ButtonLabelProperty, value);
     }
 
-    public static readonly DependencyProperty TextBoxToLabelWidthRatioProperty = DependencyProperty.Register(
-        nameof(TextBoxToLabelWidthRatio),
-        typeof(string),
+    public static readonly DependencyProperty LabelWidthProperty = DependencyProperty.Register(
+        nameof(LabelWidth),
+        typeof(double),
         typeof(FilePathFieldUserControl),
-        new PropertyMetadata("6*"));
+        new PropertyMetadata(double.NaN));
 
-    public string TextBoxToLabelWidthRatio
+    public double LabelWidth
     {
-        get => (string)GetValue(TextBoxToLabelWidthRatioProperty);
-        set => SetValue(TextBoxToLabelWidthRatioProperty, value);
+        get => (double)GetValue(LabelWidthProperty);
+        set => SetValue(LabelWidthProperty, value);
     }
 
-    // TODO: add dependency property for disabling just the button
+    public static readonly DependencyProperty IsButtonEnabledProperty = DependencyProperty.Register(
+        nameof(IsButtonEnabled),
+        typeof(bool),
+        typeof(FilePathFieldUserControl),
+        new PropertyMetadata(true));
+
+    public bool IsButtonEnabled
+    {
+        get => (bool)GetValue(IsButtonEnabledProperty);
+        set => SetValue(IsButtonEnabledProperty, value);
+    }
 
     public event RoutedEventHandler? ButtonClick;
 

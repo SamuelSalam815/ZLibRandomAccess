@@ -6,6 +6,7 @@ namespace ArchiveAccessPointVisualizer;
 
 public class LogFileCompressionJobRunner(LogFileCompressionRequest request)
 {
+    // TODO: Add a clean up operation in the event of failure
     public async Task Run(IProgress<LogFileCompressionProgressReport> progress, CancellationToken cancellationToken = default)
     {
         await using var outputFileStream = File.Open(request.OutputFilePath, FileMode.CreateNew, FileAccess.Write, FileShare.Read);
@@ -32,7 +33,7 @@ public class LogFileCompressionJobRunner(LogFileCompressionRequest request)
         };
 
         var simulationTask = Task.Run(
-            () => logSimulator.SimulateLogs(compressor, request.Encoding, request.RequestedLogSize.ByteCount),
+            () => logSimulator.SimulateLogs(compressor, request.Encoding, request.RequestedLogSize),
             cancellationToken);
 
         var progressReportingTask = Task.Run(async () =>
@@ -50,7 +51,7 @@ public class LogFileCompressionJobRunner(LogFileCompressionRequest request)
 
                     progress.Report(new LogFileCompressionProgressReport(
                         compressor.TotalBytesWritten,
-                        request.RequestedLogSize.ByteCount,
+                        request.RequestedLogSize,
                         status
                     ));
                 }

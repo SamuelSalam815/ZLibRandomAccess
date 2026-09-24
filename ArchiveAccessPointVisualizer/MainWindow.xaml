@@ -4,66 +4,123 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ArchiveAccessPointVisualizer"
+        xmlns:system="clr-namespace:System;assembly=System.Runtime"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800"
-        >
+        Title="Fictitious Log File Generator" Height="200" Width="650">
     <Window.Resources>
-        <local:LogFileCompressionRequestBuilderViewModel x:Key="Model"/>
+        <local:LogFileCompressionRequestBuilderViewModel x:Key="JobRequestModel" />
+        <local:LogFileCompressionJobStatusViewModel x:Key="JobStatusModel" />
+        <local:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+        <system:Double x:Key="LabelWidth">100</system:Double>
     </Window.Resources>
-    <Grid DataContext="{StaticResource Model}">
-        <ProgressBar Name="LogCompressionProgressBar" HorizontalAlignment="Left" Height="27" Margin="101,189,0,0" VerticalAlignment="Top" Width="309"/>
-        <Button Name="CompressLogFileButton" Content="Write Log File" HorizontalAlignment="Left" Margin="14,188,0,0" VerticalAlignment="Top" Height="27" Width="82" />
-        <TextBox Name="LogSizeTargetTextBox" HorizontalAlignment="Left" Margin="102,167,0,0" TextWrapping="Wrap" Text="8" VerticalAlignment="Top" Width="47"/>
-        <ComboBox
-            Name="LogSizeUnitComboBox"
-            HorizontalAlignment="Left"
-            Margin="154,167,0,0"
-            VerticalAlignment="Top"
-            Width="42"
-            Height="18"
-            SelectedIndex="1"
-            FontSize="10"
-            SelectedItem="{Binding Path=SelectedUnitOfMeasure, Mode=OneWayToSource}"/>
-        <TextBlock Height="20" Margin="17,166,707,0" TextWrapping="Wrap" Text="Log Size" VerticalAlignment="Top"/>
-        <CheckBox
-            Name="ShouldUseRecoveryPointCheckBox"
-            Content="Compress using random access feature"
-            HorizontalAlignment="Left" 
-            Height="16"
-            IsChecked="{Binding Path=ShouldUseRecoveryPoints}"
-            Margin="98,130,0,0" VerticalAlignment="Top" Width="230"/>
-        <Button Name="CancelButton" Content="❌" HorizontalAlignment="Left" Margin="421,192,0,0" VerticalAlignment="Top" Height="21" Width="21" IsEnabled="False" Click="CancelButton_Click" IsCancel="True"/>
-        <TextBlock Name="CompressionJobStatusTextBlock" HorizontalAlignment="Left" Margin="14,220,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="396"/>
-        <TextBlock Name="FormInputErrorTextBlock" HorizontalAlignment="Left" Height="161" Margin="443,32,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="258"/>
-        <local:FilePathFieldUserControl
-            Margin="7,32,368,366"
-            Label="Output File"
-            ButtonClick="SeekOutputFilePath"
-            />
-        <TextBox
-            HorizontalAlignment="Left"
-            Height="19"
-            Margin="98,75,0,0"
-            TextWrapping="Wrap"
-            Text="{Binding Path=RecoveryPointFilePath, Mode=OneWay}"
-            IsEnabled="{Binding Path=ShouldUseRecoveryPoints, Mode=OneWay}"
-            VerticalAlignment="Top"
-            Width="309"
-            IsReadOnly="True" />
-        <TextBlock Height="20" Margin="14,75,710,0" TextWrapping="Wrap" Text="Metadata File" VerticalAlignment="Top"/>
-        <Button IsEnabled="{Binding Path=CanUserSpecifyRecoveryPointFilePath, Mode=OneWay}" Content="📂" HorizontalAlignment="Left" Margin="412,73,0,0" VerticalAlignment="Top"
-                Click="SeekRecoveryPointFilePath"/>
-        <CheckBox 
-            IsEnabled="{Binding Path=ShouldUseRecoveryPoints, Mode=OneWay}"
-            Content="Derive metadata file path from output file" HorizontalAlignment="Left" Height="15" Margin="98,105,0,0" VerticalAlignment="Top" Width="245"
-            IsChecked="{Binding Path=ShouldDeriveRecoveryPointFilePath}"/>
-        <local:FilePathFieldUserControl
-            Margin="6,0,368,398"
-            Label="Metadata file"
-            ButtonClick="SeekRecoveryPointFilePath"
-            Value="{Binding Path=RecoveryPointFilePath}"
-            IsEnabled="{Binding Path=CanUserSpecifyRecoveryPointFilePath}"
-            />
+    <StackPanel
+        DataContext="{StaticResource JobStatusModel}"
+        Margin="5"
+        Width="600">
+        <Border
+            IsEnabled="{Binding Path=IsRunning, Converter={StaticResource InverseBooleanConverter}}">
+            <Grid
+                DataContext="{StaticResource JobRequestModel}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="{Binding Source={StaticResource LabelWidth}}" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
-    </Grid>
+                <local:FilePathFieldUserControl
+                    Grid.Column="0"
+                    Grid.Row="0"
+                    Grid.ColumnSpan="2"
+                    Label="Output File"
+                    ButtonClick="SeekOutputFilePath"
+                    Value="{Binding Path=OutputFilePath}"
+                    LabelWidth="{StaticResource LabelWidth}" />
+                <local:FilePathFieldUserControl
+                    Grid.Column="0"
+                    Grid.Row="1"
+                    Grid.ColumnSpan="2"
+                    Label="Metadata File"
+                    LabelWidth="{StaticResource LabelWidth}"
+                    ButtonClick="SeekRecoveryPointFilePath"
+                    Value="{Binding Path=RecoveryPointFilePath}"
+                    IsEnabled="{Binding Path=ShouldUseRecoveryPoints, Mode=OneWay}"
+                    IsButtonEnabled="{Binding Path=CanUserSpecifyRecoveryPointFilePath, Mode=OneWay}" />
+                <Label
+                    Grid.Column="0"
+                    Grid.Row="2"
+                    Width="100" Content="Log Size" />
+                <StackPanel
+                    Grid.Column="1"
+                    Grid.Row="2"
+                    Orientation="Horizontal">
+                    <TextBox
+                        Name="LogSizeTargetTextBox" TextWrapping="Wrap" Height="20" Text="8" Width="47" />
+                    <ComboBox
+                        Name="LogSizeUnitComboBox"
+                        Margin="5"
+                        Width="42"
+                        Height="20"
+                        SelectedIndex="1"
+                        FontSize="10"
+                        SelectedItem="{Binding Path=SelectedUnitOfMeasure, Mode=OneWayToSource}" />
+                </StackPanel>
+                <CheckBox
+                    Grid.Column="1"
+                    Grid.Row="3"
+                    Name="ShouldUseRecoveryPointCheckBox"
+                    Content="Compress using random access feature"
+                    HorizontalAlignment="Left"
+                    IsChecked="{Binding Path=ShouldUseRecoveryPoints}" />
+                <CheckBox
+                    Grid.Column="1"
+                    Grid.Row="4"
+                    IsEnabled="{Binding Path=ShouldUseRecoveryPoints, Mode=OneWay}"
+                    Content="Derive metadata file path from output file"
+                    HorizontalAlignment="Left"
+                    IsChecked="{Binding Path=ShouldDeriveRecoveryPointFilePath}" />
+            </Grid>
+        </Border>
+        <!-- To cause the progress bar to fill the available space, we use a grid instead of stack panel-->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="{Binding Source={StaticResource LabelWidth}}" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Button
+                Grid.Row="0"
+                Margin="5"
+                Content="{Binding Path=BeginCompressionJobButtonLabelOrProgressText}"
+                Click="StartNewCompressionJob_Click"
+                IsEnabled="{Binding Path=IsRunning ,Converter={StaticResource InverseBooleanConverter}}"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch" />
+            <ProgressBar
+                Grid.Column="1"
+                Margin="0,5,5,5"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                IsEnabled="{Binding IsRunning}"
+                Maximum="{Binding TargetNumberOfBytes}"
+                Value="{Binding NumberOfBytesWritten}"
+                />
+            <Button
+                Grid.Column="2"
+                Content="❌"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                IsEnabled="{Binding Path=IsRunning}"
+                Click="CancelCompressionJob_Click"
+                IsCancel="True" />
+        </Grid>
+        <TextBlock HorizontalAlignment="Stretch" Text="{Binding Path=JobStatusDescription}" />
+    </StackPanel>
 </Window>

@@ -26,10 +26,10 @@ public class LogFileCompressionRequestBuilderViewModel : INotifyPropertyChanged
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
-    public void UpdateModel(LogFileCompressionRequestBuilder newModel)
+    private void UpdateModel(LogFileCompressionRequestBuilder newRequestBuilder)
     {
-        var comparison = _compareLogic.Compare(_requestBuilder, newModel);
-        _requestBuilder = newModel;
+        var comparison = _compareLogic.Compare(_requestBuilder, newRequestBuilder);
+        _requestBuilder = newRequestBuilder;
         foreach (var difference in comparison.Differences)
         {
             OnPropertyChanged(difference.PropertyName);

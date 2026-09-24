@@ -11,7 +11,8 @@ namespace ArchiveAccessPointVisualizer;
 /// </summary>
 public partial class MainWindow : Window
 {
-    private LogFileCompressionRequestBuilderViewModel RequestBuilderViewModel => (FindResource("Model") as LogFileCompressionRequestBuilderViewModel)!;
+    private LogFileCompressionRequestBuilderViewModel RequestBuilderViewModel => (FindResource("JobRequestModel") as LogFileCompressionRequestBuilderViewModel)!;
+    private LogFileCompressionJobStatusViewModel JobStatusViewModel => (FindResource("JobStatusModel") as LogFileCompressionJobStatusViewModel)!;
 
     public MainWindow()
     {
@@ -144,10 +145,6 @@ public partial class MainWindow : Window
     //     return new LogFileCompressionJob(outputFilePath, targetLogSizeBytes, Encoding.Default);
     // }
 
-    private void CancelButton_Click(object sender, RoutedEventArgs e)
-    {
-        _logCompressionCancellationTokenSource.Cancel();
-    }
 
     private void SeekOutputFilePath(object sender, RoutedEventArgs e)
     {
@@ -179,5 +176,15 @@ public partial class MainWindow : Window
         {
             RequestBuilderViewModel.UserDefinedRecoveryPointFilePath = dialog.FileName;
         }
+    }
+
+    private void StartNewCompressionJob_Click(object sender, RoutedEventArgs e)
+    {
+        throw new NotImplementedException();
+    }
+
+    private void CancelCompressionJob_Click(object sender, RoutedEventArgs e)
+    {
+        _logCompressionCancellationTokenSource.Cancel();
     }
 }
