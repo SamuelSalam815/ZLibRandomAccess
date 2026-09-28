@@ -1,137 +1,132 @@
-﻿using System.IO.Compression;
-using LogSimulator.Simulator;
-using OxyPlot;
-using OxyPlot.Axes;
-using OxyPlot.Legends;
-using OxyPlot.Series;
-using OxyPlot.Wpf;
-using ZLibBindings.Constants;
+﻿using System.Threading.Tasks.Dataflow;
+using Benchmarking.CompressionRatio.Values;
 
 namespace Benchmarking.CompressionRatio;
 
-class Program
+public class Program
 {
-    private const int SampleCount = 3;
-
-    static void Main(string[] args)
+    //
+    public static async Task Main()
     {
-        var thread = new Thread(() =>
-        {
-            var plot = PlotCompressionRatios();
-            using var pngStream = new MemoryStream();
-            var pngExporter = new PngExporter {Height = 1200, Width = 1600, Resolution = 180d};
-            pngExporter.Export(plot, pngStream);
-            File.WriteAllBytes("output.png", pngStream.ToArray());
-        });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
+        const long gb = 1024 * 1024 * 1024;
+        const string csvOutptutFilePath = "result.csv";
+        const string graphOutputFilePath = "result.png";
+        var requests = CompressionRequest.AllCombinationsOf(
+            [
+                CompressionMethod.GZipUsingZLib,
+                CompressionMethod.GZipUsingZLibWithFullFlushing,
+                CompressionMethod.GZipUsingBaseClassLibrary
+            ],
+            [
+                NormalizedCompressionLevel.Default,
+                NormalizedCompressionLevel.Fastest,
+                NormalizedCompressionLevel.Smallest
+            ],
+            [
+                gb * 1,
+                gb * 4,
+                gb * 8,
+                gb * 16
+            ]
+        )
+        .OrderBy(request => request.NumberOfBytesToCompress)
+        .ToList();
+
+        var cancellationTokenSource = new CancellationTokenSource();
+        var taskCompletionSource = new TaskCompletionSource();
+        await using var csvStream = File.Open(csvOutptutFilePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.Read);
+
+        var userTerminationTask = SetUpTerminationByUserInput(taskCompletionSource, cancellationTokenSource);
+        var csvWriting = SetUpFileWritingTask(csvStream, cancellationTokenSource.Token);
+        var benchmarkingTask = SetUpBenchmarkRunnerTask(requests, csvWriting, cancellationTokenSource);
+        var graphGenerationTask = SetUpGraphGenerationTask(csvWriting.Completion, csvStream, cancellationTokenSource);
+
+        await Task.WhenAll(
+            benchmarkingTask,
+            csvWriting.Completion,
+            graphGenerationTask,
+            userTerminationTask);
     }
 
-    private static PlotModel PlotCompressionRatios()
+    private static Task SetUpGraphGenerationTask(
+        Task resultWritingTask,
+        FileStream outputStream,
+        CancellationTokenSource cancellationTokenSource)
     {
-        var dataSizeAxis = new CategoryAxis
-        {
-            Title = "Uncompressed Data Size",
-            Position = AxisPosition.Left,
-            ItemsSource = new[]
+        return Task.Run(async () =>
             {
-                "512 MB",
-                "1 GB",
-                "2 GB",
-                "4 GB",
-                "8 GB",
-            }
-        };
+                await resultWritingTask;
+                outputStream.Position = 0;
+                Console.WriteLine("Graphing results...");
 
-        long[] inputDataSizes =
-        [
-            DataSize.MegaByte * 512,
-            DataSize.MegaByte * 1024,
-            DataSize.MegaByte * 2048,
-            DataSize.MegaByte * 4096,
-            DataSize.MegaByte * 8192,
-        ];
+                // TODO: make the graphs
+                throw new NotImplementedException();
+            },
+            cancellationTokenSource.Token);
+    }
 
-        CompressionRequest[] compressionRequests =
-        [
-            new SystemGzipCompressionRequest(CompressionLevel.Optimal),
-            // new SystemGzipCompressionRequest(CompressionLevel.SmallestSize),
-            // new SystemGzipCompressionRequest(CompressionLevel.Fastest),
-
-            new ZlibGzipCompressionRequest(ZCompressionLevel.Z_DEFAULT_COMPRESSION),
-            // new ZlibGzipCompressionRequest(ZCompressionLevel.Z_BEST_COMPRESSION),
-            // new ZlibGzipCompressionRequest(ZCompressionLevel.Z_BEST_SPEED),
-
-            new ZlibGzipRecoveryPointCompressionRequest(DataSize.KiloByte, ZCompressionLevel.Z_DEFAULT_COMPRESSION),
-            // new ZlibGzipRecoveryPointCompressionRequest(DataSize.KiloByte, ZCompressionLevel.Z_BEST_COMPRESSION),
-            // new ZlibGzipRecoveryPointCompressionRequest(DataSize.KiloByte, ZCompressionLevel.Z_BEST_SPEED),
-
-            new ZlibGzipRecoveryPointCompressionRequest(DataSize.MegaByte, ZCompressionLevel.Z_DEFAULT_COMPRESSION),
-            // new ZlibGzipRecoveryPointCompressionRequest(DataSize.KiloByte * 8, ZCompressionLevel.Z_BEST_COMPRESSION),
-            // new ZlibGzipRecoveryPointCompressionRequest(DataSize.KiloByte * 8, ZCompressionLevel.Z_BEST_SPEED),
-        ];
-
-        var results = new List<CompressionResult>();
-
-        foreach (var dataSize in inputDataSizes)
-        {
-            foreach (var compressionRequest in compressionRequests)
+    private static Task SetUpBenchmarkRunnerTask(
+        List<CompressionRequest> requests,
+        ActionBlock<CompressionResult> outputWriter,
+        CancellationTokenSource cancellationTokenSource)
+    {
+        var runnerTask = Task.Run(
+            () =>
             {
-                for (var i = 0; i < SampleCount; i++)
+                var runner = new CompressionBenchmarkRunner();
+                foreach (var request in requests)
                 {
-                    Console.WriteLine(
-                        "Running request '{0}' with input size {1:N0} B, sample [{2}/{3}]...",
-                        compressionRequest,
-                        dataSize,
-                        i + 1,
-                        SampleCount);
-                    results.Add(compressionRequest.CalculateCompressedPayloadSize(dataSize));
-                    Console.WriteLine("Done.");
+                    Console.WriteLine($"Running request '{request}'...");
+                    outputWriter.Post(runner.Run(request));
                 }
-            }
-        }
 
-        var plot = new PlotModel
-        {
-            Title =  "Compression Ratio vs Uncompressed Data Size",
-            IsLegendVisible = true,
-            Background = OxyColors.White
-        };
-        plot.Legends.Add(
-            new Legend
-            {
-                LegendPlacement = LegendPlacement.Outside,
-                LegendOrientation = LegendOrientation.Vertical,
-                LegendPosition = LegendPosition.BottomLeft
-            });
-        plot.Axes.Add(
-            new LinearAxis
-            {
-                Title = "Compression Ratio",
-                Position = AxisPosition.Bottom,
-                AbsoluteMinimum = 0,
-                AbsoluteMaximum = 1,
-                Minimum = results.Min(x => x.CompressionRatio),
-            });
-        plot.Axes.Add(dataSizeAxis);
-        foreach (var compressionMethodGroup in results.GroupBy(result => result.CompressionRequest))
-        {
-            var series = new BarSeries
-            {
-                Title = compressionMethodGroup.Key.ToString(),
-                StrokeColor = OxyColors.Black,
-            };
-            var data = compressionMethodGroup
-                .GroupBy(result => result.InputDataSize)
-                .Select(group => (InputDataSize: group.Key,
-                    AvgCompressionRatio: group.Select(x => x.CompressionRatio).Average()))
-                .OrderBy(dataPoint => dataPoint.InputDataSize)
-                .Select(dataPoint => new BarItem() { Value = dataPoint.AvgCompressionRatio });
-            series.Items.AddRange(data);
-
-            plot.Series.Add(series);
-        }
-
-        return plot;
+                outputWriter.Complete();
+            },
+            cancellationTokenSource.Token);
+        return runnerTask;
     }
+
+    private static ActionBlock<CompressionResult> SetUpFileWritingTask(Stream outputStream, CancellationToken token)
+    {
+        using var resultWriter = new CompressionResultCsvWriter(outputStream);
+        ActionBlock<CompressionResult> resultConsumer = new(
+            resultWriter.Write,
+            new ExecutionDataflowBlockOptions { CancellationToken = token });
+        return resultConsumer;
+    }
+
+    private static Task SetUpTerminationByUserInput(
+        TaskCompletionSource taskCompletionSource,
+        CancellationTokenSource cancellationTokenSource)
+    {
+        Console.WriteLine("Enter 'exit' to terminate the process");
+        return Task.Run(
+            async () =>
+            {
+                while (true)
+                {
+                    var readTask = ConsoleReadAsync();
+                    await Task.WhenAny(taskCompletionSource.Task, readTask);
+
+                    if (taskCompletionSource.Task.IsCompleted)
+                    {
+                        return;
+                    }
+
+                    if (!"exit".Equals(await readTask, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        Console.WriteLine("Enter 'exit' to terminate the process");
+                        continue;
+                    }
+
+                    Console.WriteLine("Terminating process...");
+                    await cancellationTokenSource.CancelAsync();
+                    return;
+                }
+            },
+            cancellationTokenSource.Token);
+    }
+
+    // Note this is a bad pattern to repeat elsewhere, but the Console api forces our hand here. Worth further reading?
+    private static Task<string?> ConsoleReadAsync() => Task.Run(Console.ReadLine);
 }

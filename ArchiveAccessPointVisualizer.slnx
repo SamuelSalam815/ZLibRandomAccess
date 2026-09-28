@@ -2,6 +2,7 @@
   <Project Path="ArchiveAccessPointVisualizer/ArchiveAccessPointVisualizer.csproj" />
   <Project Path="ArchiveViewerBackend.Tests/ArchiveViewerBackend.Tests.csproj" />
   <Project Path="ArchiveViewerBackend/ArchiveViewerBackend.csproj" />
+  <Project Path="Benchmarking.CompressionRatio.Tests/Benchmarking.CompressionRatio.Tests.csproj" />
   <Project Path="Benchmarking.CompressionRatio/Benchmarking.CompressionRatio.csproj" />
   <Project Path="Benchmarking.TextSearch.Tests/Benchmarking.TextSearch.Tests.csproj" />
   <Project Path="Benchmarking.TextSearch/Benchmarking.TextSearch.csproj" />
