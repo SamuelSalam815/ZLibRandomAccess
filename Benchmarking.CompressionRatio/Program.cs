@@ -6,13 +6,13 @@ namespace Benchmarking.CompressionRatio;
 
 public class Program
 {
-    private const string CsvOutptutFilePath = "result.csv";
-
-    private const string GraphOutputFilePath = "result.png";
+    private const string CsvOutputFilePath = "result.csv";
+    private const string GraphOutputFilePath = "result.svg";
 
     public static async Task Main()
     {
-        const long gb = 1024 * 1024 * 1024;
+        const long gb = 1024L * 1024 * 1024;
+        const long mb = 1024L * 1024;
         var requests = CompressionRequest.AllCombinationsOf(
                 [
                     CompressionMethod.GZipUsingZLib,
@@ -25,10 +25,10 @@ public class Program
                     NormalizedCompressionLevel.Smallest
                 ],
                 [
-                    gb * 1,
-                    gb * 4,
-                    gb * 8,
-                    gb * 16
+                    mb * 1,
+                    mb * 4,
+                    mb * 8,
+                    mb * 16
                 ]
             )
             .OrderBy(request => request.NumberOfBytesToCompress)
@@ -37,58 +37,93 @@ public class Program
         var cancellationTokenSource = new CancellationTokenSource();
         var taskCompletionSource = new TaskCompletionSource();
 
-        var userTerminationTask = SetUpTerminationByUserInput(taskCompletionSource, cancellationTokenSource);
-        var benchmarkingTask = SetUpBenchmarkTask(requests, taskCompletionSource, cancellationTokenSource.Token);
+        if (!ConfirmOverwrite())
+        {
+            return;
+        }
+
+        var userTerminationTask = ListenForTerminationByUserInputAsync(taskCompletionSource, cancellationTokenSource);
+        var benchmarkingTask = Task.Run(
+            () => RunBenchmark(requests, taskCompletionSource, cancellationTokenSource.Token),
+            cancellationTokenSource.Token);
 
         await Task.WhenAll(
             benchmarkingTask,
             userTerminationTask);
     }
 
-    private static Task SetUpBenchmarkTask(
-        List<CompressionRequest> requests,
-        TaskCompletionSource taskCompletionSource,
-        CancellationToken cancellationToken)
+    private static bool ConfirmOverwrite()
     {
-        return Task.Run(() =>
-            {
-                try
-                {
-                    // await using var csvStream = File.Open(CsvOutputFilePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.Read);
-                    var runner = new CompressionBenchmarkRunner();
-                    List<ICompressionResultExporter> exporters =
-                    [
-                        new FakeCompressionResultExporter("Csv Exporter"),
-                        new FakeCompressionResultExporter("Graph Exporter"),
-                    ];
+        if (!File.Exists(CsvOutputFilePath) && !File.Exists(GraphOutputFilePath))
+        {
+            return true;
+        }
 
-                    foreach (var request in requests)
-                    {
-                        cancellationToken.ThrowIfCancellationRequested();
-                        var result = runner.Run(request, cancellationToken);
-                        foreach (var exporter in exporters)
-                        {
-                            exporter.Accept(result);
-                        }
-                    }
+        Console.WriteLine("Continuing will overwrite files from a previous run! Enter Y/Yes to continue anyway...");
+        var input = Console.ReadLine();
+        if (
+            !"Y".Equals(input, StringComparison.InvariantCultureIgnoreCase) &&
+            !"Yes".Equals(input, StringComparison.InvariantCultureIgnoreCase))
+        {
+            Console.WriteLine("Compression ratio benchmarks will not be run! Exiting...");
+            return false;
+        }
 
-                    foreach (var exporter in exporters)
-                    {
-                        cancellationToken.ThrowIfCancellationRequested();
-                        exporter.Complete();
-                    }
-
-                    taskCompletionSource.SetResult();
-                }
-                catch (OperationCanceledException)
-                {
-                    Console.WriteLine("Cancelled operation!");
-                }
-            },
-            cancellationToken);
+        return true;
     }
 
-    private static Task SetUpTerminationByUserInput(
+    private static void RunBenchmark(
+        List<CompressionRequest> requests,
+        TaskCompletionSource taskCompletionSource,
+        CancellationToken cancellationToken
+    )
+    {
+        try
+        {
+            Thread.Sleep(TimeSpan.FromSeconds(3));
+            using var csvStream = File.Open(
+                CsvOutputFilePath,
+                FileMode.Create,
+                FileAccess.ReadWrite,
+                FileShare.Read);
+            using var graphStream = File.Open(
+                GraphOutputFilePath,
+                FileMode.Create,
+                FileAccess.ReadWrite,
+                FileShare.Read);
+            var runner = new CompressionBenchmarkRunner();
+            List<ICompressionResultExporter> exporters =
+            [
+                new CompressionResultCsvExporter(csvStream),
+                new CompressionResultGraphExporter(graphStream),
+            ];
+
+            foreach (var request in requests)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var result = runner.Run(request, cancellationToken);
+                foreach (var exporter in exporters)
+                {
+                    exporter.Accept(result);
+                }
+            }
+
+            foreach (var exporter in exporters)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                exporter.Complete();
+                exporter.Dispose();
+            }
+
+            taskCompletionSource.SetResult();
+        }
+        catch (OperationCanceledException)
+        {
+            Console.WriteLine("Cancelled operation!");
+        }
+    }
+
+    private static Task ListenForTerminationByUserInputAsync(
         TaskCompletionSource taskCompletionSource,
         CancellationTokenSource userTerminationCancellationTokenSource)
     {
@@ -104,7 +139,7 @@ public class Program
             null,
             userTerminationCancellationTokenSource.Token);
 
-        Console.WriteLine("Enter 'exit' to terminate the process");
+        Console.WriteLine("Enter 'exit' to terminate the benchmark early...");
         return Task.Run(
             async () =>
             {

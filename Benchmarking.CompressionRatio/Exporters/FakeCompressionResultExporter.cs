@@ -13,4 +13,9 @@ public class FakeCompressionResultExporter(string name) : ICompressionResultExpo
     {
         Console.WriteLine($"{nameof(FakeCompressionResultExporter)}.{nameof(Complete)}");
     }
+
+    public void Dispose()
+    {
+        // No resources to release
+    }
 }

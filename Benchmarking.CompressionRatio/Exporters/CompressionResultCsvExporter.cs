@@ -1,28 +1,33 @@
-﻿using Benchmarking.CompressionRatio.Values;
+﻿using System.Globalization;
+using Benchmarking.CompressionRatio.Exporters.CsvHelpers;
+using Benchmarking.CompressionRatio.Values;
+using CsvHelper;
 
 namespace Benchmarking.CompressionRatio.Exporters;
 
-public class CompressionResultCsvExporter : ICompressionResultExporter, IDisposable
+public sealed class CompressionResultCsvExporter : ICompressionResultExporter
 {
-    private readonly Stream outputStream;
+    private readonly CsvWriter _csvWriter;
 
     public CompressionResultCsvExporter(Stream outputStream)
     {
-        // TODO make csv writer and write headers
+        _csvWriter = new CsvWriter(new StreamWriter(outputStream), CultureInfo.InvariantCulture);
+        _csvWriter.WriteHeader<CompressionResultCsvDto>();
     }
 
     public void Accept(CompressionResult result)
     {
-        throw new NotImplementedException();
+        _csvWriter.NextRecord();
+        _csvWriter.WriteRecord(new CompressionResultCsvDto(result));
     }
 
     public void Complete()
     {
-        throw new NotImplementedException();
+        Dispose();
     }
 
     public void Dispose()
     {
-        outputStream.Dispose();
+        _csvWriter.Dispose();
     }
 }

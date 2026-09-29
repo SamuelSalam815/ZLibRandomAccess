@@ -11,14 +11,14 @@ public enum NormalizedCompressionLevel
     Default,
 
     /// <summary>
+    /// Use the level that produces the smallest result.
+    /// This is expected to yield the best compression ratio for a given compression method.
+    /// </summary>
+    Smallest,
+
+    /// <summary>
     /// Use the level that produces the compressed result fastest.
     /// This is expected to yield the worst compression ratio for a given compression method.
     /// </summary>
     Fastest,
-
-    /// <summary>
-    /// Use the level that produces the smallest result.
-    /// This is expected to yield the best compression ratio for a given compression method.
-    /// </summary>
-    Smallest
 }
