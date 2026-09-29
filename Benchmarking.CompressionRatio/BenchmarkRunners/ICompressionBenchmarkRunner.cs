@@ -4,5 +4,5 @@ namespace Benchmarking.CompressionRatio.BenchmarkRunners;
 
 internal interface ICompressionBenchmarkRunner
 {
-    CompressionResult Run(CompressionRequest request);
+    CompressionResult Run(CompressionRequest request, CancellationToken cancellationToken);
 }

@@ -55,7 +55,7 @@ public class Program
                 try
                 {
                     // await using var csvStream = File.Open(CsvOutputFilePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.Read);
-                    var runner = new FakeBenchmarkRunner();
+                    var runner = new CompressionBenchmarkRunner();
                     List<ICompressionResultExporter> exporters =
                     [
                         new FakeCompressionResultExporter("Csv Exporter"),
@@ -65,7 +65,7 @@ public class Program
                     foreach (var request in requests)
                     {
                         cancellationToken.ThrowIfCancellationRequested();
-                        var result = runner.Run(request);
+                        var result = runner.Run(request, cancellationToken);
                         foreach (var exporter in exporters)
                         {
                             exporter.Accept(result);
@@ -124,7 +124,7 @@ public class Program
                         continue;
                     }
 
-                    Console.WriteLine("Terminating process...");
+                    Console.WriteLine("Terminating benchmarks...");
                     await userTerminationCancellationTokenSource.CancelAsync();
                     return;
                 }

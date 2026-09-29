@@ -4,7 +4,7 @@ namespace Benchmarking.CompressionRatio.BenchmarkRunners;
 
 public class FakeBenchmarkRunner : ICompressionBenchmarkRunner
 {
-    public CompressionResult Run(CompressionRequest request)
+    public CompressionResult Run(CompressionRequest request, CancellationToken cancellationToken)
     {
         const int baseSleepTime = 1000;
         const double compressionRatio = 0.95d;
@@ -12,7 +12,7 @@ public class FakeBenchmarkRunner : ICompressionBenchmarkRunner
         var scaledSleepTime = TimeSpan.FromSeconds(1) * (request.NumberOfBytesToCompress / (1024L * 1024L * 1024L));
         var compressedByteCount = (long)(request.NumberOfBytesToCompress * (1 - compressionRatio));
 
-        Thread.Sleep(baseSleepTime + (int)scaledSleepTime.TotalMilliseconds);
+        Task.Delay(baseSleepTime + (int)scaledSleepTime.TotalMilliseconds, cancellationToken).Wait(cancellationToken);
         return new CompressionResult(request, compressedByteCount);
     }
 }
