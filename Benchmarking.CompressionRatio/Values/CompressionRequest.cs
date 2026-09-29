@@ -7,10 +7,13 @@ public sealed record CompressionRequest(
 )
 {
     public static IEnumerable<CompressionRequest> AllCombinationsOf(
-        IEnumerable<CompressionMethod> methods,
-        IEnumerable<NormalizedCompressionLevel> compressionLevels,
-        IEnumerable<long> numberOfBytesToCompress)
+        List<CompressionMethod> methods,
+        List<NormalizedCompressionLevel> compressionLevels,
+        List<long> numberOfBytesToCompress)
     {
-        throw new NotImplementedException();
+        return from compressionMethod in methods
+            from compressionLevel in compressionLevels
+            from size in numberOfBytesToCompress
+            select new CompressionRequest(compressionMethod, compressionLevel, size);
     }
 }

@@ -1,104 +1,109 @@
-﻿using System.Threading.Tasks.Dataflow;
+﻿using Benchmarking.CompressionRatio.BenchmarkRunners;
+using Benchmarking.CompressionRatio.Exporters;
 using Benchmarking.CompressionRatio.Values;
 
 namespace Benchmarking.CompressionRatio;
 
 public class Program
 {
-    //
+    private const string CsvOutptutFilePath = "result.csv";
+
+    private const string GraphOutputFilePath = "result.png";
+
     public static async Task Main()
     {
         const long gb = 1024 * 1024 * 1024;
-        const string csvOutptutFilePath = "result.csv";
-        const string graphOutputFilePath = "result.png";
         var requests = CompressionRequest.AllCombinationsOf(
-            [
-                CompressionMethod.GZipUsingZLib,
-                CompressionMethod.GZipUsingZLibWithFullFlushing,
-                CompressionMethod.GZipUsingBaseClassLibrary
-            ],
-            [
-                NormalizedCompressionLevel.Default,
-                NormalizedCompressionLevel.Fastest,
-                NormalizedCompressionLevel.Smallest
-            ],
-            [
-                gb * 1,
-                gb * 4,
-                gb * 8,
-                gb * 16
-            ]
-        )
-        .OrderBy(request => request.NumberOfBytesToCompress)
-        .ToList();
+                [
+                    CompressionMethod.GZipUsingZLib,
+                    CompressionMethod.GZipUsingZLibWithFullFlushing,
+                    CompressionMethod.GZipUsingBaseClassLibrary
+                ],
+                [
+                    NormalizedCompressionLevel.Default,
+                    NormalizedCompressionLevel.Fastest,
+                    NormalizedCompressionLevel.Smallest
+                ],
+                [
+                    gb * 1,
+                    gb * 4,
+                    gb * 8,
+                    gb * 16
+                ]
+            )
+            .OrderBy(request => request.NumberOfBytesToCompress)
+            .ToList();
 
         var cancellationTokenSource = new CancellationTokenSource();
         var taskCompletionSource = new TaskCompletionSource();
-        await using var csvStream = File.Open(csvOutptutFilePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.Read);
 
         var userTerminationTask = SetUpTerminationByUserInput(taskCompletionSource, cancellationTokenSource);
-        var csvWriting = SetUpFileWritingTask(csvStream, cancellationTokenSource.Token);
-        var benchmarkingTask = SetUpBenchmarkRunnerTask(requests, csvWriting, cancellationTokenSource);
-        var graphGenerationTask = SetUpGraphGenerationTask(csvWriting.Completion, csvStream, cancellationTokenSource);
+        var benchmarkingTask = SetUpBenchmarkTask(requests, taskCompletionSource, cancellationTokenSource.Token);
 
         await Task.WhenAll(
             benchmarkingTask,
-            csvWriting.Completion,
-            graphGenerationTask,
             userTerminationTask);
     }
 
-    private static Task SetUpGraphGenerationTask(
-        Task resultWritingTask,
-        FileStream outputStream,
-        CancellationTokenSource cancellationTokenSource)
-    {
-        return Task.Run(async () =>
-            {
-                await resultWritingTask;
-                outputStream.Position = 0;
-                Console.WriteLine("Graphing results...");
-
-                // TODO: make the graphs
-                throw new NotImplementedException();
-            },
-            cancellationTokenSource.Token);
-    }
-
-    private static Task SetUpBenchmarkRunnerTask(
+    private static Task SetUpBenchmarkTask(
         List<CompressionRequest> requests,
-        ActionBlock<CompressionResult> outputWriter,
-        CancellationTokenSource cancellationTokenSource)
+        TaskCompletionSource taskCompletionSource,
+        CancellationToken cancellationToken)
     {
-        var runnerTask = Task.Run(
-            () =>
+        return Task.Run(() =>
             {
-                var runner = new CompressionBenchmarkRunner();
-                foreach (var request in requests)
+                try
                 {
-                    Console.WriteLine($"Running request '{request}'...");
-                    outputWriter.Post(runner.Run(request));
+                    // await using var csvStream = File.Open(CsvOutputFilePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.Read);
+                    var runner = new FakeBenchmarkRunner();
+                    List<ICompressionResultExporter> exporters =
+                    [
+                        new FakeCompressionResultExporter("Csv Exporter"),
+                        new FakeCompressionResultExporter("Graph Exporter"),
+                    ];
+
+                    foreach (var request in requests)
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        var result = runner.Run(request);
+                        foreach (var exporter in exporters)
+                        {
+                            exporter.Accept(result);
+                        }
+                    }
+
+                    foreach (var exporter in exporters)
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        exporter.Complete();
+                    }
+
+                    taskCompletionSource.SetResult();
                 }
-
-                outputWriter.Complete();
+                catch (OperationCanceledException)
+                {
+                    Console.WriteLine("Cancelled operation!");
+                }
             },
-            cancellationTokenSource.Token);
-        return runnerTask;
-    }
-
-    private static ActionBlock<CompressionResult> SetUpFileWritingTask(Stream outputStream, CancellationToken token)
-    {
-        using var resultWriter = new CompressionResultCsvWriter(outputStream);
-        ActionBlock<CompressionResult> resultConsumer = new(
-            resultWriter.Write,
-            new ExecutionDataflowBlockOptions { CancellationToken = token });
-        return resultConsumer;
+            cancellationToken);
     }
 
     private static Task SetUpTerminationByUserInput(
         TaskCompletionSource taskCompletionSource,
-        CancellationTokenSource cancellationTokenSource)
+        CancellationTokenSource userTerminationCancellationTokenSource)
     {
+        var stopReadingInputOnTaskComplete = new CancellationTokenSource();
+        taskCompletionSource.Task.ContinueWith(
+            (task, _) =>
+            {
+                if (task.IsCompletedSuccessfully)
+                {
+                    stopReadingInputOnTaskComplete.Cancel();
+                }
+            },
+            null,
+            userTerminationCancellationTokenSource.Token);
+
         Console.WriteLine("Enter 'exit' to terminate the process");
         return Task.Run(
             async () =>
@@ -120,11 +125,11 @@ public class Program
                     }
 
                     Console.WriteLine("Terminating process...");
-                    await cancellationTokenSource.CancelAsync();
+                    await userTerminationCancellationTokenSource.CancelAsync();
                     return;
                 }
             },
-            cancellationTokenSource.Token);
+            stopReadingInputOnTaskComplete.Token);
     }
 
     // Note this is a bad pattern to repeat elsewhere, but the Console api forces our hand here. Worth further reading?
