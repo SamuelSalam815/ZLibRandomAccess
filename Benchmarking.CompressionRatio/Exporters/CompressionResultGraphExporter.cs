@@ -1,8 +1,10 @@
 ﻿using Benchmarking.CompressionRatio.Values;
+using Benchmarking.Helpers;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Legends;
 using OxyPlot.Series;
+using CompressionMethod = Benchmarking.CompressionRatio.Values.CompressionMethod;
 
 namespace Benchmarking.CompressionRatio.Exporters;
 
@@ -28,6 +30,18 @@ public sealed class CompressionResultGraphExporter(Stream outputStream) : ICompr
             .GroupBy(x => x.Level)
             .OrderBy(x => x.Key)
             .ToList();
+        // HACK: Migration to Benchmarking.Helpers.BarChartBuilder is unfinished. Bars still need mapping from
+        // CompressionResult (average the ratio per method/level so each combination has one bar). Until then the
+        // hand-rolled PlotModel below is still used.
+        // new BarChartBuilder<CompressionMethod, NormalizedCompressionLevel>(
+        //     new BarChartConfiguration<CompressionMethod, NormalizedCompressionLevel>
+        //     {
+        //         Title = "Compression Methods against Compression Ratios",
+        //         CategoryAxisLabel = "Compression Methods",
+        //         ValueAxisLabel = "Compression Ratio",
+        //         SeriesLabel = "Compression Mode",
+        //     }).Build(_results
+        //     .Select(x => new BarChartBar<CompressionMethod, NormalizedCompressionLevel>()));
         var model = new PlotModel
         {
             Title = "Compression Methods against Compression Ratios",
@@ -83,7 +97,7 @@ public sealed class CompressionResultGraphExporter(Stream outputStream) : ICompr
         model.Axes.Add(categoryAxis);
         model.Axes.Add(valueAxis);
 
-        var exporter = new SvgExporter { Width = 800, Height = 400 };
+        var exporter = new SvgExporter { Width = 1600, Height = 600 };
         exporter.Export(model, outputStream);
     }
 
