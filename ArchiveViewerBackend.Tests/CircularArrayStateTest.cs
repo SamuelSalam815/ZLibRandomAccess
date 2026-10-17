@@ -164,4 +164,69 @@ public class CircularArrayStateTest
         Should.Throw<ArgumentOutOfRangeException>(
             () => _size10CircularArray.Append(11));
     }
+
+    [TestMethod]
+    public void DropZeroItems_FromEmptyArray_DoesNotThrow()
+    {
+        _size10CircularArray.DropFromStart(0).ShouldBe(_size10CircularArray);
+    }
+
+    [TestMethod]
+    public void DropFromEmptyArray_Throws()
+    {
+        Should.Throw<InvalidOperationException>(
+            () => _size10CircularArray.DropFromStart(1));
+    }
+
+    [TestMethod]
+    public void DropFromStart_OutOfRange_Throws()
+    {
+        var threeItems = StateAfter(_size10CircularArray.Append(3));
+
+        Should.Throw<ArgumentOutOfRangeException>(
+            () => threeItems.DropFromStart(-1));
+        Should.Throw<ArgumentOutOfRangeException>(
+            () => threeItems.DropFromStart(4));
+    }
+
+    [TestMethod]
+    public void DropFromStart_MovesStartOffsetAndShrinksLength()
+    {
+        var threeItems = StateAfter(_size10CircularArray.Append(3));
+
+        threeItems
+            .DropFromStart(2)
+            .ShouldBe(
+                _size10CircularArray with
+                {
+                    StartOffset = 2, EndOffset = 3, Length = 1
+                });
+    }
+
+    [TestMethod]
+    public void DropFromStart_WrapsStartOffset()
+    {
+        var startingState = new CircularArrayState(3);
+        var fullAtEnd = StateAfter(
+            StateAfter(startingState.Append(3)).Append(2));
+
+        fullAtEnd
+            .DropFromStart(2)
+            .ShouldBe(
+                startingState with
+                {
+                    StartOffset = 1, EndOffset = 2, Length = 1
+                });
+    }
+
+    [TestMethod]
+    public void DropEverything_LeavesStartAndEndOffsetEqual()
+    {
+        var threeItems = StateAfter(_size10CircularArray.Append(3));
+
+        var dropped = threeItems.DropFromStart(3);
+
+        dropped.Length.ShouldBe(0);
+        dropped.StartOffset.ShouldBe(dropped.EndOffset);
+    }
 }
