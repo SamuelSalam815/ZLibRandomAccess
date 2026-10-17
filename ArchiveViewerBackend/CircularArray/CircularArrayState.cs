@@ -166,6 +166,17 @@ public record CircularArrayState(int BackingArrayCapacity)
     /// capacity. Every write carries the state after the whole prepend, since a half-written
     /// block is not a valid state.
     /// </summary>
+    /// <summary>
+    /// Places a block of <paramref name="itemCount"/> items before the first item, keeping the
+    /// block's order. Yields one <see cref="CircularArrayWrite"/> per contiguous region, from the
+    /// back of the block to the front: the first write takes the last <c>Count</c> items of the
+    /// block, the next write the <c>Count</c> items before those, and so on. Each region is
+    /// adjacent to the items already in the array, so every <see cref="CircularArrayWrite.NewState"/>
+    /// is a valid state with no unwritten gap inside the readable items.
+    /// When the items do not fit, the items at the end are evicted. If the block alone exceeds
+    /// the capacity, only its first items are kept, so the yielded counts add up to at most the
+    /// capacity.
+    /// </summary>
     public IEnumerable<CircularArrayWrite> Prepend(int itemCount)
     {
         ThrowIfSpanOperationPending();
@@ -190,15 +201,21 @@ public record CircularArrayState(int BackingArrayCapacity)
             yield break;
         }
 
-        var next = GetStateAfterPrepending(keptCount);
-        var firstCount = Math.Min(keptCount, BackingArrayCapacity - next.StartOffset);
-        yield return new CircularArrayWrite(next.StartOffset, firstCount, next);
+        var finalStartOffset = GetStateAfterPrepending(keptCount).StartOffset;
+        var countBeforeEndOfBackingArray = Math.Min(keptCount, BackingArrayCapacity - finalStartOffset);
+        var wrappedCount = keptCount - countBeforeEndOfBackingArray;
 
-        var secondCount = keptCount - firstCount;
-        if (secondCount > 0)
+        // The wrapped region is adjacent to the current start, so it goes first. Writing the
+        // region at the end of the backing array first would leave an unwritten gap in between.
+        var state = this;
+        if (wrappedCount > 0)
         {
-            yield return new CircularArrayWrite(0, secondCount, next);
+            state = state.GetStateAfterPrepending(wrappedCount);
+            yield return new CircularArrayWrite(0, wrappedCount, state);
         }
+
+        state = state.GetStateAfterPrepending(countBeforeEndOfBackingArray);
+        yield return new CircularArrayWrite(finalStartOffset, countBeforeEndOfBackingArray, state);
     }
 
     /// <summary>

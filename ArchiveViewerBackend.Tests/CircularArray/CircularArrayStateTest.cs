@@ -322,16 +322,16 @@ public class CircularArrayStateTest
     }
 
     [TestMethod]
-    public void Prepend_WrappingBelowZero_YieldsTwoWritesInBlockOrder()
+    public void Prepend_WrappingBelowZero_WritesTheWrappedRegionFirst()
     {
         var twoItemsFromOffset1 = _size10CircularArray.Append(3).LastState().DropFromStart(1);
-        var expectedState = _size10CircularArray with { StartOffset = 8, EndOffset = 3, Length = 5 };
 
+        // Writing offset 0 first keeps the readable items contiguous after each write.
         twoItemsFromOffset1.Prepend(3)
             .ShouldBe(
             [
-                Write(8, 2, expectedState),
-                Write(0, 1, expectedState),
+                Write(0, 1, _size10CircularArray with { StartOffset = 0, EndOffset = 3, Length = 3 }),
+                Write(8, 2, _size10CircularArray with { StartOffset = 8, EndOffset = 3, Length = 5 }),
             ]);
     }
 
