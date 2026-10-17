@@ -198,11 +198,33 @@ public record CircularArrayState(long BackingArrayCapacity)
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// Yields at most two <see cref="CircularArrayInstruction.Read"/> instructions,
+    /// which together cover the items in order: one up to the end of the backing array and,
+    /// if the items wrap, one from its beginning.
+    /// </summary>
     public IEnumerable<CircularArrayInstruction> Enumerate()
     {
         ThrowIfSpanOperationPending();
 
-        throw new NotImplementedException();
+        return EnumerateCore();
+    }
+
+    private IEnumerable<CircularArrayInstruction> EnumerateCore()
+    {
+        if (Length == 0)
+        {
+            yield break;
+        }
+
+        var firstCount = Math.Min(Length, BackingArrayCapacity - StartOffset);
+        yield return new CircularArrayInstruction.Read(StartOffset, firstCount);
+
+        var secondCount = Length - firstCount;
+        if (secondCount > 0)
+        {
+            yield return new CircularArrayInstruction.Read(0, secondCount);
+        }
     }
 }
 

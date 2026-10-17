@@ -325,4 +325,35 @@ public class CircularArrayStateTest
         Should.Throw<InvalidOperationException>(() => pending.DropFromStart(0));
         Should.Throw<InvalidOperationException>(() => pending.Enumerate());
     }
+
+    [TestMethod]
+    public void Enumerate_EmptyArray_YieldsNothing()
+    {
+        _size10CircularArray.Enumerate().ShouldBeEmpty();
+    }
+
+    [TestMethod]
+    public void Enumerate_YieldsSingleRead_WhenItemsDoNotWrap()
+    {
+        StateAfter(_size10CircularArray.Append(3))
+            .DropFromStart(1)
+            .Enumerate()
+            .ShouldBe([Read(1, 2)]);
+    }
+
+    [TestMethod]
+    public void Enumerate_YieldsTwoReads_WhenItemsWrap()
+    {
+        FullAtEnd(new CircularArrayState(3))
+            .Enumerate()
+            .ShouldBe([Read(2, 1), Read(0, 2)]);
+    }
+
+    [TestMethod]
+    public void Enumerate_FullArrayStartingAtZero_YieldsSingleRead()
+    {
+        StateAfter(_size10CircularArray.Append(10))
+            .Enumerate()
+            .ShouldBe([Read(0, 10)]);
+    }
 }
