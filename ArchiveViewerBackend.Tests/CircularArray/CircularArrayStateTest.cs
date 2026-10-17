@@ -5,6 +5,8 @@ using JetBrains.Annotations;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shouldly;
 
+using ArchiveViewerBackend.CircularArray;
+
 namespace ArchiveViewerBackend.Tests;
 
 [TestClass]
