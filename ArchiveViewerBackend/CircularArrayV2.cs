@@ -91,6 +91,24 @@ public record CircularArrayState(long BackingArrayCapacity)
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// Removes <paramref name="itemCount"/> items from the start of the array.
+    /// Needs no I/O, so it returns the new state rather than instructions.
+    /// </summary>
+    public CircularArrayState DropFromStart(long itemCount)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Removes <paramref name="itemCount"/> items from the end of the array.
+    /// Needs no I/O, so it returns the new state rather than instructions.
+    /// </summary>
+    public CircularArrayState DropFromEnd(long itemCount)
+    {
+        throw new NotImplementedException();
+    }
+
     public IEnumerable<CircularArrayInstruction> Enumerate()
     {
         throw new NotImplementedException();
