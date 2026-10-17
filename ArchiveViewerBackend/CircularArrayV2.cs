@@ -48,22 +48,22 @@ public record CircularArrayState(long BackingArrayCapacity)
             this with { IsSpanOperationPending = true });
     }
 
-    public CircularArrayState EndWriteSpan(long itemsWritten)
+    public CircularArrayState EndWriteSpan(long itemCountWritten)
     {
         if (!IsSpanOperationPending)
         {
             throw new InvalidOperationException("No span operation is pending.");
         }
 
-        if (itemsWritten < 0 || itemsWritten > MaxWriteSpanLength)
+        if (itemCountWritten < 0 || itemCountWritten > MaxWriteSpanLength)
         {
             throw new ArgumentOutOfRangeException(
-                nameof(itemsWritten),
-                itemsWritten,
+                nameof(itemCountWritten),
+                itemCountWritten,
                 $"Expected items written to be in range [0, {MaxWriteSpanLength}]");
         }
 
-        return GetStateAfterAppending(itemsWritten) with
+        return GetStateAfterAppending(itemCountWritten) with
         {
             IsSpanOperationPending = false,
         };
@@ -219,15 +219,10 @@ public record CircularArrayState(long BackingArrayCapacity)
     /// which together cover the items in order: one up to the end of the backing array and,
     /// if the items wrap, one from its beginning.
     /// </summary>
-    public IEnumerable<CircularArrayInstruction> Enumerate()
+    public IEnumerable<CircularArrayInstruction.Read> Enumerate()
     {
         ThrowIfSpanOperationPending();
 
-        return EnumerateCore();
-    }
-
-    private IEnumerable<CircularArrayInstruction> EnumerateCore()
-    {
         if (Length == 0)
         {
             yield break;
@@ -324,10 +319,7 @@ public class CircularArrayV2<T> : IEnumerable<T>
     /// </summary>
     public Span<T> GetNextUsedSpan()
     {
-        var read = _state
-            .Enumerate()
-            .OfType<CircularArrayInstruction.Read>()
-            .FirstOrDefault();
+        var read = _state .Enumerate().FirstOrDefault();
 
         return read is null
             ? Span<T>.Empty
@@ -336,9 +328,7 @@ public class CircularArrayV2<T> : IEnumerable<T>
 
     public IEnumerator<T> GetEnumerator()
     {
-        foreach (var read in _state
-                     .Enumerate()
-                     .OfType<CircularArrayInstruction.Read>())
+        foreach (var read in _state.Enumerate())
         {
             for (var i = 0; i < read.Count; i++)
             {
