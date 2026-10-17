@@ -20,9 +20,9 @@ public class CircularArray<T>(int capacity) : IEnumerable<T>
     {
         foreach (var write in _state.Append(items.Length))
         {
-            var count = write.Count;
-            items[..count].CopyTo(_backingArray.AsSpan(write.OffsetInBackingArray));
-            items = items[count..];
+            items
+                .Slice(write.SourceOffset, write.Count)
+                .CopyTo(_backingArray.AsSpan(write.OffsetInBackingArray));
             _state = write.NewState;
         }
     }

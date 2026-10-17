@@ -1,12 +1,11 @@
 using System;
 using System.Linq;
+using ArchiveViewerBackend.CircularArray;
 using JetBrains.Annotations;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shouldly;
 
-using ArchiveViewerBackend.CircularArray;
-
-namespace ArchiveViewerBackend.Tests;
+namespace ArchiveViewerBackend.Tests.CircularArray;
 
 [TestClass]
 [TestSubject(typeof(CircularArray<>))]

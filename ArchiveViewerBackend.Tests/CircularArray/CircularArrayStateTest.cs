@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ArchiveViewerBackend.CircularArray;
 using JetBrains.Annotations;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shouldly;
 
-using ArchiveViewerBackend.CircularArray;
-
-namespace ArchiveViewerBackend.Tests;
+namespace ArchiveViewerBackend.Tests.CircularArray;
 
 [TestClass]
 [TestSubject(typeof(CircularArrayState))]
@@ -15,9 +14,13 @@ public class CircularArrayStateTest
 {
     private readonly CircularArrayState _size10CircularArray = new(10);
 
-    private static CircularArrayWrite Write(int offset, int count, CircularArrayState state)
+    private static CircularArrayWrite Write(
+        int offset,
+        int count,
+        CircularArrayState state,
+        int sourceOffset = 0)
     {
-        return new CircularArrayWrite(offset, count, state);
+        return new CircularArrayWrite(offset, count, state, sourceOffset);
     }
 
     private static CircularArrayRead Read(int offset, int count)
@@ -70,7 +73,8 @@ public class CircularArrayStateTest
                         startingState with
                         {
                             EndOffset = 2, StartOffset = 2, Length = 3
-                        }),
+                        },
+                        sourceOffset: 1),
                 ]
             );
     }
@@ -116,7 +120,8 @@ public class CircularArrayStateTest
                     startingState with
                     {
                         EndOffset = 1, StartOffset = 1, Length = 3
-                    }),
+                    },
+                    sourceOffset: 1),
             ]);
     }
 
@@ -164,11 +169,12 @@ public class CircularArrayStateTest
         instructions.ShouldBe(
         [
             Write(0, 10, _size10CircularArray with { EndOffset = 0, Length = 10 }),
-            Write(0, 10, _size10CircularArray with { EndOffset = 0, Length = 10 }),
+            Write(0, 10, _size10CircularArray with { EndOffset = 0, Length = 10 }, sourceOffset: 10),
             Write(
                 0,
                 5,
-                _size10CircularArray with { EndOffset = 5, StartOffset = 5, Length = 10 }),
+                _size10CircularArray with { EndOffset = 5, StartOffset = 5, Length = 10 },
+                sourceOffset: 20),
         ]);
     }
 
@@ -330,7 +336,7 @@ public class CircularArrayStateTest
         twoItemsFromOffset1.Prepend(3)
             .ShouldBe(
             [
-                Write(0, 1, _size10CircularArray with { StartOffset = 0, EndOffset = 3, Length = 3 }),
+                Write(0, 1, _size10CircularArray with { StartOffset = 0, EndOffset = 3, Length = 3 }, sourceOffset: 2),
                 Write(8, 2, _size10CircularArray with { StartOffset = 8, EndOffset = 3, Length = 5 }),
             ]);
     }
@@ -358,6 +364,53 @@ public class CircularArrayStateTest
             [
                 Write(0, 3, startingState with { StartOffset = 0, EndOffset = 0, Length = 3 }),
             ]);
+    }
+
+    [TestMethod]
+    public void Prepend_EveryWrite_LeavesNoUnwrittenGapInTheReadableItems()
+    {
+        const int capacity = 5;
+
+        for (var appended = 0; appended <= capacity * 2; appended++)
+        {
+            var filled = new CircularArrayState(capacity)
+                .Append(appended)
+                .Aggregate(new CircularArrayState(capacity), (_, write) => write.NewState);
+
+            for (var dropped = 0; dropped <= filled.Length; dropped++)
+            {
+                var start = filled.DropFromStart(dropped);
+
+                for (var prepended = 1; prepended <= capacity * 2; prepended++)
+                {
+                    AssertNoGapAfterEachWrite(start, prepended);
+                }
+            }
+        }
+    }
+
+    private static void AssertNoGapAfterEachWrite(CircularArrayState start, int prependCount)
+    {
+        var written = new bool[start.BackingArrayCapacity];
+        foreach (var read in start.Enumerate())
+        {
+            Array.Fill(written, true, read.OffsetInBackingArray, read.Count);
+        }
+
+        foreach (var write in start.Prepend(prependCount))
+        {
+            Array.Fill(written, true, write.OffsetInBackingArray, write.Count);
+
+            foreach (var read in write.NewState.Enumerate())
+            {
+                written
+                    .Skip(read.OffsetInBackingArray)
+                    .Take(read.Count)
+                    .ShouldAllBe(
+                        isWritten => isWritten,
+                        $"gap after prepending {prependCount} to {start}");
+            }
+        }
     }
 
     [TestMethod]
