@@ -157,12 +157,26 @@ public class CircularArrayStateTest
     }
 
     [TestMethod]
-    public void AppendOutOfRange_Throws()
+    public void AppendNegative_Throws()
     {
         Should.Throw<ArgumentOutOfRangeException>(
             () => _size10CircularArray.Append(-1));
-        Should.Throw<ArgumentOutOfRangeException>(
-            () => _size10CircularArray.Append(11));
+    }
+
+    [TestMethod]
+    public void AppendMoreThanCapacity_WrapsAroundRepeatedly()
+    {
+        var instructions = _size10CircularArray.Append(25).ToList();
+
+        instructions.ShouldBe(
+        [
+            Write(0, 10, _size10CircularArray with { EndOffset = 0, Length = 10 }),
+            Write(0, 10, _size10CircularArray with { EndOffset = 0, Length = 10 }),
+            Write(
+                0,
+                5,
+                _size10CircularArray with { EndOffset = 5, StartOffset = 5, Length = 10 }),
+        ]);
     }
 
     [TestMethod]

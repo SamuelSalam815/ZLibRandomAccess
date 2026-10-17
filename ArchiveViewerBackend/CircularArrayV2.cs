@@ -90,19 +90,20 @@ public record CircularArrayState(long BackingArrayCapacity)
         BackingArrayCapacity - Length);
 
     /// <summary>
-    /// Yields at most two <see cref="CircularArrayInstruction.Write"/> instructions:
-    /// one up to the end of the backing array and, if the append wraps, one from its beginning.
+    /// Yields one <see cref="CircularArrayInstruction.Write"/> per contiguous region, wrapping
+    /// around the backing array as often as needed. When <paramref name="itemCount"/> exceeds
+    /// the capacity, later writes overwrite earlier ones, so the newest items win.
     /// </summary>
     public IEnumerable<CircularArrayInstruction> Append(long itemCount)
     {
         ThrowIfSpanOperationPending();
 
-        if (itemCount < 0 || itemCount > BackingArrayCapacity)
+        if (itemCount < 0)
         {
             throw new ArgumentOutOfRangeException(
                 nameof(itemCount),
                 itemCount,
-                $"Expected item count to be in range [0, {BackingArrayCapacity}]");
+                "Expected item count to not be negative");
         }
 
         return AppendCore(itemCount);
@@ -110,28 +111,16 @@ public record CircularArrayState(long BackingArrayCapacity)
 
     private IEnumerable<CircularArrayInstruction> AppendCore(long itemCount)
     {
-        if (itemCount == 0)
+        var state = this;
+        var remaining = itemCount;
+        while (remaining > 0)
         {
-            yield break;
+            var count = Math.Min(remaining, BackingArrayCapacity - state.EndOffset);
+            var next = state.GetStateAfterAppending(count);
+            yield return new CircularArrayInstruction.Write(state.EndOffset, count, next);
+            state = next;
+            remaining -= count;
         }
-
-        var firstCount = Math.Min(itemCount, BackingArrayCapacity - EndOffset);
-        var stateAfterFirst = GetStateAfterAppending(firstCount);
-        yield return new CircularArrayInstruction.Write(
-            EndOffset,
-            firstCount,
-            stateAfterFirst);
-
-        var secondCount = itemCount - firstCount;
-        if (secondCount <= 0)
-        {
-            yield break;
-        }
-
-        yield return new CircularArrayInstruction.Write(
-            stateAfterFirst.EndOffset,
-            secondCount,
-            stateAfterFirst.GetStateAfterAppending(secondCount));
     }
 
     private CircularArrayState GetStateAfterAppending(long count)
@@ -223,6 +212,11 @@ public record CircularArrayState(long BackingArrayCapacity)
     {
         ThrowIfSpanOperationPending();
 
+        return EnumerateCore();
+    }
+
+    private IEnumerable<CircularArrayInstruction.Read> EnumerateCore()
+    {
         if (Length == 0)
         {
             yield break;
