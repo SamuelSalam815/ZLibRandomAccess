@@ -25,13 +25,6 @@ public class CircularArrayStateTest
         return new CircularArrayRead(offset, count);
     }
 
-    private static CircularArrayState StateAfter(IEnumerable<CircularArrayWrite> writes)
-    {
-        return writes
-            .Last()
-            .NewState;
-    }
-
     [TestMethod]
     public void LengthShouldBeZero_AfterCreation()
     {
@@ -54,14 +47,14 @@ public class CircularArrayStateTest
     [TestMethod]
     public void AppendIncreasesLength()
     {
-        StateAfter(_size10CircularArray.Append(3)).Length.ShouldBe(3);
+        _size10CircularArray.Append(3).LastState().Length.ShouldBe(3);
     }
 
     [TestMethod]
     public void AppendWrapsAround_IntoTwoWrites()
     {
         var startingState = new CircularArrayState(3);
-        var afterTwo = StateAfter(startingState.Append(2));
+        var afterTwo = startingState.Append(2).LastState();
 
         afterTwo
             .Append(3)
@@ -85,7 +78,7 @@ public class CircularArrayStateTest
     [TestMethod]
     public void AppendToFullArray_MovesStartOffset()
     {
-        var full = StateAfter(_size10CircularArray.Append(10));
+        var full = _size10CircularArray.Append(10).LastState();
 
         full.Append(5)
             .ShouldBe(
@@ -104,10 +97,9 @@ public class CircularArrayStateTest
     public void AppendWrapsAround_OnFullArray()
     {
         var startingState = new CircularArrayState(3);
-        var fullAtEnd = StateAfter(
-            StateAfter(startingState.Append(3)).Append(2));
+        var overfilled = startingState.OverfillBy(2);
 
-        fullAtEnd
+        overfilled
             .Append(2)
             .ShouldBe(
             [
@@ -145,9 +137,9 @@ public class CircularArrayStateTest
     [TestMethod]
     public void AppendDoesNotIncreaseLengthBeyondCapacity()
     {
-        var full = StateAfter(_size10CircularArray.Append(10));
+        var full = _size10CircularArray.Append(10).LastState();
 
-        StateAfter(full.Append(5))
+        full.Append(5).LastState()
             .Length.ShouldBe(_size10CircularArray.BackingArrayCapacity);
     }
 
@@ -196,7 +188,7 @@ public class CircularArrayStateTest
     [TestMethod]
     public void DropFromStart_OutOfRange_Throws()
     {
-        var threeItems = StateAfter(_size10CircularArray.Append(3));
+        var threeItems = _size10CircularArray.Append(3).LastState();
 
         Should.Throw<ArgumentOutOfRangeException>(
             () => threeItems.DropFromStart(-1));
@@ -207,7 +199,7 @@ public class CircularArrayStateTest
     [TestMethod]
     public void DropFromStart_MovesStartOffsetAndShrinksLength()
     {
-        var threeItems = StateAfter(_size10CircularArray.Append(3));
+        var threeItems = _size10CircularArray.Append(3).LastState();
 
         threeItems
             .DropFromStart(2)
@@ -222,10 +214,9 @@ public class CircularArrayStateTest
     public void DropFromStart_WrapsStartOffset()
     {
         var startingState = new CircularArrayState(3);
-        var fullAtEnd = StateAfter(
-            StateAfter(startingState.Append(3)).Append(2));
+        var overfilled = startingState.OverfillBy(2);
 
-        fullAtEnd
+        overfilled
             .DropFromStart(2)
             .ShouldBe(
                 startingState with
@@ -237,7 +228,7 @@ public class CircularArrayStateTest
     [TestMethod]
     public void DropEverything_LeavesStartAndEndOffsetEqual()
     {
-        var threeItems = StateAfter(_size10CircularArray.Append(3));
+        var threeItems = _size10CircularArray.Append(3).LastState();
 
         var dropped = threeItems.DropFromStart(3);
 
@@ -261,7 +252,7 @@ public class CircularArrayStateTest
     [TestMethod]
     public void DropFromEnd_OutOfRange_Throws()
     {
-        var threeItems = StateAfter(_size10CircularArray.Append(3));
+        var threeItems = _size10CircularArray.Append(3).LastState();
 
         Should.Throw<ArgumentOutOfRangeException>(
             () => threeItems.DropFromEnd(-1));
@@ -272,7 +263,7 @@ public class CircularArrayStateTest
     [TestMethod]
     public void DropFromEnd_MovesEndOffsetAndShrinksLength()
     {
-        var threeItems = StateAfter(_size10CircularArray.Append(3));
+        var threeItems = _size10CircularArray.Append(3).LastState();
 
         threeItems
             .DropFromEnd(2)
@@ -288,7 +279,7 @@ public class CircularArrayStateTest
     {
         var startingState = new CircularArrayState(3);
 
-        FullAtEnd(startingState)
+        startingState.OverfillBy(2)
             .DropFromEnd(1)
             .ShouldBe(
                 startingState with
@@ -300,7 +291,7 @@ public class CircularArrayStateTest
     [TestMethod]
     public void DropEverythingFromEnd_LeavesStartAndEndOffsetEqual()
     {
-        var wrapped = FullAtEnd(new CircularArrayState(3));
+        var wrapped = new CircularArrayState(3).OverfillBy(2);
 
         var dropped = wrapped.DropFromEnd(3);
 
@@ -333,7 +324,7 @@ public class CircularArrayStateTest
     [TestMethod]
     public void Prepend_WrappingBelowZero_YieldsTwoWritesInBlockOrder()
     {
-        var twoItemsFromOffset1 = StateAfter(_size10CircularArray.Append(3)).DropFromStart(1);
+        var twoItemsFromOffset1 = _size10CircularArray.Append(3).LastState().DropFromStart(1);
         var expectedState = _size10CircularArray with { StartOffset = 8, EndOffset = 3, Length = 5 };
 
         twoItemsFromOffset1.Prepend(3)
@@ -348,7 +339,7 @@ public class CircularArrayStateTest
     public void Prepend_OnFullArray_EvictsItemsFromTheEnd()
     {
         var startingState = new CircularArrayState(3);
-        var full = StateAfter(startingState.Append(3));
+        var full = startingState.Append(3).LastState();
 
         full.Prepend(1)
             .ShouldBe(
@@ -391,12 +382,6 @@ public class CircularArrayStateTest
             () => pending.Prepend(1));
     }
 
-    private static CircularArrayState FullAtEnd(CircularArrayState emptyState)
-    {
-        // Capacity 3: full, with start and end offsets both at 2.
-        return StateAfter(StateAfter(emptyState.Append(3)).Append(2));
-    }
-
     [TestMethod]
     public void BeginWriteSpan_OnEmptyArray_CoversWholeArray()
     {
@@ -413,7 +398,7 @@ public class CircularArrayStateTest
     public void BeginWriteSpan_StopsAtWrapPoint()
     {
         var startingState = new CircularArrayState(3);
-        var twoItems = StateAfter(startingState.Append(2));
+        var twoItems = startingState.Append(2).LastState();
 
         twoItems
             .BeginWriteSpan()
@@ -423,7 +408,7 @@ public class CircularArrayStateTest
     [TestMethod]
     public void BeginWriteSpan_OnFullArray_IsEmpty()
     {
-        var full = StateAfter(_size10CircularArray.Append(10));
+        var full = _size10CircularArray.Append(10).LastState();
 
         full.BeginWriteSpan().Count.ShouldBe(0);
     }
@@ -451,7 +436,7 @@ public class CircularArrayStateTest
     [TestMethod]
     public void EndWriteSpan_WithZeroItems_OnFullArray_ClearsFlag()
     {
-        var full = StateAfter(_size10CircularArray.Append(10));
+        var full = _size10CircularArray.Append(10).LastState();
 
         full.BeginWriteSpan().NewState.EndWriteSpan(0).ShouldBe(full);
     }
@@ -459,7 +444,7 @@ public class CircularArrayStateTest
     [TestMethod]
     public void EndWriteSpan_OutOfRange_Throws()
     {
-        var pending = FullAtEnd(new CircularArrayState(3))
+        var pending = new CircularArrayState(3).OverfillBy(2)
             .DropFromStart(1)
             .BeginWriteSpan()
             .NewState;
@@ -496,7 +481,7 @@ public class CircularArrayStateTest
     [TestMethod]
     public void Enumerate_YieldsSingleRead_WhenItemsDoNotWrap()
     {
-        StateAfter(_size10CircularArray.Append(3))
+        _size10CircularArray.Append(3).LastState()
             .DropFromStart(1)
             .Enumerate()
             .ShouldBe([Read(1, 2)]);
@@ -505,7 +490,7 @@ public class CircularArrayStateTest
     [TestMethod]
     public void Enumerate_YieldsTwoReads_WhenItemsWrap()
     {
-        FullAtEnd(new CircularArrayState(3))
+        new CircularArrayState(3).OverfillBy(2)
             .Enumerate()
             .ShouldBe([Read(2, 1), Read(0, 2)]);
     }
@@ -513,7 +498,7 @@ public class CircularArrayStateTest
     [TestMethod]
     public void Enumerate_FullArrayStartingAtZero_YieldsSingleRead()
     {
-        StateAfter(_size10CircularArray.Append(10))
+        _size10CircularArray.Append(10).LastState()
             .Enumerate()
             .ShouldBe([Read(0, 10)]);
     }
@@ -521,7 +506,7 @@ public class CircularArrayStateTest
     [TestMethod]
     public void GetOffsetOfItem_MapsIndexThroughStartOffset()
     {
-        var wrapped = FullAtEnd(new CircularArrayState(3));
+        var wrapped = new CircularArrayState(3).OverfillBy(2);
 
         wrapped.GetOffsetOfItem(0).ShouldBe(2);
         wrapped.GetOffsetOfItem(1).ShouldBe(0);
@@ -531,7 +516,7 @@ public class CircularArrayStateTest
     [TestMethod]
     public void GetOffsetOfItem_OutsideLength_Throws()
     {
-        var threeItems = StateAfter(_size10CircularArray.Append(3));
+        var threeItems = _size10CircularArray.Append(3).LastState();
 
         Should.Throw<IndexOutOfRangeException>(() => threeItems.GetOffsetOfItem(-1));
         Should.Throw<IndexOutOfRangeException>(() => threeItems.GetOffsetOfItem(3));
@@ -543,5 +528,22 @@ public class CircularArrayStateTest
         var pending = _size10CircularArray.BeginWriteSpan().NewState;
 
         Should.Throw<InvalidOperationException>(() => pending.GetOffsetOfItem(0));
+    }
+}
+
+internal static class CircularArrayStateTestExtensions
+{
+    public static CircularArrayState LastState(this IEnumerable<CircularArrayWrite> writes)
+    {
+        return writes.Last().NewState;
+    }
+
+    /// <summary>
+    /// Fills the array, then appends <paramref name="itemCount"/> more items,
+    /// so the oldest items are overwritten and the offsets wrap around.
+    /// </summary>
+    public static CircularArrayState OverfillBy(this CircularArrayState state, int itemCount)
+    {
+        return state.Append(state.BackingArrayCapacity + itemCount).LastState();
     }
 }
