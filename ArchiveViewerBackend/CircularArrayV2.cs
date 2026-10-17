@@ -94,7 +94,7 @@ public record CircularArrayState(long BackingArrayCapacity)
     /// around the backing array as often as needed. When <paramref name="itemCount"/> exceeds
     /// the capacity, later writes overwrite earlier ones, so the newest items win.
     /// </summary>
-    public IEnumerable<CircularArrayInstruction> Append(long itemCount)
+    public IEnumerable<CircularArrayInstruction.Write> Append(long itemCount)
     {
         ThrowIfSpanOperationPending();
 
@@ -109,7 +109,7 @@ public record CircularArrayState(long BackingArrayCapacity)
         return AppendCore(itemCount);
     }
 
-    private IEnumerable<CircularArrayInstruction> AppendCore(long itemCount)
+    private IEnumerable<CircularArrayInstruction.Write> AppendCore(long itemCount)
     {
         var state = this;
         var remaining = itemCount;
@@ -255,9 +255,7 @@ public class CircularArrayV2<T> : IEnumerable<T>
 
     public void AddRange(ReadOnlySpan<T> items)
     {
-        foreach (var write in _state
-                     .Append(items.Length)
-                     .OfType<CircularArrayInstruction.Write>())
+        foreach (var write in _state.Append(items.Length))
         {
             var count = (int)write.Count;
             items[..count].CopyTo(_backingArray.AsSpan((int)write.OffsetInBackingArray));
