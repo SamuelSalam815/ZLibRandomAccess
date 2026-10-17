@@ -255,24 +255,14 @@ public class CircularArrayV2<T> : IEnumerable<T>
 
     public void AddRange(ReadOnlySpan<T> items)
     {
-        // Append rejects more than Capacity items at once. Items from earlier
-        // chunks get overwritten by later ones, so the newest Capacity items win.
-        while (!items.IsEmpty)
+        foreach (var write in _state
+                     .Append(items.Length)
+                     .OfType<CircularArrayInstruction.Write>())
         {
-            var chunk = items[..Math.Min(items.Length, Capacity)];
-            items = items[chunk.Length..];
-
-            var remainingInChunk = chunk;
-            foreach (var write in _state
-                         .Append(chunk.Length)
-                         .OfType<CircularArrayInstruction.Write>())
-            {
-                var count = (int)write.Count;
-                remainingInChunk[..count].CopyTo(
-                    _backingArray.AsSpan((int)write.OffsetInBackingArray));
-                remainingInChunk = remainingInChunk[count..];
-                _state = write.NewState;
-            }
+            var count = (int)write.Count;
+            items[..count].CopyTo(_backingArray.AsSpan((int)write.OffsetInBackingArray));
+            items = items[count..];
+            _state = write.NewState;
         }
     }
 
