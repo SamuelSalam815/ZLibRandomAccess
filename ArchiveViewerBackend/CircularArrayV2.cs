@@ -8,7 +8,7 @@ public abstract record CircularArrayInstruction
     {
     }
 
-    public sealed record Write(long OffsetInBackingArray, CircularArrayState NewState) : CircularArrayInstruction;
+    public sealed record Write(long OffsetInBackingArray, long Count, CircularArrayState NewState) : CircularArrayInstruction;
     public sealed record Read(long OffsetInBackingArray, long Count) : CircularArrayInstruction;
 }
 
@@ -18,38 +18,59 @@ public record CircularArrayState(long BackingArrayCapacity)
     public long StartOffset { get; init; } = 0;
     public long EndOffset { get; init; } = 0;
 
+    /// <summary>
+    /// Yields at most two <see cref="CircularArrayInstruction.Write"/> instructions:
+    /// one up to the end of the backing array and, if the append wraps, one from its beginning.
+    /// </summary>
     public IEnumerable<CircularArrayInstruction> Append(long itemCount)
     {
-        return Append(itemCount, this);
+        if (itemCount < 0 || itemCount > BackingArrayCapacity)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(itemCount),
+                itemCount,
+                $"Expected item count to be in range [0, {BackingArrayCapacity}]");
+        }
+
+        return AppendCore(itemCount);
     }
 
-    private static IEnumerable<CircularArrayInstruction> Append(
-        long itemCount,
-        CircularArrayState currentState)
+    private IEnumerable<CircularArrayInstruction> AppendCore(long itemCount)
     {
-        for (var i = 0; i < itemCount; i++)
+        if (itemCount == 0)
         {
-            var newState = currentState.ExpandForwardByOne();
+            yield break;
+        }
 
+        var firstCount = Math.Min(itemCount, BackingArrayCapacity - EndOffset);
+        var stateAfterFirst = ExpandForward(firstCount);
+        yield return new CircularArrayInstruction.Write(
+            EndOffset,
+            firstCount,
+            stateAfterFirst);
+
+        var secondCount = itemCount - firstCount;
+        if (secondCount > 0)
+        {
             yield return new CircularArrayInstruction.Write(
-                currentState.EndOffset,
-                newState);
-
-            currentState = newState;
+                stateAfterFirst.EndOffset,
+                secondCount,
+                stateAfterFirst.ExpandForward(secondCount));
         }
     }
 
-    private CircularArrayState ExpandForwardByOne()
+    private CircularArrayState ExpandForward(long count)
     {
-        var newLength =
-            Length + 1 <= BackingArrayCapacity ? Length + 1 : Length;
+        var newLength = Math.Min(Length + count, BackingArrayCapacity);
 
-        var newStartOffset = Length == BackingArrayCapacity
-                ? PositiveModulo.Fix(StartOffset + 1, BackingArrayCapacity)
-                : StartOffset;
+        // Items that no longer fit push the start offset forward.
+        var overflow = Length + count - newLength;
+        var newStartOffset = PositiveModulo.Fix(
+            StartOffset + overflow,
+            BackingArrayCapacity);
 
         var newEndOffset = PositiveModulo.Fix(
-            EndOffset + 1,
+            EndOffset + count,
             BackingArrayCapacity);
 
         return this with
