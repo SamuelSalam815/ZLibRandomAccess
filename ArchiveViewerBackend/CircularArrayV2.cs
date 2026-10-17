@@ -69,6 +69,22 @@ public record CircularArrayState(long BackingArrayCapacity)
         };
     }
 
+    /// <summary>
+    /// Maps an index among the items (0 is the first item) to its offset in the backing array.
+    /// </summary>
+    public long GetOffsetOfItem(long index)
+    {
+        ThrowIfSpanOperationPending();
+
+        if (index < 0 || index >= Length)
+        {
+            throw new IndexOutOfRangeException(
+                $"Tried to index {index}, but it is not in the allowed range [0, {Length - 1}]");
+        }
+
+        return PositiveModulo.Fix(StartOffset + index, BackingArrayCapacity);
+    }
+
     private long MaxWriteSpanLength => Math.Min(
         BackingArrayCapacity - EndOffset,
         BackingArrayCapacity - Length);
@@ -299,9 +315,36 @@ public class CircularArrayV2<T> : IEnumerable<T>
         _state = _state.EndWriteSpan(count);
     }
 
+    public T this[int index] =>
+        _backingArray[(int)_state.GetOffsetOfItem(index)];
+
+    /// <summary>
+    /// Exposes the first contiguous region of items for reading. If the items wrap around,
+    /// the items after the wrap are not included.
+    /// </summary>
+    public Span<T> GetNextUsedSpan()
+    {
+        var read = _state
+            .Enumerate()
+            .OfType<CircularArrayInstruction.Read>()
+            .FirstOrDefault();
+
+        return read is null
+            ? Span<T>.Empty
+            : _backingArray.AsSpan((int)read.OffsetInBackingArray, (int)read.Count);
+    }
+
     public IEnumerator<T> GetEnumerator()
     {
-        throw new NotImplementedException();
+        foreach (var read in _state
+                     .Enumerate()
+                     .OfType<CircularArrayInstruction.Read>())
+        {
+            for (var i = 0; i < read.Count; i++)
+            {
+                yield return _backingArray[read.OffsetInBackingArray + i];
+            }
+        }
     }
 
     IEnumerator IEnumerable.GetEnumerator()

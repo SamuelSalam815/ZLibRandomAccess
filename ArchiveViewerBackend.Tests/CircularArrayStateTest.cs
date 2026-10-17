@@ -356,4 +356,31 @@ public class CircularArrayStateTest
             .Enumerate()
             .ShouldBe([Read(0, 10)]);
     }
+
+    [TestMethod]
+    public void GetOffsetOfItem_MapsIndexThroughStartOffset()
+    {
+        var wrapped = FullAtEnd(new CircularArrayState(3));
+
+        wrapped.GetOffsetOfItem(0).ShouldBe(2);
+        wrapped.GetOffsetOfItem(1).ShouldBe(0);
+        wrapped.GetOffsetOfItem(2).ShouldBe(1);
+    }
+
+    [TestMethod]
+    public void GetOffsetOfItem_OutsideLength_Throws()
+    {
+        var threeItems = StateAfter(_size10CircularArray.Append(3));
+
+        Should.Throw<IndexOutOfRangeException>(() => threeItems.GetOffsetOfItem(-1));
+        Should.Throw<IndexOutOfRangeException>(() => threeItems.GetOffsetOfItem(3));
+    }
+
+    [TestMethod]
+    public void GetOffsetOfItem_Throws_WhileSpanOperationPending()
+    {
+        var pending = _size10CircularArray.BeginWriteSpan().NewState;
+
+        Should.Throw<InvalidOperationException>(() => pending.GetOffsetOfItem(0));
+    }
 }
