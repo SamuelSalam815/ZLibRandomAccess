@@ -119,6 +119,19 @@ public record CircularArrayState(long BackingArrayCapacity)
 
 public class CircularArrayV2<T> : IEnumerable<T>
 {
+    private readonly T[] _backingArray;
+    private CircularArrayState _state;
+
+    public CircularArrayV2(int capacity)
+    {
+        _backingArray = new T[capacity];
+        _state = new CircularArrayState(capacity);
+    }
+
+    public int Capacity => _backingArray.Length;
+
+    public int Length => (int)_state.Length;
+
     public IEnumerator<T> GetEnumerator()
     {
         throw new NotImplementedException();
