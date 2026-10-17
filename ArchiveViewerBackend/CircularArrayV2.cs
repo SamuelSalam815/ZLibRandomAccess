@@ -109,6 +109,8 @@ public record CircularArrayState(int BackingArrayCapacity)
         return AppendCore(itemCount);
     }
 
+    // Split from Append because an iterator body only runs on the first MoveNext.
+    // Append validates eagerly so a bad call or a pending span throws at the call site.
     private IEnumerable<CircularArrayInstruction.Write> AppendCore(int itemCount)
     {
         var state = this;
@@ -215,6 +217,7 @@ public record CircularArrayState(int BackingArrayCapacity)
         return EnumerateCore();
     }
 
+    // Split from Enumerate for the same reason as AppendCore: validate eagerly, iterate lazily.
     private IEnumerable<CircularArrayInstruction.Read> EnumerateCore()
     {
         if (Length == 0)
