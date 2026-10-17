@@ -190,7 +190,31 @@ public record CircularArrayState(int BackingArrayCapacity)
     {
         ThrowIfSpanOperationPending();
 
-        throw new NotImplementedException();
+        if (itemCount == 0)
+        {
+            return this;
+        }
+
+        if (Length == 0)
+        {
+            throw new InvalidOperationException("Cannot drop items from an empty circular array!");
+        }
+
+        if (itemCount < 0 || itemCount > Length)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(itemCount),
+                itemCount,
+                $"Expected drop count to be in range [0, {Length}]");
+        }
+
+        return this with
+        {
+            Length = Length - itemCount,
+            EndOffset = PositiveModulo.Fix(
+                EndOffset - itemCount,
+                BackingArrayCapacity),
+        };
     }
 
     /// <summary>

@@ -245,6 +245,78 @@ public class CircularArrayStateTest
         dropped.StartOffset.ShouldBe(dropped.EndOffset);
     }
 
+    [TestMethod]
+    public void DropZeroItemsFromEnd_FromEmptyArray_DoesNotThrow()
+    {
+        _size10CircularArray.DropFromEnd(0).ShouldBe(_size10CircularArray);
+    }
+
+    [TestMethod]
+    public void DropFromEnd_OnEmptyArray_Throws()
+    {
+        Should.Throw<InvalidOperationException>(
+            () => _size10CircularArray.DropFromEnd(1));
+    }
+
+    [TestMethod]
+    public void DropFromEnd_OutOfRange_Throws()
+    {
+        var threeItems = StateAfter(_size10CircularArray.Append(3));
+
+        Should.Throw<ArgumentOutOfRangeException>(
+            () => threeItems.DropFromEnd(-1));
+        Should.Throw<ArgumentOutOfRangeException>(
+            () => threeItems.DropFromEnd(4));
+    }
+
+    [TestMethod]
+    public void DropFromEnd_MovesEndOffsetAndShrinksLength()
+    {
+        var threeItems = StateAfter(_size10CircularArray.Append(3));
+
+        threeItems
+            .DropFromEnd(2)
+            .ShouldBe(
+                _size10CircularArray with
+                {
+                    StartOffset = 0, EndOffset = 1, Length = 1
+                });
+    }
+
+    [TestMethod]
+    public void DropFromEnd_WrapsEndOffset()
+    {
+        var startingState = new CircularArrayState(3);
+
+        FullAtEnd(startingState)
+            .DropFromEnd(1)
+            .ShouldBe(
+                startingState with
+                {
+                    StartOffset = 2, EndOffset = 1, Length = 2
+                });
+    }
+
+    [TestMethod]
+    public void DropEverythingFromEnd_LeavesStartAndEndOffsetEqual()
+    {
+        var wrapped = FullAtEnd(new CircularArrayState(3));
+
+        var dropped = wrapped.DropFromEnd(3);
+
+        dropped.Length.ShouldBe(0);
+        dropped.EndOffset.ShouldBe(dropped.StartOffset);
+    }
+
+    [TestMethod]
+    public void DropFromEnd_WhileSpanPending_Throws()
+    {
+        var pending = _size10CircularArray.BeginWriteSpan().NewState;
+
+        Should.Throw<InvalidOperationException>(
+            () => pending.DropFromEnd(0));
+    }
+
     private static CircularArrayState FullAtEnd(CircularArrayState emptyState)
     {
         // Capacity 3: full, with start and end offsets both at 2.
