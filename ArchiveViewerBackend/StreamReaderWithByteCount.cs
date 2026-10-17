@@ -7,8 +7,8 @@ namespace ArchiveViewerBackend;
 public class StreamReaderWithByteCount : TextReader
 {
 
-    private readonly CircularArrayV2<byte> _byteBuffer;
-    private readonly CircularArrayV2<char> _characterBuffer;
+    private readonly CircularArray<byte> _byteBuffer;
+    private readonly CircularArray<char> _characterBuffer;
     private readonly Stream _stream;
     private readonly Encoding _encoding;
     private readonly Decoder _decoder;
@@ -22,8 +22,8 @@ public class StreamReaderWithByteCount : TextReader
 
     public StreamReaderWithByteCount(Stream stream, Encoding encoding, int bufferSize = 1024, bool leaveOpen = false)
     {
-        _byteBuffer = new CircularArrayV2<byte>(bufferSize);
-        _characterBuffer = new CircularArrayV2<char>(bufferSize);
+        _byteBuffer = new CircularArray<byte>(bufferSize);
+        _characterBuffer = new CircularArray<char>(bufferSize);
         _stream = stream;
         _leaveInnerStreamOpen = leaveOpen;
         _encoding = encoding;

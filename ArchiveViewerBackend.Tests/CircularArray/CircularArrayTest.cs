@@ -9,15 +9,15 @@ using ArchiveViewerBackend.CircularArray;
 namespace ArchiveViewerBackend.Tests;
 
 [TestClass]
-[TestSubject(typeof(CircularArrayV2<>))]
-public class CircularArrayV2Test
+[TestSubject(typeof(CircularArray<>))]
+public class CircularArrayTest
 {
-    private static CircularArrayV2<int> CreateTestArray() => new(3);
+    private static CircularArray<int> CreateTestArray() => new(3);
 
     [TestMethod]
     public void Capacity_ShouldGetPassedThrough()
     {
-        new CircularArrayV2<int>(1337).Capacity.ShouldBe(1337);
+        new CircularArray<int>(1337).Capacity.ShouldBe(1337);
     }
 
     [TestMethod]
@@ -138,7 +138,7 @@ public class CircularArrayV2Test
     [TestMethod]
     public void AddingItems_MutatesTheArray()
     {
-        var sut = new CircularArrayV2<int>(5) { 3 };
+        var sut = new CircularArray<int>(5) { 3 };
         sut.First().ShouldBe(3);
     }
 

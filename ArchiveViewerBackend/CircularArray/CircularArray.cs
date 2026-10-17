@@ -2,7 +2,7 @@ using System.Collections;
 
 namespace ArchiveViewerBackend.CircularArray;
 
-public class CircularArrayV2<T>(int capacity) : IEnumerable<T>
+public class CircularArray<T>(int capacity) : IEnumerable<T>
 {
     private readonly T[] _backingArray = new T[capacity];
     private CircularArrayState _state = new(capacity);
