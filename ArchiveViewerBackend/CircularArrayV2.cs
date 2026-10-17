@@ -43,23 +43,25 @@ public record CircularArrayState(long BackingArrayCapacity)
         }
 
         var firstCount = Math.Min(itemCount, BackingArrayCapacity - EndOffset);
-        var stateAfterFirst = ExpandForward(firstCount);
+        var stateAfterFirst = GetStateAfterAppending(firstCount);
         yield return new CircularArrayInstruction.Write(
             EndOffset,
             firstCount,
             stateAfterFirst);
 
         var secondCount = itemCount - firstCount;
-        if (secondCount > 0)
+        if (secondCount <= 0)
         {
-            yield return new CircularArrayInstruction.Write(
-                stateAfterFirst.EndOffset,
-                secondCount,
-                stateAfterFirst.ExpandForward(secondCount));
+            yield break;
         }
+
+        yield return new CircularArrayInstruction.Write(
+            stateAfterFirst.EndOffset,
+            secondCount,
+            stateAfterFirst.GetStateAfterAppending(secondCount));
     }
 
-    private CircularArrayState ExpandForward(long count)
+    private CircularArrayState GetStateAfterAppending(long count)
     {
         var newLength = Math.Min(Length + count, BackingArrayCapacity);
 
@@ -81,7 +83,7 @@ public record CircularArrayState(long BackingArrayCapacity)
         };
     }
 
-    private CircularArrayState ExpandBackwardsByOne()
+    private CircularArrayState GetStateAfterPrepending(long count)
     {
         throw new NotImplementedException();
     }
