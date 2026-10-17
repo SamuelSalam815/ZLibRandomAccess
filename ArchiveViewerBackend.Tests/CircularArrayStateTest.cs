@@ -229,4 +229,100 @@ public class CircularArrayStateTest
         dropped.Length.ShouldBe(0);
         dropped.StartOffset.ShouldBe(dropped.EndOffset);
     }
+
+    private static CircularArrayState FullAtEnd(CircularArrayState emptyState)
+    {
+        // Capacity 3: full, with start and end offsets both at 2.
+        return StateAfter(StateAfter(emptyState.Append(3)).Append(2));
+    }
+
+    [TestMethod]
+    public void BeginWriteSpan_OnEmptyArray_CoversWholeArray()
+    {
+        _size10CircularArray
+            .BeginWriteSpan()
+            .ShouldBe(
+                Write(
+                    0,
+                    10,
+                    _size10CircularArray with { IsSpanOperationPending = true }));
+    }
+
+    [TestMethod]
+    public void BeginWriteSpan_StopsAtWrapPoint()
+    {
+        var startingState = new CircularArrayState(3);
+        var twoItems = StateAfter(startingState.Append(2));
+
+        twoItems
+            .BeginWriteSpan()
+            .ShouldBe(Write(2, 1, twoItems with { IsSpanOperationPending = true }));
+    }
+
+    [TestMethod]
+    public void BeginWriteSpan_OnFullArray_IsEmpty()
+    {
+        var full = StateAfter(_size10CircularArray.Append(10));
+
+        full.BeginWriteSpan().Count.ShouldBe(0);
+    }
+
+    [TestMethod]
+    public void EndWriteSpan_AppendsReportedItemsAndClearsFlag()
+    {
+        _size10CircularArray
+            .BeginWriteSpan()
+            .NewState
+            .EndWriteSpan(4)
+            .ShouldBe(_size10CircularArray with { EndOffset = 4, Length = 4 });
+    }
+
+    [TestMethod]
+    public void EndWriteSpan_CanFillTheArray()
+    {
+        _size10CircularArray
+            .BeginWriteSpan()
+            .NewState
+            .EndWriteSpan(10)
+            .ShouldBe(_size10CircularArray with { EndOffset = 0, Length = 10 });
+    }
+
+    [TestMethod]
+    public void EndWriteSpan_WithZeroItems_OnFullArray_ClearsFlag()
+    {
+        var full = StateAfter(_size10CircularArray.Append(10));
+
+        full.BeginWriteSpan().NewState.EndWriteSpan(0).ShouldBe(full);
+    }
+
+    [TestMethod]
+    public void EndWriteSpan_OutOfRange_Throws()
+    {
+        var pending = FullAtEnd(new CircularArrayState(3))
+            .DropFromStart(1)
+            .BeginWriteSpan()
+            .NewState;
+
+        // One item fits before the wrap point, so 2 is already too many.
+        Should.Throw<ArgumentOutOfRangeException>(() => pending.EndWriteSpan(-1));
+        Should.Throw<ArgumentOutOfRangeException>(() => pending.EndWriteSpan(2));
+    }
+
+    [TestMethod]
+    public void EndWriteSpan_WithNothingPending_Throws()
+    {
+        Should.Throw<InvalidOperationException>(
+            () => _size10CircularArray.EndWriteSpan(0));
+    }
+
+    [TestMethod]
+    public void OperationsOtherThanEndWriteSpan_Throw_WhileSpanOperationPending()
+    {
+        var pending = _size10CircularArray.BeginWriteSpan().NewState;
+
+        Should.Throw<InvalidOperationException>(() => pending.BeginWriteSpan());
+        Should.Throw<InvalidOperationException>(() => pending.Append(1));
+        Should.Throw<InvalidOperationException>(() => pending.DropFromStart(0));
+        Should.Throw<InvalidOperationException>(() => pending.Enumerate());
+    }
 }

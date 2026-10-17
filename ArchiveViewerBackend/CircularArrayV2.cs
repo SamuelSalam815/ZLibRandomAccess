@@ -19,11 +19,68 @@ public record CircularArrayState(long BackingArrayCapacity)
     public long EndOffset { get; init; } = 0;
 
     /// <summary>
+    /// True between <see cref="BeginWriteSpan"/> and <see cref="EndWriteSpan"/>.
+    /// While a span operation is pending, only <see cref="EndWriteSpan"/> is allowed.
+    /// </summary>
+    public bool IsSpanOperationPending { get; init; } = false;
+
+    private void ThrowIfSpanOperationPending()
+    {
+        if (IsSpanOperationPending)
+        {
+            throw new InvalidOperationException(
+                "A span operation is pending. Report the items written to it first.");
+        }
+    }
+
+    /// <summary>
+    /// Starts a span operation on the next contiguous unused region, which is
+    /// where the next appended items would go. The caller writes into that region
+    /// and then calls <see cref="EndWriteSpan"/> with the number of items written.
+    /// </summary>
+    public CircularArrayInstruction.Write BeginWriteSpan()
+    {
+        ThrowIfSpanOperationPending();
+
+        return new CircularArrayInstruction.Write(
+            EndOffset,
+            MaxWriteSpanLength,
+            this with { IsSpanOperationPending = true });
+    }
+
+    public CircularArrayState EndWriteSpan(long itemsWritten)
+    {
+        if (!IsSpanOperationPending)
+        {
+            throw new InvalidOperationException("No span operation is pending.");
+        }
+
+        if (itemsWritten < 0 || itemsWritten > MaxWriteSpanLength)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(itemsWritten),
+                itemsWritten,
+                $"Expected items written to be in range [0, {MaxWriteSpanLength}]");
+        }
+
+        return GetStateAfterAppending(itemsWritten) with
+        {
+            IsSpanOperationPending = false,
+        };
+    }
+
+    private long MaxWriteSpanLength => Math.Min(
+        BackingArrayCapacity - EndOffset,
+        BackingArrayCapacity - Length);
+
+    /// <summary>
     /// Yields at most two <see cref="CircularArrayInstruction.Write"/> instructions:
     /// one up to the end of the backing array and, if the append wraps, one from its beginning.
     /// </summary>
     public IEnumerable<CircularArrayInstruction> Append(long itemCount)
     {
+        ThrowIfSpanOperationPending();
+
         if (itemCount < 0 || itemCount > BackingArrayCapacity)
         {
             throw new ArgumentOutOfRangeException(
@@ -90,6 +147,8 @@ public record CircularArrayState(long BackingArrayCapacity)
 
     public IEnumerable<CircularArrayInstruction> Prepend(long itemCount)
     {
+        ThrowIfSpanOperationPending();
+
         throw new NotImplementedException();
     }
 
@@ -99,6 +158,8 @@ public record CircularArrayState(long BackingArrayCapacity)
     /// </summary>
     public CircularArrayState DropFromStart(long itemCount)
     {
+        ThrowIfSpanOperationPending();
+
         if (itemCount == 0)
         {
             return this;
@@ -132,11 +193,15 @@ public record CircularArrayState(long BackingArrayCapacity)
     /// </summary>
     public CircularArrayState DropFromEnd(long itemCount)
     {
+        ThrowIfSpanOperationPending();
+
         throw new NotImplementedException();
     }
 
     public IEnumerable<CircularArrayInstruction> Enumerate()
     {
+        ThrowIfSpanOperationPending();
+
         throw new NotImplementedException();
     }
 }
