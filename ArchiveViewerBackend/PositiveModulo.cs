@@ -10,4 +10,10 @@ public static class PositiveModulo
         var newValue = value % @base;
         return newValue >= 0 ? newValue : newValue + @base;
     }
+
+    public static int Fix(int value, int @base)
+    {
+        var newValue = value % @base;
+        return newValue >= 0 ? newValue : newValue + @base;
+    }
 }

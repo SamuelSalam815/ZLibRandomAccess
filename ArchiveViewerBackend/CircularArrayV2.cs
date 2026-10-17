@@ -8,15 +8,15 @@ public abstract record CircularArrayInstruction
     {
     }
 
-    public sealed record Write(long OffsetInBackingArray, long Count, CircularArrayState NewState) : CircularArrayInstruction;
-    public sealed record Read(long OffsetInBackingArray, long Count) : CircularArrayInstruction;
+    public sealed record Write(int OffsetInBackingArray, int Count, CircularArrayState NewState) : CircularArrayInstruction;
+    public sealed record Read(int OffsetInBackingArray, int Count) : CircularArrayInstruction;
 }
 
-public record CircularArrayState(long BackingArrayCapacity)
+public record CircularArrayState(int BackingArrayCapacity)
 {
-    public long Length { get; init; } = 0;
-    public long StartOffset { get; init; } = 0;
-    public long EndOffset { get; init; } = 0;
+    public int Length { get; init; } = 0;
+    public int StartOffset { get; init; } = 0;
+    public int EndOffset { get; init; } = 0;
 
     /// <summary>
     /// True between <see cref="BeginWriteSpan"/> and <see cref="EndWriteSpan"/>.
@@ -48,7 +48,7 @@ public record CircularArrayState(long BackingArrayCapacity)
             this with { IsSpanOperationPending = true });
     }
 
-    public CircularArrayState EndWriteSpan(long itemCountWritten)
+    public CircularArrayState EndWriteSpan(int itemCountWritten)
     {
         if (!IsSpanOperationPending)
         {
@@ -72,7 +72,7 @@ public record CircularArrayState(long BackingArrayCapacity)
     /// <summary>
     /// Maps an index among the items (0 is the first item) to its offset in the backing array.
     /// </summary>
-    public long GetOffsetOfItem(long index)
+    public int GetOffsetOfItem(int index)
     {
         ThrowIfSpanOperationPending();
 
@@ -85,7 +85,7 @@ public record CircularArrayState(long BackingArrayCapacity)
         return PositiveModulo.Fix(StartOffset + index, BackingArrayCapacity);
     }
 
-    private long MaxWriteSpanLength => Math.Min(
+    private int MaxWriteSpanLength => Math.Min(
         BackingArrayCapacity - EndOffset,
         BackingArrayCapacity - Length);
 
@@ -94,7 +94,7 @@ public record CircularArrayState(long BackingArrayCapacity)
     /// around the backing array as often as needed. When <paramref name="itemCount"/> exceeds
     /// the capacity, later writes overwrite earlier ones, so the newest items win.
     /// </summary>
-    public IEnumerable<CircularArrayInstruction.Write> Append(long itemCount)
+    public IEnumerable<CircularArrayInstruction.Write> Append(int itemCount)
     {
         ThrowIfSpanOperationPending();
 
@@ -109,7 +109,7 @@ public record CircularArrayState(long BackingArrayCapacity)
         return AppendCore(itemCount);
     }
 
-    private IEnumerable<CircularArrayInstruction.Write> AppendCore(long itemCount)
+    private IEnumerable<CircularArrayInstruction.Write> AppendCore(int itemCount)
     {
         var state = this;
         var remaining = itemCount;
@@ -123,7 +123,7 @@ public record CircularArrayState(long BackingArrayCapacity)
         }
     }
 
-    private CircularArrayState GetStateAfterAppending(long count)
+    private CircularArrayState GetStateAfterAppending(int count)
     {
         var newLength = Math.Min(Length + count, BackingArrayCapacity);
 
@@ -145,12 +145,12 @@ public record CircularArrayState(long BackingArrayCapacity)
         };
     }
 
-    private CircularArrayState GetStateAfterPrepending(long count)
+    private CircularArrayState GetStateAfterPrepending(int count)
     {
         throw new NotImplementedException();
     }
 
-    public IEnumerable<CircularArrayInstruction> Prepend(long itemCount)
+    public IEnumerable<CircularArrayInstruction> Prepend(int itemCount)
     {
         ThrowIfSpanOperationPending();
 
@@ -161,7 +161,7 @@ public record CircularArrayState(long BackingArrayCapacity)
     /// Removes <paramref name="itemCount"/> items from the start of the array.
     /// Needs no I/O, so it returns the new state rather than instructions.
     /// </summary>
-    public CircularArrayState DropFromStart(long itemCount)
+    public CircularArrayState DropFromStart(int itemCount)
     {
         ThrowIfSpanOperationPending();
 
@@ -196,7 +196,7 @@ public record CircularArrayState(long BackingArrayCapacity)
     /// Removes <paramref name="itemCount"/> items from the end of the array.
     /// Needs no I/O, so it returns the new state rather than instructions.
     /// </summary>
-    public CircularArrayState DropFromEnd(long itemCount)
+    public CircularArrayState DropFromEnd(int itemCount)
     {
         ThrowIfSpanOperationPending();
 
@@ -246,7 +246,7 @@ public class CircularArrayV2<T> : IEnumerable<T>
 
     public int Capacity => _backingArray.Length;
 
-    public int Length => (int)_state.Length;
+    public int Length => _state.Length;
 
     public void Add(T item)
     {
@@ -257,8 +257,8 @@ public class CircularArrayV2<T> : IEnumerable<T>
     {
         foreach (var write in _state.Append(items.Length))
         {
-            var count = (int)write.Count;
-            items[..count].CopyTo(_backingArray.AsSpan((int)write.OffsetInBackingArray));
+            var count = write.Count;
+            items[..count].CopyTo(_backingArray.AsSpan(write.OffsetInBackingArray));
             items = items[count..];
             _state = write.NewState;
         }
@@ -279,8 +279,8 @@ public class CircularArrayV2<T> : IEnumerable<T>
         var write = _state.BeginWriteSpan();
         _state = write.NewState;
         return _backingArray.AsSpan(
-            (int)write.OffsetInBackingArray,
-            (int)write.Count);
+            write.OffsetInBackingArray,
+            write.Count);
     }
 
     /// <summary>
@@ -293,7 +293,7 @@ public class CircularArrayV2<T> : IEnumerable<T>
     }
 
     public T this[int index] =>
-        _backingArray[(int)_state.GetOffsetOfItem(index)];
+        _backingArray[_state.GetOffsetOfItem(index)];
 
     /// <summary>
     /// Exposes the first contiguous region of items for reading. If the items wrap around,
@@ -301,11 +301,11 @@ public class CircularArrayV2<T> : IEnumerable<T>
     /// </summary>
     public Span<T> GetNextUsedSpan()
     {
-        var read = _state .Enumerate().FirstOrDefault();
+        var read = _state.Enumerate().FirstOrDefault();
 
         return read is null
             ? Span<T>.Empty
-            : _backingArray.AsSpan((int)read.OffsetInBackingArray, (int)read.Count);
+            : _backingArray.AsSpan(read.OffsetInBackingArray, read.Count);
     }
 
     public IEnumerator<T> GetEnumerator()

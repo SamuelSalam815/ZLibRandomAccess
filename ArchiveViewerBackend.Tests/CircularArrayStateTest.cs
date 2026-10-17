@@ -13,12 +13,12 @@ public class CircularArrayStateTest
 {
     private readonly CircularArrayState _size10CircularArray = new(10);
 
-    private static CircularArrayInstruction.Write Write(long offset, long count, CircularArrayState state)
+    private static CircularArrayInstruction.Write Write(int offset, int count, CircularArrayState state)
     {
         return new CircularArrayInstruction.Write(offset, count, state);
     }
 
-    private static CircularArrayInstruction.Read Read(long offset, long count)
+    private static CircularArrayInstruction.Read Read(int offset, int count)
     {
         return new CircularArrayInstruction.Read(offset, count);
     }
