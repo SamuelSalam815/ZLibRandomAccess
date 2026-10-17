@@ -5,8 +5,8 @@ namespace ArchiveViewerBackend;
 public class StreamReaderWithByteCount : TextReader
 {
 
-    private readonly CircularArray<byte> _byteBuffer;
-    private readonly CircularArray<char> _characterBuffer;
+    private readonly CircularArrayV2<byte> _byteBuffer;
+    private readonly CircularArrayV2<char> _characterBuffer;
     private readonly Stream _stream;
     private readonly Encoding _encoding;
     private readonly Decoder _decoder;
@@ -20,8 +20,8 @@ public class StreamReaderWithByteCount : TextReader
 
     public StreamReaderWithByteCount(Stream stream, Encoding encoding, int bufferSize = 1024, bool leaveOpen = false)
     {
-        _byteBuffer = new CircularArray<byte>(bufferSize);
-        _characterBuffer = new CircularArray<char>(bufferSize);
+        _byteBuffer = new CircularArrayV2<byte>(bufferSize);
+        _characterBuffer = new CircularArrayV2<char>(bufferSize);
         _stream = stream;
         _leaveInnerStreamOpen = leaveOpen;
         _encoding = encoding;
@@ -48,9 +48,9 @@ public class StreamReaderWithByteCount : TextReader
 
         while (_byteBuffer.Length < _byteBuffer.Capacity)
         {
-            var byteSpan = _byteBuffer.GetNextUnusedSpan();
+            var byteSpan = _byteBuffer.GetNextWritableSpan();
             var numBytesRead = _stream.Read(byteSpan);
-            _byteBuffer.SimulateAdd(numBytesRead);
+            _byteBuffer.ReportItemsWritten(numBytesRead);
             if (numBytesRead < byteSpan.Length)
             {
                 break;
@@ -59,9 +59,9 @@ public class StreamReaderWithByteCount : TextReader
 
         while (_byteBuffer.Length > 0 && _characterBuffer.Length < _characterBuffer.Capacity)
         {
-            _decoder.Convert(_byteBuffer.GetNextUsedSpan(), _characterBuffer.GetNextUnusedSpan(), false, out var bytesUsed, out var charsUsed, out _);
+            _decoder.Convert(_byteBuffer.GetNextUsedSpan(), _characterBuffer.GetNextWritableSpan(), false, out var bytesUsed, out var charsUsed, out _);
             _byteBuffer.Drop(bytesUsed);
-            _characterBuffer.SimulateAdd(charsUsed);
+            _characterBuffer.ReportItemsWritten(charsUsed);
         }
     }
 
