@@ -137,14 +137,68 @@ public record CircularArrayState(int BackingArrayCapacity)
 
     private CircularArrayState GetStateAfterPrepending(int count)
     {
-        throw new NotImplementedException();
+        var newLength = Math.Min(Length + count, BackingArrayCapacity);
+
+        // Items that no longer fit are evicted from the end.
+        var overflow = Length + count - newLength;
+        var newEndOffset = PositiveModulo.Fix(
+            EndOffset - overflow,
+            BackingArrayCapacity);
+
+        var newStartOffset = PositiveModulo.Fix(
+            StartOffset - count,
+            BackingArrayCapacity);
+
+        return this with
+        {
+            Length = newLength,
+            StartOffset = newStartOffset,
+            EndOffset = newEndOffset,
+        };
     }
 
+    /// <summary>
+    /// Places a block of <paramref name="itemCount"/> items before the first item, keeping the
+    /// block's order. Yields one <see cref="CircularArrayWrite"/> per contiguous region, in block
+    /// order, so the caller takes the next <c>Count</c> items of the block for each write.
+    /// When the items do not fit, the items at the end are evicted. If the block alone exceeds
+    /// the capacity, only its first items are kept, so the yielded counts add up to at most the
+    /// capacity. Every write carries the state after the whole prepend, since a half-written
+    /// block is not a valid state.
+    /// </summary>
     public IEnumerable<CircularArrayWrite> Prepend(int itemCount)
     {
         ThrowIfSpanOperationPending();
 
-        throw new NotImplementedException();
+        if (itemCount < 0)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(itemCount),
+                itemCount,
+                "Expected item count to not be negative");
+        }
+
+        return PrependCore(itemCount);
+    }
+
+    // Split from Prepend for the same reason as AppendCore: validate eagerly, iterate lazily.
+    private IEnumerable<CircularArrayWrite> PrependCore(int itemCount)
+    {
+        var keptCount = Math.Min(itemCount, BackingArrayCapacity);
+        if (keptCount == 0)
+        {
+            yield break;
+        }
+
+        var next = GetStateAfterPrepending(keptCount);
+        var firstCount = Math.Min(keptCount, BackingArrayCapacity - next.StartOffset);
+        yield return new CircularArrayWrite(next.StartOffset, firstCount, next);
+
+        var secondCount = keptCount - firstCount;
+        if (secondCount > 0)
+        {
+            yield return new CircularArrayWrite(0, secondCount, next);
+        }
     }
 
     /// <summary>

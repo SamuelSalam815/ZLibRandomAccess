@@ -317,6 +317,80 @@ public class CircularArrayStateTest
             () => pending.DropFromEnd(0));
     }
 
+    [TestMethod]
+    public void Prepend_OnEmptyArray_WritesBeforeTheStart()
+    {
+        _size10CircularArray.Prepend(3)
+            .ShouldBe(
+            [
+                Write(
+                    7,
+                    3,
+                    _size10CircularArray with { StartOffset = 7, EndOffset = 0, Length = 3 }),
+            ]);
+    }
+
+    [TestMethod]
+    public void Prepend_WrappingBelowZero_YieldsTwoWritesInBlockOrder()
+    {
+        var twoItemsFromOffset1 = StateAfter(_size10CircularArray.Append(3)).DropFromStart(1);
+        var expectedState = _size10CircularArray with { StartOffset = 8, EndOffset = 3, Length = 5 };
+
+        twoItemsFromOffset1.Prepend(3)
+            .ShouldBe(
+            [
+                Write(8, 2, expectedState),
+                Write(0, 1, expectedState),
+            ]);
+    }
+
+    [TestMethod]
+    public void Prepend_OnFullArray_EvictsItemsFromTheEnd()
+    {
+        var startingState = new CircularArrayState(3);
+        var full = StateAfter(startingState.Append(3));
+
+        full.Prepend(1)
+            .ShouldBe(
+            [
+                Write(2, 1, startingState with { StartOffset = 2, EndOffset = 2, Length = 3 }),
+            ]);
+    }
+
+    [TestMethod]
+    public void Prepend_MoreThanCapacity_KeepsOnlyTheFirstItemsOfTheBlock()
+    {
+        var startingState = new CircularArrayState(3);
+
+        startingState.Prepend(5)
+            .ShouldBe(
+            [
+                Write(0, 3, startingState with { StartOffset = 0, EndOffset = 0, Length = 3 }),
+            ]);
+    }
+
+    [TestMethod]
+    public void PrependZero_YieldsNoInstructions()
+    {
+        _size10CircularArray.Prepend(0).ShouldBeEmpty();
+    }
+
+    [TestMethod]
+    public void Prepend_NegativeCount_ThrowsEagerly()
+    {
+        Should.Throw<ArgumentOutOfRangeException>(
+            () => _size10CircularArray.Prepend(-1));
+    }
+
+    [TestMethod]
+    public void Prepend_WhileSpanPending_Throws()
+    {
+        var pending = _size10CircularArray.BeginWriteSpan().NewState;
+
+        Should.Throw<InvalidOperationException>(
+            () => pending.Prepend(1));
+    }
+
     private static CircularArrayState FullAtEnd(CircularArrayState emptyState)
     {
         // Capacity 3: full, with start and end offsets both at 2.
