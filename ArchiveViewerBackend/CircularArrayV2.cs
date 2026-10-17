@@ -243,6 +243,62 @@ public class CircularArrayV2<T> : IEnumerable<T>
 
     public int Length => (int)_state.Length;
 
+    public void Add(T item)
+    {
+        AddRange([item]);
+    }
+
+    public void AddRange(ReadOnlySpan<T> items)
+    {
+        // Append rejects more than Capacity items at once. Items from earlier
+        // chunks get overwritten by later ones, so the newest Capacity items win.
+        while (!items.IsEmpty)
+        {
+            var chunk = items[..Math.Min(items.Length, Capacity)];
+            items = items[chunk.Length..];
+
+            var remainingInChunk = chunk;
+            foreach (var write in _state
+                         .Append(chunk.Length)
+                         .OfType<CircularArrayInstruction.Write>())
+            {
+                var count = (int)write.Count;
+                remainingInChunk[..count].CopyTo(
+                    _backingArray.AsSpan((int)write.OffsetInBackingArray));
+                remainingInChunk = remainingInChunk[count..];
+                _state = write.NewState;
+            }
+        }
+    }
+
+    public void Drop(int dropCount = 1)
+    {
+        _state = _state.DropFromStart(dropCount);
+    }
+
+    /// <summary>
+    /// Exposes the next contiguous unused region for writing only, and starts a span operation.
+    /// Write into the span, then call <see cref="ReportItemsWritten"/>.
+    /// Every other operation throws until then.
+    /// </summary>
+    public Span<T> GetNextWritableSpan()
+    {
+        var write = _state.BeginWriteSpan();
+        _state = write.NewState;
+        return _backingArray.AsSpan(
+            (int)write.OffsetInBackingArray,
+            (int)write.Count);
+    }
+
+    /// <summary>
+    /// Ends the span operation started by <see cref="GetNextWritableSpan"/>.
+    /// </summary>
+    /// <param name="count">How many items were written to the start of the span.</param>
+    public void ReportItemsWritten(int count)
+    {
+        _state = _state.EndWriteSpan(count);
+    }
+
     public IEnumerator<T> GetEnumerator()
     {
         throw new NotImplementedException();
