@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
@@ -13,20 +13,19 @@ public class CircularArrayStateTest
 {
     private readonly CircularArrayState _size10CircularArray = new(10);
 
-    private static CircularArrayInstruction.Write Write(int offset, int count, CircularArrayState state)
+    private static CircularArrayWrite Write(int offset, int count, CircularArrayState state)
     {
-        return new CircularArrayInstruction.Write(offset, count, state);
+        return new CircularArrayWrite(offset, count, state);
     }
 
-    private static CircularArrayInstruction.Read Read(int offset, int count)
+    private static CircularArrayRead Read(int offset, int count)
     {
-        return new CircularArrayInstruction.Read(offset, count);
+        return new CircularArrayRead(offset, count);
     }
 
-    private static CircularArrayState StateAfter(IEnumerable<CircularArrayInstruction> instructions)
+    private static CircularArrayState StateAfter(IEnumerable<CircularArrayWrite> writes)
     {
-        return instructions
-            .OfType<CircularArrayInstruction.Write>()
+        return writes
             .Last()
             .NewState;
     }

@@ -1,16 +1,10 @@
-﻿using System.Collections;
+using System.Collections;
 
 namespace ArchiveViewerBackend;
 
-public abstract record CircularArrayInstruction
-{
-    private CircularArrayInstruction()
-    {
-    }
+public sealed record CircularArrayWrite(int OffsetInBackingArray, int Count, CircularArrayState NewState);
 
-    public sealed record Write(int OffsetInBackingArray, int Count, CircularArrayState NewState) : CircularArrayInstruction;
-    public sealed record Read(int OffsetInBackingArray, int Count) : CircularArrayInstruction;
-}
+public sealed record CircularArrayRead(int OffsetInBackingArray, int Count);
 
 public record CircularArrayState(int BackingArrayCapacity)
 {
@@ -38,11 +32,11 @@ public record CircularArrayState(int BackingArrayCapacity)
     /// where the next appended items would go. The caller writes into that region
     /// and then calls <see cref="EndWriteSpan"/> with the number of items written.
     /// </summary>
-    public CircularArrayInstruction.Write BeginWriteSpan()
+    public CircularArrayWrite BeginWriteSpan()
     {
         ThrowIfSpanOperationPending();
 
-        return new CircularArrayInstruction.Write(
+        return new CircularArrayWrite(
             EndOffset,
             MaxWriteSpanLength,
             this with { IsSpanOperationPending = true });
@@ -90,11 +84,11 @@ public record CircularArrayState(int BackingArrayCapacity)
         BackingArrayCapacity - Length);
 
     /// <summary>
-    /// Yields one <see cref="CircularArrayInstruction.Write"/> per contiguous region, wrapping
+    /// Yields one <see cref="CircularArrayWrite"/> per contiguous region, wrapping
     /// around the backing array as often as needed. When <paramref name="itemCount"/> exceeds
     /// the capacity, later writes overwrite earlier ones, so the newest items win.
     /// </summary>
-    public IEnumerable<CircularArrayInstruction.Write> Append(int itemCount)
+    public IEnumerable<CircularArrayWrite> Append(int itemCount)
     {
         ThrowIfSpanOperationPending();
 
@@ -111,7 +105,7 @@ public record CircularArrayState(int BackingArrayCapacity)
 
     // Split from Append because an iterator body only runs on the first MoveNext.
     // Append validates eagerly so a bad call or a pending span throws at the call site.
-    private IEnumerable<CircularArrayInstruction.Write> AppendCore(int itemCount)
+    private IEnumerable<CircularArrayWrite> AppendCore(int itemCount)
     {
         var state = this;
         var remaining = itemCount;
@@ -119,7 +113,7 @@ public record CircularArrayState(int BackingArrayCapacity)
         {
             var count = Math.Min(remaining, BackingArrayCapacity - state.EndOffset);
             var next = state.GetStateAfterAppending(count);
-            yield return new CircularArrayInstruction.Write(state.EndOffset, count, next);
+            yield return new CircularArrayWrite(state.EndOffset, count, next);
             state = next;
             remaining -= count;
         }
@@ -152,7 +146,7 @@ public record CircularArrayState(int BackingArrayCapacity)
         throw new NotImplementedException();
     }
 
-    public IEnumerable<CircularArrayInstruction> Prepend(int itemCount)
+    public IEnumerable<CircularArrayWrite> Prepend(int itemCount)
     {
         ThrowIfSpanOperationPending();
 
@@ -206,11 +200,11 @@ public record CircularArrayState(int BackingArrayCapacity)
     }
 
     /// <summary>
-    /// Yields at most two <see cref="CircularArrayInstruction.Read"/> instructions,
+    /// Yields at most two <see cref="CircularArrayRead"/> instructions,
     /// which together cover the items in order: one up to the end of the backing array and,
     /// if the items wrap, one from its beginning.
     /// </summary>
-    public IEnumerable<CircularArrayInstruction.Read> Enumerate()
+    public IEnumerable<CircularArrayRead> Enumerate()
     {
         ThrowIfSpanOperationPending();
 
@@ -218,7 +212,7 @@ public record CircularArrayState(int BackingArrayCapacity)
     }
 
     // Split from Enumerate for the same reason as AppendCore: validate eagerly, iterate lazily.
-    private IEnumerable<CircularArrayInstruction.Read> EnumerateCore()
+    private IEnumerable<CircularArrayRead> EnumerateCore()
     {
         if (Length == 0)
         {
@@ -226,12 +220,12 @@ public record CircularArrayState(int BackingArrayCapacity)
         }
 
         var firstCount = Math.Min(Length, BackingArrayCapacity - StartOffset);
-        yield return new CircularArrayInstruction.Read(StartOffset, firstCount);
+        yield return new CircularArrayRead(StartOffset, firstCount);
 
         var secondCount = Length - firstCount;
         if (secondCount > 0)
         {
-            yield return new CircularArrayInstruction.Read(0, secondCount);
+            yield return new CircularArrayRead(0, secondCount);
         }
     }
 }
