@@ -233,16 +233,10 @@ public record CircularArrayState(int BackingArrayCapacity)
     }
 }
 
-public class CircularArrayV2<T> : IEnumerable<T>
+public class CircularArrayV2<T>(int capacity) : IEnumerable<T>
 {
-    private readonly T[] _backingArray;
-    private CircularArrayState _state;
-
-    public CircularArrayV2(int capacity)
-    {
-        _backingArray = new T[capacity];
-        _state = new CircularArrayState(capacity);
-    }
+    private readonly T[] _backingArray = new T[capacity];
+    private CircularArrayState _state = new(capacity);
 
     public int Capacity => _backingArray.Length;
 
