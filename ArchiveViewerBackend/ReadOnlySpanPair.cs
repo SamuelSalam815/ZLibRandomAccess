@@ -1,4 +1,4 @@
-namespace ArchiveViewerBackend;
+﻿namespace ArchiveViewerBackend;
 
 /// <summary>
 /// Two read-only spans that read as one contiguous sequence, for example the two segments of a wrapped
@@ -57,16 +57,36 @@ public readonly ref struct ReadOnlySpanPair<T>
 
     public ref struct Enumerator
     {
-        private readonly ReadOnlySpanPair<T> _pair;
+        // Walks one span at a time and switches to the second span once, in MoveNext,
+        // so Current does not have to choose a span on every access.
+        private ReadOnlySpan<T> _current;
+        private ReadOnlySpan<T> _next;
         private int _index = -1;
 
         internal Enumerator(ReadOnlySpanPair<T> pair)
         {
-            _pair = pair;
+            _current = pair.First;
+            _next = pair.Second;
         }
 
-        public bool MoveNext() => ++_index < _pair.Length;
+        public bool MoveNext()
+        {
+            if (++_index < _current.Length)
+            {
+                return true;
+            }
 
-        public readonly T Current => _pair[_index];
+            if (_next.IsEmpty)
+            {
+                return false;
+            }
+
+            _current = _next;
+            _next = ReadOnlySpan<T>.Empty;
+            _index = 0;
+            return true;
+        }
+
+        public readonly ref readonly T Current => ref _current[_index];
     }
 }

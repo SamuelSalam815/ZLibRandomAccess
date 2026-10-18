@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -259,6 +260,57 @@ public class RingBufferTest
 
         Should.Throw<IndexOutOfRangeException>(() => buffer[2]);
         Should.Throw<IndexOutOfRangeException>(() => buffer[-1]);
+    }
+
+    private static RingBuffer<char> WrappedBuffer()
+    {
+        var buffer = BufferWith(5, "abcde");
+        buffer.DropFirst(2);
+        buffer.Append("fg");
+        return buffer;
+    }
+
+    [TestMethod]
+    public void Foreach_WhenItemsWrap_YieldsItemsInOrder()
+    {
+        var items = new List<char>();
+
+        foreach (var item in WrappedBuffer())
+        {
+            items.Add(item);
+        }
+
+        new string(items.ToArray()).ShouldBe("cdefg");
+    }
+
+    [TestMethod]
+    public void Foreach_DoesNotAllocate()
+    {
+        static int Count(RingBuffer<char> buffer)
+        {
+            var count = 0;
+            foreach (var _ in buffer)
+            {
+                count++;
+            }
+
+            return count;
+        }
+
+        var buffer = WrappedBuffer();
+        Count(buffer); // Warm up so that JIT work is not counted.
+        var before = GC.GetAllocatedBytesForCurrentThread();
+
+        var count = Count(buffer);
+
+        GC.GetAllocatedBytesForCurrentThread().ShouldBe(before);
+        count.ShouldBe(5);
+    }
+
+    [TestMethod]
+    public void AsEnumerable_WhenItemsWrap_YieldsItemsInOrder()
+    {
+        new string(WrappedBuffer().AsEnumerable().ToArray()).ShouldBe("cdefg");
     }
 
     private static RingBuffer<char> BufferWith(int capacity, string initial)

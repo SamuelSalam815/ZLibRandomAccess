@@ -130,9 +130,16 @@ public sealed class RingBuffer<T>(int capacity) : IEnumerable<T>
         Length += count;
     }
 
+    /// <summary>
+    /// Enumerates without allocating, so <c>foreach</c> over a buffer binds to this method. The enumerator
+    /// is a view of the backing array, valid only until the next mutation. LINQ and other callers
+    /// that need an <see cref="IEnumerator{T}"/> use the interface implementation.
+    /// </summary>
+    public ReadOnlySpanPair<T>.Enumerator GetEnumerator() => Contents.GetEnumerator();
+
     // An iterator cannot hold spans across a yield, so this indexes the backing array
     // using the same first/second split as Contents.
-    public IEnumerator<T> GetEnumerator()
+    IEnumerator<T> IEnumerable<T>.GetEnumerator()
     {
         var firstSegmentLength = FirstSegmentLength;
         for (var i = 0; i < firstSegmentLength; i++)
@@ -146,7 +153,7 @@ public sealed class RingBuffer<T>(int capacity) : IEnumerable<T>
         }
     }
 
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable<T>)this).GetEnumerator();
 
     /// <summary>Copies <paramref name="block"/> to the backing array at <paramref name="offset"/>, continuing at 0 past the end.</summary>
     private void CopyWrapping(ReadOnlySpan<T> block, int offset)

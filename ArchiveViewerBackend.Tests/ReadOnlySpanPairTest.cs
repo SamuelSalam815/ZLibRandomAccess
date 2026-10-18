@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -106,5 +106,45 @@ public class ReadOnlySpanPairTest
         }
 
         new string(items.ToArray()).ShouldBe("abcde");
+    }
+
+    [TestMethod]
+    [DataRow("", "", "")]
+    [DataRow("", "xy", "xy")]
+    [DataRow("xy", "", "xy")]
+    [DataRow("x", "y", "xy")]
+    public void Enumeration_HandlesEmptySpans(string first, string second, string expected)
+    {
+        var items = new List<char>();
+
+        foreach (var item in new ReadOnlySpanPair<char>(first, second))
+        {
+            items.Add(item);
+        }
+
+        new string(items.ToArray()).ShouldBe(expected);
+    }
+
+    [TestMethod]
+    public void Enumeration_DoesNotAllocate()
+    {
+        static int Count(ReadOnlySpanPair<char> pair)
+        {
+            var count = 0;
+            foreach (var _ in pair)
+            {
+                count++;
+            }
+
+            return count;
+        }
+
+        Count(Abcde()); // Warm up so that JIT work is not counted.
+        var before = GC.GetAllocatedBytesForCurrentThread();
+
+        var count = Count(Abcde());
+
+        GC.GetAllocatedBytesForCurrentThread().ShouldBe(before);
+        count.ShouldBe(5);
     }
 }
