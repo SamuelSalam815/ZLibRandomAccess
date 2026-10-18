@@ -59,7 +59,7 @@ public class StreamReaderWithByteCount : TextReader
 
         while (_byteBuffer.Length > 0 && _characterBuffer.Length < _characterBuffer.Capacity)
         {
-            _decoder.Convert(_byteBuffer.FirstSegment, _characterBuffer.GetWritableSpan(), false, out var bytesUsed, out var charsUsed, out _);
+            _decoder.Convert(_byteBuffer.Contents.First, _characterBuffer.GetWritableSpan(), false, out var bytesUsed, out var charsUsed, out _);
             _byteBuffer.DropFirst(bytesUsed);
             _characterBuffer.ReportWritten(charsUsed);
         }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using JetBrains.Annotations;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -77,7 +77,7 @@ public class RingBufferTest
         buffer.Append("123");
 
         buffer.ShouldEqualText("c123");
-        buffer.SecondSegment.IsEmpty.ShouldBeFalse();
+        buffer.Contents.Second.IsEmpty.ShouldBeFalse();
     }
 
     [TestMethod]
@@ -89,7 +89,7 @@ public class RingBufferTest
         buffer.Prepend("123");
 
         buffer.ShouldEqualText("123a");
-        buffer.SecondSegment.IsEmpty.ShouldBeFalse();
+        buffer.Contents.Second.IsEmpty.ShouldBeFalse();
     }
 
     [TestMethod]
@@ -277,6 +277,8 @@ internal static class RingBufferTestExtensions
         buffer.Length.ShouldBe(expected.Length);
         new string(buffer.ToArray()).ShouldBe(expected);
         new string(Enumerable.Range(0, buffer.Length).Select(i => buffer[i]).ToArray()).ShouldBe(expected);
-        (new string(buffer.FirstSegment) + new string(buffer.SecondSegment)).ShouldBe(expected);
+        var contents = new char[buffer.Length];
+        buffer.Contents.CopyTo(contents);
+        new string(contents).ShouldBe(expected);
     }
 }

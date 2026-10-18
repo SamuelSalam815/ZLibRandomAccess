@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 
 namespace ArchiveViewerBackend;
 
@@ -9,7 +9,7 @@ namespace ArchiveViewerBackend;
 /// </summary>
 /// <remarks>
 /// Items are stored in one backing array, so the logical contents are at most two contiguous slices.
-/// Slices are views of the backing array and are valid only until the next mutation.
+/// <see cref="Contents"/> is a view of the backing array and is valid only until the next mutation.
 /// </remarks>
 public sealed class RingBuffer<T>(int capacity) : IEnumerable<T>
 {
@@ -20,11 +20,13 @@ public sealed class RingBuffer<T>(int capacity) : IEnumerable<T>
 
     public int Length { get; private set; }
 
-    /// <summary>The slice that starts at the first item. It is empty only when the buffer is empty.</summary>
-    public ReadOnlySpan<T> FirstSegment => _array.AsSpan(_start, FirstSegmentLength);
-
-    /// <summary>The slice that continues after <see cref="FirstSegment"/>. It is empty unless the items wrap.</summary>
-    public ReadOnlySpan<T> SecondSegment => _array.AsSpan(0, Length - FirstSegmentLength);
+    /// <summary>
+    /// The items as a view of the backing array, valid only until the next mutation. The second span is
+    /// empty unless the items wrap.
+    /// </summary>
+    public ReadOnlySpanPair<T> Contents => new(
+        _array.AsSpan(_start, FirstSegmentLength),
+        _array.AsSpan(0, Length - FirstSegmentLength));
 
     private int FirstSegmentLength => Math.Min(Length, Capacity - _start);
 
@@ -128,8 +130,8 @@ public sealed class RingBuffer<T>(int capacity) : IEnumerable<T>
         Length += count;
     }
 
-    // An iterator cannot hold the span segments across a yield, so this indexes the backing array
-    // using the same first/second split as FirstSegment and SecondSegment.
+    // An iterator cannot hold spans across a yield, so this indexes the backing array
+    // using the same first/second split as Contents.
     public IEnumerator<T> GetEnumerator()
     {
         var firstSegmentLength = FirstSegmentLength;
