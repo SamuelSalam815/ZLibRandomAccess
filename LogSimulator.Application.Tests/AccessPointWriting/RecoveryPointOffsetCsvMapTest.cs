@@ -22,8 +22,8 @@ public class RecoveryPointOffsetCsvMapTest
         using var memoryStream = new MemoryStream();
         List<RecoveryPointOffset> expectedItems =
         [
-            new(101, 321, 5, true),
-            new(401, 123, 9, false),
+            new(101, 321, 5),
+            new(401, 123, 9),
         ];
 
         using(var textWriter = new StreamWriter(memoryStream, leaveOpen: true))

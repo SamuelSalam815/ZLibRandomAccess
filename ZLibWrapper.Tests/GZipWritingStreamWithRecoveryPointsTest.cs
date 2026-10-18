@@ -29,7 +29,7 @@ public class GZipWritingStreamWithRecoveryPointsTest
     private static RecoveryPointOffset Strip(RecoveryPointOffset point) => point with { OffsetInCompressedStream = 0 };
 
     [TestMethod]
-    public void RecoveryPoints_CountLinesAndTrackLineStart_ForUtf8()
+    public void RecoveryPoints_CountLines_ForUtf8()
     {
         var points = WriteChunks(
             Encoding.UTF8,
@@ -38,9 +38,9 @@ public class GZipWritingStreamWithRecoveryPointsTest
             Encoding.UTF8.GetBytes("e"));
 
         points.ConvertAll(Strip).ShouldBe([
-            new RecoveryPointOffset(4, 0, 1, false),
-            new RecoveryPointOffset(6, 0, 2, true),
-            new RecoveryPointOffset(7, 0, 2, false),
+            new RecoveryPointOffset(4, 0, 1),
+            new RecoveryPointOffset(6, 0, 2),
+            new RecoveryPointOffset(7, 0, 2),
         ]);
     }
 
@@ -53,8 +53,8 @@ public class GZipWritingStreamWithRecoveryPointsTest
         var points = WriteChunks(Encoding.Unicode, bytes[..3], bytes[3..]);
 
         points.ConvertAll(Strip).ShouldBe([
-            new RecoveryPointOffset(3, 0, 0, false),
-            new RecoveryPointOffset(6, 0, 1, false),
+            new RecoveryPointOffset(3, 0, 0),
+            new RecoveryPointOffset(6, 0, 1),
         ]);
     }
 }

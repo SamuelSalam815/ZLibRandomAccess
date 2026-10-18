@@ -47,12 +47,12 @@ public class RecoveryPointOffsetCsvWriterTest
     [DynamicData(nameof(Encodings))]
     public void WritingUsingCsvHelper_ProducesExpectedResult(Encoding encoding)
     {
-        var records = new List<RecoveryPointOffset> { new(1,2,3,true), new(3,4,5,false), };
+        var records = new List<RecoveryPointOffset> { new(1,2,3), new(3,4,5), };
         var expectedResult =
             $"""
-             {nameof(RecoveryPointOffset.OffsetInUncompressedStream)},{nameof(RecoveryPointOffset.OffsetInCompressedStream)},{nameof(RecoveryPointOffset.LineOffset)},{nameof(RecoveryPointOffset.IsAtLineStart)}
-             1,2,3,True
-             3,4,5,False
+             {nameof(RecoveryPointOffset.OffsetInUncompressedStream)},{nameof(RecoveryPointOffset.OffsetInCompressedStream)},{nameof(RecoveryPointOffset.LineOffset)}
+             1,2,3
+             3,4,5
 
              """;
         using var memoryStream = new MemoryStream();

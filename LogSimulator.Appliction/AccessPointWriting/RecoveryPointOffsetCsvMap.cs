@@ -15,8 +15,5 @@ public sealed class RecoveryPointOffsetCsvMap : ClassMap<RecoveryPointOffset>
 
         Map(m => m.LineOffset).Index(2).Name("lines");
         Parameter(nameof(RecoveryPointOffset.LineOffset)).Index(2).Name("lines");
-
-        Map(m => m.IsAtLineStart).Index(3).Name("atLineStart");
-        Parameter(nameof(RecoveryPointOffset.IsAtLineStart)).Index(3).Name("atLineStart");
     }
 }

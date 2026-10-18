@@ -20,7 +20,6 @@ public class GZipWritingStreamWithRecoveryPoints(
     private long _bytesWrittenSinceLastRecoveryPoint = 0;
 
     public long TotalLinesWritten { get; private set; }
-    private bool _isAtLineStart = true;
     private readonly Encoding _encoding = encoding ?? Encoding.Default;
     // The decoder keeps characters split across writes, so counting works for any encoding.
     private readonly Decoder _decoder = (encoding ?? Encoding.Default).GetDecoder();
@@ -42,7 +41,7 @@ public class GZipWritingStreamWithRecoveryPoints(
         _deflateStream.Flush();
         _bytesWrittenSinceLastRecoveryPoint = 0;
         RecoveryPointWritten?.Invoke(new RecoveryPointOffset(
-            TotalBytesWritten, _deflateStream.Position, TotalLinesWritten, _isAtLineStart));
+            TotalBytesWritten, _deflateStream.Position, TotalLinesWritten));
     }
 
     private void CountLines(byte[] buffer, int offset, int count)
@@ -51,13 +50,7 @@ public class GZipWritingStreamWithRecoveryPoints(
         try
         {
             var charCount = _decoder.GetChars(buffer, offset, count, chars, 0);
-            if (charCount == 0)
-            {
-                return;
-            }
-
             TotalLinesWritten += new ReadOnlySpan<char>(chars, 0, charCount).Count('\n');
-            _isAtLineStart = chars[charCount - 1] == '\n';
         }
         finally
         {
