@@ -14,19 +14,17 @@ public class Program
 {
     public static readonly DirectoryInfo TempDirectory = new("C:\\Temp");
 
-    private static readonly CompressionFilePathFactory FilePathFactory = new(
-        TempDirectory,
-        DateTimeOffset.Now);
-
     private static FileStream WriteFileStream(FileInfo fileInfo)
     {
         fileInfo.Directory?.Create();
         return File.Open(fileInfo.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.Read);
     }
 
-    private static void SetUpRecoveryPointWriting(GZipWritingStreamWithRecoveryPoints writingStreamWithRecoveryPoints)
+    private static void SetUpRecoveryPointWriting(
+        CompressionFilePathFactory filePathFactory,
+        GZipWritingStreamWithRecoveryPoints writingStreamWithRecoveryPoints)
     {
-        var accessPointFileStream = Create(FilePathFactory.RecoveryPointFile);
+        var accessPointFileStream = Create(filePathFactory.RecoveryPointFile);
         var csvWriter = new CsvWriter(new StreamWriter(accessPointFileStream), CultureInfo.InvariantCulture);
         csvWriter.Context.RegisterClassMap<RecoveryPointOffsetCsvMap>();
         writingStreamWithRecoveryPoints.RecoveryPointWritten += csvWriter.WriteRecord;
@@ -40,16 +38,17 @@ public class Program
     }
 
     [MustDisposeResource]
-    private static Stream GetOutputStream()
+    private static Stream GetOutputStream(
+        CompressionFilePathFactory filePathFactory,
+        long recoveryPointByteInterval)
     {
-        var controlGZipStream = new GZipStream(Create(FilePathFactory.BCLCompressionFile), CompressionMode.Compress);
-        var zlibGZipStream = new GZipWritingStreamWithRecoveryPoints(Create(FilePathFactory.ZLibCompressionFile));
-        const long megabyte = 1024 * 1024;
+        var controlGZipStream = new GZipStream(Create(filePathFactory.BCLCompressionFile), CompressionMode.Compress);
+        var zlibGZipStream = new GZipWritingStreamWithRecoveryPoints(Create(filePathFactory.ZLibCompressionFile));
         var zlibGZipStreamWithRecoveryPoints = new GZipWritingStreamWithRecoveryPoints(
-            Create(FilePathFactory.ZLibCompressionWithRecoveryPointsFile),
+            Create(filePathFactory.ZLibCompressionWithRecoveryPointsFile),
             false,
-            10 * megabyte);
-        SetUpRecoveryPointWriting(zlibGZipStreamWithRecoveryPoints);
+            recoveryPointByteInterval);
+        SetUpRecoveryPointWriting(filePathFactory, zlibGZipStreamWithRecoveryPoints);
         var broadcastStream = new BroadcastStream(
         [
             new SubscribedStream(controlGZipStream, false),
@@ -59,16 +58,20 @@ public class Program
         return broadcastStream;
     }
 
+    // Usage: [outputDirectory] [megabytesOfLogs] [recoveryPointIntervalKilobytes]
     static void Main(string[] args)
     {
-        const int targetMbOfLogsToWrite = 128;
+        var outputDirectory = args.Length > 0 ? new DirectoryInfo(args[0]) : TempDirectory;
+        var targetMbOfLogsToWrite = args.Length > 1 ? int.Parse(args[1]) : 128;
+        var recoveryPointByteInterval = (args.Length > 2 ? long.Parse(args[2]) : 10 * 1024) * 1024;
+        var filePathFactory = new CompressionFilePathFactory(outputDirectory, DateTimeOffset.Now);
 
         Console.WriteLine(
             "Writing logs to '{0}' until {1:N0} MB of logs have been compressed!",
-            FilePathFactory.TimestampedOutputDirectory.FullName,
+            filePathFactory.TimestampedOutputDirectory.FullName,
             targetMbOfLogsToWrite);
 
-        const long targetNumberOfBytesToWrite = targetMbOfLogsToWrite * 1024L * 1024L;
+        var targetNumberOfBytesToWrite = targetMbOfLogsToWrite * 1024L * 1024L;
 
         var sim = new Simulator.LogSimulator();
         var progressLogger = new GameSimTally(5, 50);
@@ -82,7 +85,7 @@ public class Program
 
             progressLogger.MarkGameSimulated();
         };
-        using var outputStream = GetOutputStream();
+        using var outputStream = GetOutputStream(filePathFactory, recoveryPointByteInterval);
         Console.WriteLine(progressLogger.TallyLegend);
         sim.SimulateLogs(outputStream, Encoding.Default, targetNumberOfBytesToWrite);
     }
