@@ -16,15 +16,19 @@ public sealed class RingBuffer<T>(int capacity) : IEnumerable<T>
     private readonly T[] _array = new T[capacity];
     private int _start;
 
-    public int Capacity => _array.Length;
+    public int Capacity { get; } = capacity;
 
     public int Length { get; private set; }
 
     /// <summary>The slice that starts at the first item. It is empty only when the buffer is empty.</summary>
-    public ReadOnlyMemory<T> FirstSegment => _array.AsMemory(_start, Math.Min(Length, Capacity - _start));
+    public ReadOnlySpan<T> FirstSegment => _array.AsSpan(_start, FirstSegmentLength);
 
     /// <summary>The slice that continues after <see cref="FirstSegment"/>. It is empty unless the items wrap.</summary>
-    public ReadOnlyMemory<T> SecondSegment => _array.AsMemory(0, Length - FirstSegment.Length);
+    public ReadOnlySpan<T> SecondSegment => _array.AsSpan(0, Length - FirstSegmentLength);
+
+    private int FirstSegmentLength => Math.Min(Length, Capacity - _start);
+
+    private int WritableSpanLength => Math.Min(Capacity - Length, Capacity - (_start + Length) % Capacity);
 
     public T this[int index]
     {
@@ -78,41 +82,65 @@ public sealed class RingBuffer<T>(int capacity) : IEnumerable<T>
         Length += block.Length;
     }
 
-    public void DropFromStart(int count)
+    public void DropFirst(int count)
     {
         if (count == 0)
         {
             return;
         }
 
-        ThrowIfInvalidDropCount(count);
+        ThrowIfCannotDrop(count);
         _start = (_start + count) % Capacity;
         Length -= count;
     }
 
-    public void DropFromEnd(int count)
+    public void DropLast(int count)
     {
         if (count == 0)
         {
             return;
         }
 
-        ThrowIfInvalidDropCount(count);
+        ThrowIfCannotDrop(count);
         Length -= count;
     }
 
-    public IEnumerator<T> GetEnumerator()
+    public void Clear()
     {
-        var first = FirstSegment;
-        for (var i = 0; i < first.Length; i++)
+        _start = 0;
+        Length = 0;
+    }
+
+    /// <summary>
+    /// Returns the free space after the last item that can be written without wrapping. It is empty only
+    /// when the buffer is full. Write into it, then call <see cref="ReportWritten"/>.
+    /// </summary>
+    public Span<T> GetWritableSpan() => _array.AsSpan((_start + Length) % Capacity, WritableSpanLength);
+
+    /// <summary>Adds the first <paramref name="count"/> items written into the span from <see cref="GetWritableSpan"/>.</summary>
+    public void ReportWritten(int count)
+    {
+        if (count < 0 || count > WritableSpanLength)
         {
-            yield return first.Span[i];
+            throw new ArgumentOutOfRangeException(nameof(count), count, $"Expected written count to be in range [0, {WritableSpanLength}]");
         }
 
-        var second = SecondSegment;
-        for (var i = 0; i < second.Length; i++)
+        Length += count;
+    }
+
+    // An iterator cannot hold the span segments across a yield, so this indexes the backing array
+    // using the same first/second split as FirstSegment and SecondSegment.
+    public IEnumerator<T> GetEnumerator()
+    {
+        var firstSegmentLength = FirstSegmentLength;
+        for (var i = 0; i < firstSegmentLength; i++)
         {
-            yield return second.Span[i];
+            yield return _array[_start + i];
+        }
+
+        for (var i = 0; i < Length - firstSegmentLength; i++)
+        {
+            yield return _array[i];
         }
     }
 
@@ -126,13 +154,8 @@ public sealed class RingBuffer<T>(int capacity) : IEnumerable<T>
         block[firstCount..].CopyTo(_array);
     }
 
-    private void ThrowIfInvalidDropCount(int count)
+    private void ThrowIfCannotDrop(int count)
     {
-        if (Length == 0)
-        {
-            throw new InvalidOperationException("Cannot drop from an empty buffer");
-        }
-
         if (count < 0 || count > Length)
         {
             throw new ArgumentOutOfRangeException(nameof(count), count, $"Expected drop count to be in range [0, {Length}]");
