@@ -1,14 +1,12 @@
 using System.Text;
 
-using ArchiveViewerBackend.CircularArray;
-
 namespace ArchiveViewerBackend;
 
 public class StreamReaderWithByteCount : TextReader
 {
 
-    private readonly CircularArray<byte> _byteBuffer;
-    private readonly CircularArray<char> _characterBuffer;
+    private readonly RingBuffer<byte> _byteBuffer;
+    private readonly RingBuffer<char> _characterBuffer;
     private readonly Stream _stream;
     private readonly Encoding _encoding;
     private readonly Decoder _decoder;
@@ -22,8 +20,8 @@ public class StreamReaderWithByteCount : TextReader
 
     public StreamReaderWithByteCount(Stream stream, Encoding encoding, int bufferSize = 1024, bool leaveOpen = false)
     {
-        _byteBuffer = new CircularArray<byte>(bufferSize);
-        _characterBuffer = new CircularArray<char>(bufferSize);
+        _byteBuffer = new RingBuffer<byte>(bufferSize);
+        _characterBuffer = new RingBuffer<char>(bufferSize);
         _stream = stream;
         _leaveInnerStreamOpen = leaveOpen;
         _encoding = encoding;
@@ -50,9 +48,9 @@ public class StreamReaderWithByteCount : TextReader
 
         while (_byteBuffer.Length < _byteBuffer.Capacity)
         {
-            var byteSpan = _byteBuffer.GetNextWritableSpan();
+            var byteSpan = _byteBuffer.GetWritableSpan();
             var numBytesRead = _stream.Read(byteSpan);
-            _byteBuffer.ReportItemsWritten(numBytesRead);
+            _byteBuffer.ReportWritten(numBytesRead);
             if (numBytesRead < byteSpan.Length)
             {
                 break;
@@ -61,9 +59,9 @@ public class StreamReaderWithByteCount : TextReader
 
         while (_byteBuffer.Length > 0 && _characterBuffer.Length < _characterBuffer.Capacity)
         {
-            _decoder.Convert(_byteBuffer.GetNextUsedSpan(), _characterBuffer.GetNextWritableSpan(), false, out var bytesUsed, out var charsUsed, out _);
-            _byteBuffer.Drop(bytesUsed);
-            _characterBuffer.ReportItemsWritten(charsUsed);
+            _decoder.Convert(_byteBuffer.FirstSegment, _characterBuffer.GetWritableSpan(), false, out var bytesUsed, out var charsUsed, out _);
+            _byteBuffer.DropFirst(bytesUsed);
+            _characterBuffer.ReportWritten(charsUsed);
         }
     }
 
@@ -76,7 +74,7 @@ public class StreamReaderWithByteCount : TextReader
         }
         var result = _characterBuffer[0];
         NumberOfBytesRead += _encoding.GetByteCount([result]);
-        _characterBuffer.Drop();
+        _characterBuffer.DropFirst(1);
         return result;
     }
 
