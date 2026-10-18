@@ -189,20 +189,20 @@ public record CircularArrayState(int BackingArrayCapacity)
         }
 
         var finalStartOffset = GetStateAfterPrepending(keptCount).StartOffset;
-        var tailRegionCount = Math.Min(keptCount, BackingArrayCapacity - finalStartOffset);
-        var wrappedRegionCount = keptCount - tailRegionCount;
+        var leadingSegmentCount = Math.Min(keptCount, BackingArrayCapacity - finalStartOffset);
+        var trailingSegmentCount = keptCount - leadingSegmentCount;
 
-        // Rejected: writing the tail region first. It would leave an unwritten gap between
+        // Rejected: writing the leading segment first. It would leave an unwritten gap between
         // itself and the current start, so the intermediate state would be invalid.
         var state = this;
-        if (wrappedRegionCount > 0)
+        if (trailingSegmentCount > 0)
         {
-            state = state.GetStateAfterPrepending(wrappedRegionCount);
-            yield return new CircularArrayWrite(0, wrappedRegionCount, state, tailRegionCount);
+            state = state.GetStateAfterPrepending(trailingSegmentCount);
+            yield return new CircularArrayWrite(0, trailingSegmentCount, state, leadingSegmentCount);
         }
 
-        state = state.GetStateAfterPrepending(tailRegionCount);
-        yield return new CircularArrayWrite(finalStartOffset, tailRegionCount, state, 0);
+        state = state.GetStateAfterPrepending(leadingSegmentCount);
+        yield return new CircularArrayWrite(finalStartOffset, leadingSegmentCount, state, 0);
     }
 
     /// <summary>
