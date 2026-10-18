@@ -9,8 +9,7 @@
   <Project Path="Benchmarking.TextSearch.Tests/Benchmarking.TextSearch.Tests.csproj" />
   <Project Path="Benchmarking.TextSearch/Benchmarking.TextSearch.csproj" />
   <Project Path="LogSimulator.Application.Tests.Integration/LogSimulator.Application.Tests.Integration.csproj" />
-  <Project Path="LogSimulator.Application.Tests/LogSimulator.Application.Tests.csproj" />
-  <Project Path="LogSimulator.Appliction/LogSimulator.Appliction.csproj" />
+  <Project Path="LogSimulator.Application/LogSimulator.Application.csproj" />
   <Project Path="LogSimulator.Tests/LogSimulator.Tests.csproj" />
   <Project Path="LogSimulator/LogSimulator.csproj" />
   <Project Path="ZLibBindings.Tests/ZLibBindings.Tests.csproj" />

@@ -5,7 +5,7 @@ using LogSimulator.ChacterSpec;
 using LogSimulator.Logging;
 using ZLibWrapper;
 
-namespace LogSimulator.Appliction;
+namespace LogSimulator.Application;
 
 public class Program
 {

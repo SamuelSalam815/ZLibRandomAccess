@@ -4,7 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using JetBrains.Annotations;
-using LogSimulator.Appliction;
+using LogSimulator.Application;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shouldly;
 using ZLibWrapper;
@@ -17,7 +17,7 @@ public class ProgramIntegrationTest
 {
 
     // Snapshot of 1 MB of logs with a 64 KB recovery point interval. Regenerate with:
-    // dotnet run --project LogSimulator.Appliction -- <outputDirectory> 1 64
+    // dotnet run --project LogSimulator.Application -- <outputDirectory> 1 64
     private static readonly DirectoryInfo TestArtifactsDirectory = new(Path.Combine(AppContext.BaseDirectory, "TestArtifacts"));
 
     public static IEnumerable<object[]> LogTimeStamps()

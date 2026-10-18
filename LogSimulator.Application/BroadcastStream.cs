@@ -1,4 +1,4 @@
-﻿namespace LogSimulator.Appliction;
+﻿namespace LogSimulator.Application;
 
 public class BroadcastStream(List<SubscribedStream> subscriptions) : Stream
 {

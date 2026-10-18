@@ -1,4 +1,4 @@
-﻿namespace LogSimulator.Appliction;
+﻿namespace LogSimulator.Application;
 
 public record CompressionFilePathFactory(DirectoryInfo BaseOutputDirectory, DateTimeOffset Timestamp)
 {

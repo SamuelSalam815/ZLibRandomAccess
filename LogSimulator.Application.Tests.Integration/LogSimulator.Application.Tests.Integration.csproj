@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LogSimulator.Appliction\LogSimulator.Appliction.csproj" />
+    <ProjectReference Include="..\LogSimulator.Application\LogSimulator.Application.csproj" />
   </ItemGroup>
   
 </Project>

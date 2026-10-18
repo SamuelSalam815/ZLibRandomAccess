@@ -1,6 +1,6 @@
 ﻿using System.Net.NetworkInformation;
 
-namespace LogSimulator.Appliction;
+namespace LogSimulator.Application;
 
 public class GameSimTally(int gamesPerTally, int talliesPerLine)
 {
