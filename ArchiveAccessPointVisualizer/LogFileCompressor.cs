@@ -19,7 +19,7 @@ public class LogFileCompressor
             ? Stream.Null
             : File.Open(job.RecoveryPointFilePath, FileMode.CreateNew, FileAccess.Write, FileShare.Read);
 
-        await using var compressor = new GZipWritingStreamWithRecoveryPoints(outputFileStream, recoveryPointByteInterval: job.RecoveryPointByteInterval);
+        await using var compressor = new GZipWritingStreamWithRecoveryPoints(outputFileStream, recoveryPointByteInterval: job.RecoveryPointByteInterval, encoding: job.Encoding);
         await using var accessPointStream = new RecoveryPointOffsetCsvWriter(recoveryPointFileStream, job.Encoding);
         compressor.RecoveryPointWritten += accessPointStream.Write;
 
