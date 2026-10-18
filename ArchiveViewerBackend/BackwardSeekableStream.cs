@@ -8,57 +8,28 @@ namespace ArchiveViewerBackend;
 /// bytes. Seeking backwards asks a restart function for a stream that is positioned at or before the target,
 /// then reads forward from there. <see cref="Position"/> is the offset in the decompressed data.
 /// </summary>
-public class BackwardSeekableStream : Stream
+/// <typeparam name="TContext">
+/// The resource the streams are made from, such as a file handle. The stream owns it and disposes it.
+/// </typeparam>
+public sealed class BackwardSeekableStream<TContext> : Stream where TContext : IDisposable
 {
-    private readonly Func<long, (Stream Stream, long Offset)> _restartAtOrBefore;
+    private readonly TContext _context;
+    private readonly Func<TContext, long, (Stream Stream, long Offset)> _restartAtOrBefore;
     private Stream _inner;
     private long _position;
     private bool _isDisposed;
 
+    /// <param name="context">Passed to <paramref name="restartAtOrBefore"/> on every call. Disposed with this stream.</param>
     /// <param name="restartAtOrBefore">
-    /// Given a target offset, returns a readable stream and the offset it is positioned at, which must not be
-    /// after the target. It is called once with 0 to get the first stream. It may return the stream it
-    /// returned before; any other stream replaces the old one, which is then disposed.
+    /// Given the context and a target offset, returns a readable stream and the offset it is positioned at,
+    /// which must not be after the target. It is called once with 0 to get the first stream. It may return the
+    /// stream it returned before; any other stream replaces the old one, which is then disposed.
     /// </param>
-    public BackwardSeekableStream(Func<long, (Stream Stream, long Offset)> restartAtOrBefore)
+    public BackwardSeekableStream(TContext context, Func<TContext, long, (Stream Stream, long Offset)> restartAtOrBefore)
     {
+        _context = context;
         _restartAtOrBefore = restartAtOrBefore;
-        (_inner, _position) = restartAtOrBefore(0);
-    }
-
-    /// <summary>
-    /// Seeks backwards in a plain gzip stream by decompressing again from the start. The caller keeps
-    /// ownership of <paramref name="compressed"/>, which must be seekable.
-    /// </summary>
-    public static BackwardSeekableStream ForGZip(Stream compressed) => new(_ =>
-    {
-        compressed.Position = 0;
-        return (new GZipStream(compressed, CompressionMode.Decompress, leaveOpen: true), 0);
-    });
-
-    /// <summary>
-    /// Seeks backwards in a gzip stream with recovery points by jumping to the last recovery point at or
-    /// before the target. The caller keeps ownership of <paramref name="compressed"/>, which must be seekable.
-    /// </summary>
-    public static BackwardSeekableStream ForGZipWithRecoveryPoints(
-        Stream compressed,
-        List<RecoveryPointOffset> recoveryPoints)
-    {
-        GZipReadingStreamWithRecoveryPoints? reader = null;
-        return new BackwardSeekableStream(target =>
-        {
-            var pointIndex = recoveryPoints.FindLastIndex(point => point.OffsetInUncompressedStream <= target);
-            if (reader is not null && pointIndex >= 0)
-            {
-                return (reader, reader.JumpTo(pointIndex).OffsetInUncompressedStream);
-            }
-
-            // No recovery point before the target, so decompress from the start of the file.
-            reader?.Dispose();
-            compressed.Position = 0;
-            reader = new GZipReadingStreamWithRecoveryPoints(compressed, recoveryPoints, leaveOpen: true);
-            return (reader, 0);
-        });
+        (_inner, _position) = restartAtOrBefore(context, 0);
     }
 
     public override int Read(byte[] buffer, int offset, int count)
@@ -96,7 +67,7 @@ public class BackwardSeekableStream : Stream
 
     private void Restart(long target)
     {
-        var (stream, offset) = _restartAtOrBefore(target);
+        var (stream, offset) = _restartAtOrBefore(_context, target);
         if (!ReferenceEquals(stream, _inner))
         {
             _inner.Dispose();
@@ -144,9 +115,65 @@ public class BackwardSeekableStream : Stream
         if (disposing && !_isDisposed)
         {
             _inner.Dispose();
+            _context.Dispose();
             _isDisposed = true;
         }
 
         base.Dispose(disposing);
+    }
+}
+
+/// <summary>Creates <see cref="BackwardSeekableStream{TContext}"/>s over gzip data. Each takes ownership of the compressed stream.</summary>
+public static class BackwardSeekableStream
+{
+    /// <summary>
+    /// Seeks backwards in a plain gzip stream by decompressing again from the start.
+    /// <paramref name="compressed"/> must be seekable and is disposed with the returned stream.
+    /// </summary>
+    public static Stream ForGZip(Stream compressed) =>
+        new BackwardSeekableStream<Stream>(compressed, static (source, _) =>
+        {
+            source.Position = 0;
+            return (new GZipStream(source, CompressionMode.Decompress, leaveOpen: true), 0);
+        });
+
+    /// <summary>
+    /// Seeks backwards in a gzip stream with recovery points by jumping to the last recovery point at or
+    /// before the target. <paramref name="compressed"/> must be seekable and is disposed with the returned stream.
+    /// </summary>
+    public static Stream ForGZipWithRecoveryPoints(Stream compressed, List<RecoveryPointOffset> recoveryPoints) =>
+        new BackwardSeekableStream<RecoveryPointContext>(
+            new RecoveryPointContext(compressed, recoveryPoints),
+            RestartAtRecoveryPoint);
+
+    private static (Stream Stream, long Offset) RestartAtRecoveryPoint(RecoveryPointContext context, long target)
+    {
+        var pointIndex = context.RecoveryPoints.FindLastIndex(point => point.OffsetInUncompressedStream <= target);
+        if (context.Reader is not null && pointIndex >= 0)
+        {
+            return (context.Reader, context.Reader.JumpTo(pointIndex).OffsetInUncompressedStream);
+        }
+
+        // No recovery point before the target, so decompress from the start of the file.
+        // The seekable stream disposes the reader that this one replaces.
+        context.Compressed.Position = 0;
+        context.Reader = new GZipReadingStreamWithRecoveryPoints(context.Compressed, context.RecoveryPoints, leaveOpen: true);
+        return (context.Reader, 0);
+    }
+
+    private sealed class RecoveryPointContext(Stream compressed, List<RecoveryPointOffset> recoveryPoints) : IDisposable
+    {
+        public Stream Compressed { get; } = compressed;
+
+        public List<RecoveryPointOffset> RecoveryPoints { get; } = recoveryPoints;
+
+        /// <summary>The reader made by the latest restart from the start of the file, or null before the first.</summary>
+        public GZipReadingStreamWithRecoveryPoints? Reader { get; set; }
+
+        public void Dispose()
+        {
+            Reader?.Dispose();
+            Compressed.Dispose();
+        }
     }
 }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -61,11 +61,83 @@ public class BackwardSeekableStreamTest
         return compressed;
     }
 
+    private sealed class DisposeCounter : IDisposable
+    {
+        public int Count { get; private set; }
+
+        public void Dispose() => Count++;
+    }
+
+    private static BackwardSeekableStream<DisposeCounter> Create(
+        Func<long, (Stream Stream, long Offset)> restartAtOrBefore,
+        DisposeCounter? context = null) =>
+        new(context ?? new DisposeCounter(), (_, target) => restartAtOrBefore(target));
+
+    [TestMethod]
+    public void Dispose_DisposesTheContextAndTheCurrentStream()
+    {
+        var context = new DisposeCounter();
+        var inner = new MemoryStream(Data);
+        var sut = Create(_ => (inner, 0), context);
+
+        sut.Dispose();
+
+        context.Count.ShouldBe(1);
+        inner.CanRead.ShouldBeFalse();
+    }
+
+    [TestMethod]
+    public void Dispose_AfterARestart_DisposesTheReplacedStreamToo()
+    {
+        var context = new DisposeCounter();
+        var streams = new List<MemoryStream>();
+        var sut = Create(_ =>
+        {
+            var stream = new MemoryStream(Data);
+            streams.Add(stream);
+            return (stream, 0);
+        }, context);
+        ReadAt(sut, 100, 1);
+        ReadAt(sut, 10, 1);
+
+        streams.Count.ShouldBe(2);
+        streams[0].CanRead.ShouldBeFalse();
+        streams[1].CanRead.ShouldBeTrue();
+
+        sut.Dispose();
+
+        streams[1].CanRead.ShouldBeFalse();
+        context.Count.ShouldBe(1);
+    }
+
+    [TestMethod]
+    public void ForGZip_Dispose_DisposesTheCompressedStream()
+    {
+        var compressed = CompressWithBcl();
+
+        BackwardSeekableStream.ForGZip(compressed).Dispose();
+
+        compressed.CanRead.ShouldBeFalse();
+    }
+
+    [TestMethod]
+    public void ForGZipWithRecoveryPoints_Dispose_DisposesTheCompressedStream()
+    {
+        var compressed = CompressWithRecoveryPoints(out var recoveryPoints);
+        var sut = BackwardSeekableStream.ForGZipWithRecoveryPoints(compressed, recoveryPoints);
+        ReadAt(sut, 48_000, 1);
+        ReadAt(sut, 100, 1);
+
+        sut.Dispose();
+
+        compressed.CanRead.ShouldBeFalse();
+    }
+
     [TestMethod]
     public void Seek_Forwards_DoesNotRestart()
     {
         var restartTargets = new List<long>();
-        using var sut = new BackwardSeekableStream(target =>
+        using var sut = Create(target =>
         {
             restartTargets.Add(target);
             return (new MemoryStream(Data), 0);
@@ -81,7 +153,7 @@ public class BackwardSeekableStreamTest
     {
         const long restartOffset = 20_000;
         var restartTargets = new List<long>();
-        using var sut = new BackwardSeekableStream(target =>
+        using var sut = Create(target =>
         {
             restartTargets.Add(target);
             var offset = target == 0 ? 0 : restartOffset;
@@ -97,7 +169,7 @@ public class BackwardSeekableStreamTest
     [TestMethod]
     public void Seek_PastTheEnd_StopsAtTheEnd()
     {
-        using var sut = new BackwardSeekableStream(_ => (new MemoryStream(Data), 0));
+        using var sut = Create(_ => (new MemoryStream(Data), 0));
 
         sut.Seek(DataLength + 100, SeekOrigin.Begin).ShouldBe(DataLength);
     }
@@ -105,7 +177,7 @@ public class BackwardSeekableStreamTest
     [TestMethod]
     public void Seek_BeforeTheStart_Throws()
     {
-        using var sut = new BackwardSeekableStream(_ => (new MemoryStream(Data), 0));
+        using var sut = Create(_ => (new MemoryStream(Data), 0));
 
         Should.Throw<ArgumentOutOfRangeException>(() => sut.Seek(-1, SeekOrigin.Begin));
     }
@@ -113,7 +185,7 @@ public class BackwardSeekableStreamTest
     [TestMethod]
     public void Seek_FromEnd_IsNotSupported()
     {
-        using var sut = new BackwardSeekableStream(_ => (new MemoryStream(Data), 0));
+        using var sut = Create(_ => (new MemoryStream(Data), 0));
 
         Should.Throw<NotSupportedException>(() => sut.Seek(-1, SeekOrigin.End));
     }
@@ -126,7 +198,7 @@ public class BackwardSeekableStreamTest
     [DataRow(49_900, 100)]
     public void ForGZip_SeekingBackwards_ReadsTheRequestedBytes(int position, int count)
     {
-        using var compressed = CompressWithBcl();
+        var compressed = CompressWithBcl();
         using var sut = BackwardSeekableStream.ForGZip(compressed);
         ReadAt(sut, 48_000, 1);
 
@@ -142,7 +214,7 @@ public class BackwardSeekableStreamTest
     [DataRow(49_900, 100)]
     public void ForGZipWithRecoveryPoints_SeekingBackwards_ReadsTheRequestedBytes(int position, int count)
     {
-        using var compressed = CompressWithRecoveryPoints(out var recoveryPoints);
+        var compressed = CompressWithRecoveryPoints(out var recoveryPoints);
         recoveryPoints.Count.ShouldBeGreaterThan(3);
         using var sut = BackwardSeekableStream.ForGZipWithRecoveryPoints(compressed, recoveryPoints);
         ReadAt(sut, 48_000, 1);

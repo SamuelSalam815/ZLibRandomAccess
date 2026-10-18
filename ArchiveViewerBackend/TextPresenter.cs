@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using ZLibWrapper;
 
 namespace ArchiveViewerBackend;
@@ -18,7 +18,7 @@ public sealed class TextPresenter
     private readonly int _bufferCapacityInChars;
     private LineAwareReader _reader;
 
-    /// <param name="stream">A seekable stream of decompressed text, such as <see cref="BackwardSeekableStream"/>.</param>
+    /// <param name="stream">A seekable stream of decompressed text, such as one from <see cref="BackwardSeekableStream.ForGZipWithRecoveryPoints"/>. The caller disposes it.</param>
     /// <param name="recoveryPoints">Recovery points in ascending order. They are assumed to fall mid-line.</param>
     /// <param name="renderedLineCount">The number of lines <see cref="Render"/> returns.</param>
     /// <param name="bufferedLineCount">The number of lines to keep buffered. At least <paramref name="renderedLineCount"/>.</param>
