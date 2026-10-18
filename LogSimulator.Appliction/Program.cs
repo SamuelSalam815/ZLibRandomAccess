@@ -1,9 +1,6 @@
-﻿using System.Globalization;
-using System.IO.Compression;
+﻿using System.IO.Compression;
 using System.Text;
-using CsvHelper;
 using JetBrains.Annotations;
-using LogSimulator.Appliction.AccessPointWriting;
 using LogSimulator.ChacterSpec;
 using LogSimulator.Logging;
 using ZLibWrapper;
@@ -24,10 +21,8 @@ public class Program
         CompressionFilePathFactory filePathFactory,
         GZipWritingStreamWithRecoveryPoints writingStreamWithRecoveryPoints)
     {
-        var accessPointFileStream = Create(filePathFactory.RecoveryPointFile);
-        var csvWriter = new CsvWriter(new StreamWriter(accessPointFileStream), CultureInfo.InvariantCulture);
-        csvWriter.Context.RegisterClassMap<RecoveryPointOffsetCsvMap>();
-        writingStreamWithRecoveryPoints.RecoveryPointWritten += csvWriter.WriteRecord;
+        var csvWriter = new RecoveryPointOffsetCsvWriter(Create(filePathFactory.RecoveryPointFile), Encoding.Default);
+        writingStreamWithRecoveryPoints.RecoveryPointWritten += csvWriter.Write;
         writingStreamWithRecoveryPoints.StreamClosed += csvWriter.Dispose;
     }
 

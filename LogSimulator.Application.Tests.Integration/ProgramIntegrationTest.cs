@@ -22,7 +22,7 @@ public class ProgramIntegrationTest
 
     public static IEnumerable<object[]> LogTimeStamps()
     {
-        yield return [new DateTimeOffset(2026, 10, 18, 21, 6, 30, TimeSpan.Zero)];
+        yield return [new DateTimeOffset(2026, 10, 18, 21, 8, 28, TimeSpan.Zero)];
     }
 
     [TestMethod]
