@@ -1,4 +1,4 @@
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OxyPlot.Axes;
 using OxyPlot.Series;
@@ -50,6 +50,25 @@ public class BarChartBuilderTest
         var model = new BarChartBuilder<string, string>(Config("{0:0.0}")).Build(Bars);
 
         model.Series.Cast<BarSeries>().ShouldAllBe(series => series.LabelFormatString == "{0:0.0}");
+    }
+
+    [TestMethod]
+    public void Write_UsesAnOpaqueBackgroundSoTextIsReadableOnDarkPages()
+    {
+        var path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + ".svg");
+        try
+        {
+            var model = new BarChartBuilder<string, string>(Config()).Build(Bars);
+
+            PlotModelSvgWriter.Write(model, path);
+
+            model.Background.ShouldBe(OxyPlot.OxyColors.White);
+            File.ReadAllText(path).ShouldContain("fill:rgb(255,255,255);stroke:none;");
+        }
+        finally
+        {
+            File.Delete(path);
+        }
     }
 
     [TestMethod]
