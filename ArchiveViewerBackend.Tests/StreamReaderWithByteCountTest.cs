@@ -76,6 +76,30 @@ public class StreamReaderWithByteCountTest
     }
 
     [TestMethod]
+    [DataRow("UTF-8")]
+    [DataRow("utf-16")]
+    [DataRow("utf-32")]
+    public void NumberOfBytesRead_CountsASurrogatePairOnceWithItsEncodedSize(string encodingName)
+    {
+        var encoding = Encoding.GetEncoding(encodingName);
+        using var sut = new StreamReaderWithByteCount(EncodeWith("a😀b", encoding), encoding);
+        var bytesAfterEachRead = new List<int>();
+
+        for (var character = sut.Read(); character != -1; character = sut.Read())
+        {
+            bytesAfterEachRead.Add(sut.NumberOfBytesRead);
+        }
+
+        // The reads return "a", the two halves of the emoji, and "b".
+        bytesAfterEachRead.ShouldBe([
+            encoding.GetByteCount("a"),
+            encoding.GetByteCount("a"),
+            encoding.GetByteCount("a😀"),
+            encoding.GetByteCount("a😀b"),
+        ]);
+    }
+
+    [TestMethod]
     public void ResetByteCount_SetsByteCountToZero()
     {
         using var sut = new  StreamReaderWithByteCount(EncodeWith(SampleTexts.MixedNewLineStyles, TestEncoding), TestEncoding);

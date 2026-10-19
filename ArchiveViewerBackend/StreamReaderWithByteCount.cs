@@ -11,6 +11,7 @@ public class StreamReaderWithByteCount : TextReader
     private readonly Encoding _encoding;
     private readonly Decoder _decoder;
     public int NumberOfBytesRead { get; private set; }
+    private char _previousCharacter;
     private bool _isDisposed;
     private readonly bool _leaveInnerStreamOpen;
 
@@ -76,9 +77,26 @@ public class StreamReaderWithByteCount : TextReader
             return -1;
         }
         var result = _characterBuffer.Contents[0];
-        NumberOfBytesRead += _encoding.GetByteCount([result]);
+        NumberOfBytesRead += BytesToCount(result);
+        _previousCharacter = result;
         _characterBuffer.DropFirst(1);
         return result;
+    }
+
+    /// <summary>
+    /// A surrogate pair is encoded as one character, so neither half has a size alone. The pair is counted
+    /// when its second half is read.
+    /// </summary>
+    private int BytesToCount(char character)
+    {
+        if (char.IsHighSurrogate(character))
+        {
+            return 0;
+        }
+
+        return char.IsLowSurrogate(character) && char.IsHighSurrogate(_previousCharacter)
+            ? _encoding.GetByteCount([_previousCharacter, character])
+            : _encoding.GetByteCount([character]);
     }
 
     protected override void Dispose(bool disposing)
