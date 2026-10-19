@@ -23,6 +23,7 @@ public class BarChartBuilder<TCategory, TSeries>(BarChartConfiguration<TCategory
         var model = new PlotModel
         {
             Title = config.Title,
+            Subtitle = config.Subtitle,
         };
 
         model.Legends.Add(

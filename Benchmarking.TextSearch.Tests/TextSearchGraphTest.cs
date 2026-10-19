@@ -30,6 +30,14 @@ public class TextSearchGraphTest
     }
 
     [TestMethod]
+    public void Build_ShowsTheMachineDescriptionAsSubtitle()
+    {
+        var model = TextSearchGraph.Build(TextSearchGraph.ToBars(Measurements), "Some CPU, 8 cores");
+
+        model.Subtitle.ShouldBe("Some CPU, 8 cores");
+    }
+
+    [TestMethod]
     public void Build_ListsSeriesInTheOrderOfTheBenchmarks()
     {
         var model = TextSearchGraph.Build(TextSearchGraph.ToBars(Measurements));

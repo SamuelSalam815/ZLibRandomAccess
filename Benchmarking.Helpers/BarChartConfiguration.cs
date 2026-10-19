@@ -3,6 +3,7 @@
 public record BarChartConfiguration<TCategory, TSeries>
 {
     public required string Title { get; init; }
+    public string? Subtitle { get; init; }
     public string CategoryAxisLabel { get; init; } = string.Empty;
     public string ValueAxisLabel { get; init; } = string.Empty;
     public string SeriesLabel { get; init; } = string.Empty;

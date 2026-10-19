@@ -29,15 +29,18 @@ public static class TextSearchGraph
             report.BenchmarkCase.Descriptor.WorkloadMethod.Name,
             (int)report.BenchmarkCase.Parameters[nameof(BenchmarkingRegexInGzipStream.UncompressedLogSizeInMegabytes)],
             report.ResultStatistics!.Mean));
-        return Build(ToBars(measurements));
+        // BenchmarkDotNet describes the OS, CPU (including core counts) and runtime it ran on.
+        var machine = string.Join("\n", summary.HostEnvironmentInfo.ToFormattedString());
+        return Build(ToBars(measurements), machine);
     }
 
-    public static PlotModel Build(List<BarChartBar<int, string>> bars)
+    public static PlotModel Build(List<BarChartBar<int, string>> bars, string? machineDescription = null)
     {
         return new BarChartBuilder<int, string>(
             new BarChartConfiguration<int, string>
             {
                 Title = "Regex search over gzip-compressed logs",
+                Subtitle = machineDescription,
                 CategoryAxisLabel = "Uncompressed log size (MB)",
                 ValueAxisLabel = "Time to find every match (seconds, lower is better)",
                 SeriesLabel = "Search method",
