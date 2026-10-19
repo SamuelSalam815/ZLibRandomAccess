@@ -1,4 +1,3 @@
-using System.Buffers;
 using System.Text;
 
 namespace ArchiveViewerBackend;
@@ -16,7 +15,7 @@ public sealed class LineAwareReader
     private readonly Encoding _encoding;
     private readonly Decoder _decoder;
     private readonly int _targetLineCount;
-    private readonly RingBuffer<char> _text;
+    private readonly CompactingBuffer<char> _text;
     private readonly byte[] _bytes = new byte[ChunkSizeInBytes];
     private int _lineFeedCount;
     private bool _isSkippingPartialLine;
@@ -42,7 +41,7 @@ public sealed class LineAwareReader
         _encoding = encoding;
         _decoder = encoding.GetDecoder();
         _targetLineCount = targetLineCount;
-        _text = new RingBuffer<char>(capacityInChars);
+        _text = new CompactingBuffer<char>(capacityInChars);
         FirstLineNumber = lineAtStart;
         _isSkippingPartialLine = startsMidLine;
     }
@@ -53,7 +52,7 @@ public sealed class LineAwareReader
     public bool IsAtEndOfStream { get; private set; }
 
     /// <summary>The buffered text, valid until the next call to <see cref="Fill"/> or <see cref="DropLines"/>.</summary>
-    public ReadOnlySpanPair<char> Text => _text.Contents;
+    public ReadOnlySpan<char> Text => _text.Contents;
 
     /// <summary>The number of lines in <see cref="Text"/>. After the end of the stream, an unfinished last line counts.</summary>
     public int LineCount => _lineFeedCount + (IsAtEndOfStream && _text.Length > 0 && Text[^1] != '\n' ? 1 : 0);
@@ -64,9 +63,8 @@ public sealed class LineAwareReader
     {
         while (LineCount < _targetLineCount && !IsAtEndOfStream)
         {
-            // n bytes decode to at most n + 1 characters, so reading one byte fewer than the free space cannot overflow.
-            var bytesToRead = Math.Min(_bytes.Length, _text.Capacity - _text.Length - 1);
-            if (bytesToRead <= 0)
+            var bytesToRead = BytesThatCertainlyFit(_text.Capacity - _text.Length);
+            if (bytesToRead == 0)
             {
                 throw new LineTooLongException(_text.Capacity);
             }
@@ -107,32 +105,47 @@ public sealed class LineAwareReader
         FirstLineNumber += count;
     }
 
+    /// <summary>
+    /// The decoder throws if its output span is too small, so the reader reads only as many bytes as are
+    /// certain to decode into the free space. That can be fewer than the free space in characters: n bytes can
+    /// decode to more than n characters, because the decoder holds a partly received character between reads
+    /// and the next bytes can complete it. For example, 3 bytes of an emoji arrived last time and 1 byte
+    /// arrives now; that 1 byte produces 2 characters (UTF-8 reports <c>n + 1</c>). The headroom comes from the
+    /// encoding's own <see cref="Encoding.GetMaxCharCount"/>, so it is right for every encoding.
+    /// </summary>
+    private int BytesThatCertainlyFit(int freeChars)
+    {
+        var byteCount = Math.Min(_bytes.Length, freeChars);
+        while (byteCount > 0 && _encoding.GetMaxCharCount(byteCount) > freeChars)
+        {
+            byteCount--;
+        }
+
+        return byteCount;
+    }
+
     private void AppendDecoded(int byteCount)
     {
-        var chars = ArrayPool<char>.Shared.Rent(_encoding.GetMaxCharCount(byteCount));
-        try
+        var writable = _text.GetWritableSpan(_encoding.GetMaxCharCount(byteCount));
+        var charCount = _decoder.GetChars(_bytes.AsSpan(0, byteCount), writable, flush: false);
+        if (_isSkippingPartialLine)
         {
-            var charCount = _decoder.GetChars(_bytes, 0, byteCount, chars, 0);
-            ReadOnlySpan<char> decoded = chars.AsSpan(0, charCount);
-            if (_isSkippingPartialLine)
+            var lineFeedIndex = writable[..charCount].IndexOf('\n');
+            if (lineFeedIndex < 0)
             {
-                var lineFeedIndex = decoded.IndexOf('\n');
-                if (lineFeedIndex < 0)
-                {
-                    return;
-                }
-
-                decoded = decoded[(lineFeedIndex + 1)..];
-                _isSkippingPartialLine = false;
-                FirstLineNumber++;
+                // The whole chunk is the rest of the partial line. Nothing is reported written, so it is discarded.
+                return;
             }
 
-            _text.Append(decoded);
-            _lineFeedCount += decoded.Count('\n');
+            var wholeLines = writable[(lineFeedIndex + 1)..charCount];
+            wholeLines.CopyTo(writable);
+            charCount = wholeLines.Length;
+            _isSkippingPartialLine = false;
+            FirstLineNumber++;
         }
-        finally
-        {
-            ArrayPool<char>.Shared.Return(chars);
-        }
+
+        ReadOnlySpan<char> decoded = writable[..charCount];
+        _lineFeedCount += decoded.Count('\n');
+        _text.ReportWritten(charCount);
     }
 }

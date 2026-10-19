@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using JetBrains.Annotations;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -29,12 +30,7 @@ public class LineAwareReaderTest
         bool startsMidLine = false) =>
         new(new MemoryStream(encoding.GetBytes(text)), encoding, targetLineCount, capacityInChars, lineAtStart, startsMidLine);
 
-    private static string TextOf(LineAwareReader reader)
-    {
-        var chars = new char[reader.Text.Length];
-        reader.Text.CopyTo(chars);
-        return new string(chars);
-    }
+    private static string TextOf(LineAwareReader reader) => new(reader.Text);
 
     [TestMethod]
     [DynamicData(nameof(Encodings))]
@@ -93,6 +89,28 @@ public class LineAwareReaderTest
         sut.LineCount.ShouldBeGreaterThanOrEqualTo(2);
         sut.FirstLineNumber.ShouldBeGreaterThan(0);
         TextOf(sut).ShouldStartWith($"l{sut.FirstLineNumber}\n");
+    }
+
+    [TestMethod]
+    [DataRow("UTF-8")]
+    [DataRow("utf-16")]
+    public void FillAndDropLines_Repeatedly_DecodesCharactersThatNeedTwoCodeUnits(string encodingName)
+    {
+        // The emoji are surrogate pairs. The small buffer makes the text move through the whole array.
+        var encoding = Encoding.GetEncoding(encodingName);
+        string[] lines = ["abcd", "\U0001F600\U0001F600", "xy", "\U0001F600a", "z", "\U0001F600\U0001F600\U0001F600"];
+        var sut = CreateReader(string.Concat(lines.Select(line => line + "\n")), encoding, targetLineCount: 2, capacityInChars: 16);
+        var linesRead = new List<string>();
+
+        sut.Fill();
+        while (sut.LineCount > 0)
+        {
+            linesRead.Add(TextOf(sut).Split('\n')[0]);
+            sut.DropLines(1);
+            sut.Fill();
+        }
+
+        linesRead.ShouldBe(lines);
     }
 
     [TestMethod]

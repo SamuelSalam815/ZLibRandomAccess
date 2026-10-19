@@ -92,16 +92,14 @@ public sealed class TextPresenter
         return lines;
     }
 
-    private static string LineText(ReadOnlySpanPair<char> text, int start, int length)
+    private static string LineText(ReadOnlySpan<char> text, int start, int length)
     {
         if (length > 0 && text[start + length - 1] == '\r')
         {
             length--;
         }
 
-        var chars = new char[length];
-        text.Slice(start, length).CopyTo(chars);
-        return new string(chars);
+        return new string(text.Slice(start, length));
     }
 
     private void LoadBufferStartingAt(long start)
