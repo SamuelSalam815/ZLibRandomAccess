@@ -100,6 +100,23 @@ public class StreamReaderWithByteCountTest
     }
 
     [TestMethod]
+    public void Constructor_BufferTooSmallForOneCharacter_Throws()
+    {
+        // A surrogate pair can take two characters of room in UTF-8.
+        Should.Throw<ArgumentOutOfRangeException>(() =>
+            new StreamReaderWithByteCount(EncodeWith("a", Encoding.UTF8), Encoding.UTF8, bufferSize: 1));
+    }
+
+    [TestMethod]
+    public void Read_SingleByteEncoding_WorksWithAOneCharacterBuffer()
+    {
+        // Latin-1 never needs two characters of room for one character.
+        using var sut = new StreamReaderWithByteCount(EncodeWith("abc", Encoding.Latin1), Encoding.Latin1, bufferSize: 1);
+
+        sut.ReadToEnd().ShouldBe("abc");
+    }
+
+    [TestMethod]
     public void ResetByteCount_SetsByteCountToZero()
     {
         using var sut = new  StreamReaderWithByteCount(EncodeWith(SampleTexts.MixedNewLineStyles, TestEncoding), TestEncoding);

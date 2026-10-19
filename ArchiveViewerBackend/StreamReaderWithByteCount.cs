@@ -10,6 +10,9 @@ public class StreamReaderWithByteCount : TextReader
     private readonly Stream _stream;
     private readonly Encoding _encoding;
     private readonly Decoder _decoder;
+    // The decoder throws unless its output has room for what one more byte can decode to:
+    // two characters where a surrogate pair is possible, one for single-byte encodings.
+    private readonly int _roomForOneCharacter;
     public int NumberOfBytesRead { get; private set; }
     private char _previousCharacter;
     private bool _isDisposed;
@@ -21,7 +24,8 @@ public class StreamReaderWithByteCount : TextReader
 
     public StreamReaderWithByteCount(Stream stream, Encoding encoding, int bufferSize = 1024, bool leaveOpen = false)
     {
-        ArgumentOutOfRangeException.ThrowIfLessThan(bufferSize, Utf16.MaxCodeUnitsPerCharacter);
+        _roomForOneCharacter = encoding.GetMaxCharCount(1);
+        ArgumentOutOfRangeException.ThrowIfLessThan(bufferSize, _roomForOneCharacter);
         _byteBuffer = new CompactingBuffer<byte>(bufferSize);
         _characterBuffer = new CompactingBuffer<char>(bufferSize);
         _stream = stream;
@@ -59,9 +63,7 @@ public class StreamReaderWithByteCount : TextReader
             }
         }
 
-        // The decoder throws unless the output has room for the next whole character.
-        while (_byteBuffer.Length > 0
-               && _characterBuffer.Capacity - _characterBuffer.Length >= Utf16.MaxCodeUnitsPerCharacter)
+        while (_byteBuffer.Length > 0 && _characterBuffer.Capacity - _characterBuffer.Length >= _roomForOneCharacter)
         {
             _decoder.Convert(_byteBuffer.Contents, _characterBuffer.GetWritableSpan(), false, out var bytesUsed, out var charsUsed, out _);
             _byteBuffer.DropFirst(bytesUsed);
