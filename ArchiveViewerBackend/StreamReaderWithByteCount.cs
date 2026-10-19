@@ -1,12 +1,12 @@
-using System.Text;
+﻿using System.Text;
 
 namespace ArchiveViewerBackend;
 
 public class StreamReaderWithByteCount : TextReader
 {
 
-    private readonly RingBuffer<byte> _byteBuffer;
-    private readonly RingBuffer<char> _characterBuffer;
+    private readonly CompactingBuffer<byte> _byteBuffer;
+    private readonly CompactingBuffer<char> _characterBuffer;
     private readonly Stream _stream;
     private readonly Encoding _encoding;
     private readonly Decoder _decoder;
@@ -20,8 +20,10 @@ public class StreamReaderWithByteCount : TextReader
 
     public StreamReaderWithByteCount(Stream stream, Encoding encoding, int bufferSize = 1024, bool leaveOpen = false)
     {
-        _byteBuffer = new RingBuffer<byte>(bufferSize);
-        _characterBuffer = new RingBuffer<char>(bufferSize);
+        // A surrogate pair needs two characters of room, or the decoder throws.
+        ArgumentOutOfRangeException.ThrowIfLessThan(bufferSize, 2);
+        _byteBuffer = new CompactingBuffer<byte>(bufferSize);
+        _characterBuffer = new CompactingBuffer<char>(bufferSize);
         _stream = stream;
         _leaveInnerStreamOpen = leaveOpen;
         _encoding = encoding;
@@ -36,7 +38,7 @@ public class StreamReaderWithByteCount : TextReader
     public override int Peek()
     {
         DecodeMoreCharactersIfAllCharactersHaveBeenRead();
-        return _characterBuffer.Length == 0 ? -1 : _characterBuffer[0];
+        return _characterBuffer.Length == 0 ? -1 : _characterBuffer.Contents[0];
     }
 
     private void DecodeMoreCharactersIfAllCharactersHaveBeenRead()
@@ -57,9 +59,10 @@ public class StreamReaderWithByteCount : TextReader
             }
         }
 
-        while (_byteBuffer.Length > 0 && _characterBuffer.Length < _characterBuffer.Capacity)
+        // The decoder throws unless the output has room for the next character, which can take two code units.
+        while (_byteBuffer.Length > 0 && _characterBuffer.Capacity - _characterBuffer.Length >= 2)
         {
-            _decoder.Convert(_byteBuffer.Contents.First, _characterBuffer.GetWritableSpan(), false, out var bytesUsed, out var charsUsed, out _);
+            _decoder.Convert(_byteBuffer.Contents, _characterBuffer.GetWritableSpan(), false, out var bytesUsed, out var charsUsed, out _);
             _byteBuffer.DropFirst(bytesUsed);
             _characterBuffer.ReportWritten(charsUsed);
         }
@@ -72,7 +75,7 @@ public class StreamReaderWithByteCount : TextReader
         {
             return -1;
         }
-        var result = _characterBuffer[0];
+        var result = _characterBuffer.Contents[0];
         NumberOfBytesRead += _encoding.GetByteCount([result]);
         _characterBuffer.DropFirst(1);
         return result;

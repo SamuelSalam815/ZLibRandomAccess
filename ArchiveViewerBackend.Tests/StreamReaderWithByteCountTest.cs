@@ -131,6 +131,20 @@ public class StreamReaderWithByteCountTest
     }
 
     [TestMethod]
+    [DataRow("UTF-8")]
+    [DataRow("utf-16")]
+    public void Read_CharactersThatNeedTwoCodeUnits_AreDecodedWhateverThePositionInTheBuffer(string encodingName)
+    {
+        // With a buffer of 4 characters, the three letters leave the next write position at the last cell,
+        // where a surrogate pair does not fit.
+        var encoding = Encoding.GetEncoding(encodingName);
+        const string text = "abc\U0001F600\U0001F600";
+        using var sut = new StreamReaderWithByteCount(EncodeWith(text, encoding), encoding, bufferSize: 4);
+
+        sut.ReadToEnd().ShouldBe(text);
+    }
+
+    [TestMethod]
     public void LeaveOpen_DoesNotDisposeInnerStream()
     {
         var textStream = EncodeWith("test", TestEncoding);
