@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 
 namespace ArchiveViewerBackend;
 
@@ -22,7 +22,9 @@ public sealed class LineAwareReader
 
     /// <param name="source">A stream positioned at the first byte to read.</param>
     /// <param name="targetLineCount">The number of lines <see cref="Fill"/> reads up to.</param>
-    /// <param name="capacityInChars">The most characters the buffer holds. Must be at least 2.</param>
+    /// <param name="capacityInChars">
+    /// The most characters the buffer holds. Must be at least <see cref="Utf16.MaxCodeUnitsPerCharacter"/>.
+    /// </param>
     /// <param name="lineAtStart">The index of the line that <paramref name="source"/> is positioned in.</param>
     /// <param name="startsMidLine">
     /// True when <paramref name="source"/> is positioned inside a line, such as at a recovery point. The rest
@@ -36,7 +38,7 @@ public sealed class LineAwareReader
         long lineAtStart = 0,
         bool startsMidLine = false)
     {
-        ArgumentOutOfRangeException.ThrowIfLessThan(capacityInChars, 2);
+        ArgumentOutOfRangeException.ThrowIfLessThan(capacityInChars, Utf16.MaxCodeUnitsPerCharacter);
         _source = source;
         _encoding = encoding;
         _decoder = encoding.GetDecoder();
@@ -63,7 +65,12 @@ public sealed class LineAwareReader
     {
         while (LineCount < _targetLineCount && !IsAtEndOfStream)
         {
-            var bytesToRead = BytesThatCertainlyFit(_text.Capacity - _text.Length);
+            // The decoder throws if its output span is too small, so read only as many bytes as are certain to fit.
+            // n bytes can decode to n + 1 characters (see Encoding.GetMaxCharCount): the decoder keeps a partly
+            // received character between reads, and the next bytes can complete it. For example, 3 bytes of an
+            // emoji arrived last time and 1 byte arrives now; that 1 byte produces 2 characters. So one character
+            // of room is kept free as headroom.
+            var bytesToRead = Math.Clamp(_text.Capacity - _text.Length - 1, 0, _bytes.Length);
             if (bytesToRead == 0)
             {
                 throw new LineTooLongException(_text.Capacity);
@@ -103,25 +110,6 @@ public sealed class LineAwareReader
         _text.DropFirst(charsToDrop);
         _lineFeedCount -= lineFeedsDropped;
         FirstLineNumber += count;
-    }
-
-    /// <summary>
-    /// The decoder throws if its output span is too small, so the reader reads only as many bytes as are
-    /// certain to decode into the free space. That can be fewer than the free space in characters: n bytes can
-    /// decode to more than n characters, because the decoder holds a partly received character between reads
-    /// and the next bytes can complete it. For example, 3 bytes of an emoji arrived last time and 1 byte
-    /// arrives now; that 1 byte produces 2 characters (UTF-8 reports <c>n + 1</c>). The headroom comes from the
-    /// encoding's own <see cref="Encoding.GetMaxCharCount"/>, so it is right for every encoding.
-    /// </summary>
-    private int BytesThatCertainlyFit(int freeChars)
-    {
-        var byteCount = Math.Min(_bytes.Length, freeChars);
-        while (byteCount > 0 && _encoding.GetMaxCharCount(byteCount) > freeChars)
-        {
-            byteCount--;
-        }
-
-        return byteCount;
     }
 
     private void AppendDecoded(int byteCount)
