@@ -36,7 +36,7 @@ public class StreamReaderWithByteCount : TextReader
     public override int Peek()
     {
         DecodeMoreCharactersIfAllCharactersHaveBeenRead();
-        return _characterBuffer[0];
+        return _characterBuffer.Length == 0 ? -1 : _characterBuffer[0];
     }
 
     private void DecodeMoreCharactersIfAllCharactersHaveBeenRead()

@@ -113,6 +113,24 @@ public class StreamReaderWithByteCountTest
     }
 
     [TestMethod]
+    public void Peek_OnEmptyStream_ReturnsMinusOne()
+    {
+        using var sut = new StreamReaderWithByteCount(EncodeWith("", TestEncoding), TestEncoding);
+
+        sut.Peek().ShouldBe(-1);
+    }
+
+    [TestMethod]
+    public void Peek_AfterReadingEveryCharacter_ReturnsMinusOne()
+    {
+        using var sut = new StreamReaderWithByteCount(EncodeWith("ab", TestEncoding), TestEncoding);
+        sut.Read().ShouldBe('a');
+        sut.Read().ShouldBe('b');
+
+        sut.Peek().ShouldBe(-1);
+    }
+
+    [TestMethod]
     public void LeaveOpen_DoesNotDisposeInnerStream()
     {
         var textStream = EncodeWith("test", TestEncoding);
