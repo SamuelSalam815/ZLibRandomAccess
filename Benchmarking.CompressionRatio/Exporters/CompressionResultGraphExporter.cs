@@ -1,15 +1,24 @@
-﻿using Benchmarking.CompressionRatio.Values;
+using Benchmarking.CompressionRatio.Values;
 using Benchmarking.Helpers;
-using OxyPlot;
-using OxyPlot.Axes;
-using OxyPlot.Legends;
-using OxyPlot.Series;
-using CompressionMethod = Benchmarking.CompressionRatio.Values.CompressionMethod;
 
 namespace Benchmarking.CompressionRatio.Exporters;
 
-public sealed class CompressionResultGraphExporter(Stream outputStream) : ICompressionResultExporter
+public sealed class CompressionResultGraphExporter(string outputFilePath) : ICompressionResultExporter
 {
+    private static readonly string[] MethodOrder =
+    [
+        MethodName(CompressionMethod.GZipUsingBaseClassLibrary),
+        MethodName(CompressionMethod.GZipUsingZLib),
+        MethodName(CompressionMethod.GZipUsingZLibWithFullFlushing),
+    ];
+
+    private static readonly string[] LevelOrder =
+    [
+        LevelName(NormalizedCompressionLevel.Fastest),
+        LevelName(NormalizedCompressionLevel.Default),
+        LevelName(NormalizedCompressionLevel.Smallest),
+    ];
+
     private readonly List<CompressionResult> _results = [];
 
     public void Accept(CompressionResult result)
@@ -19,90 +28,66 @@ public sealed class CompressionResultGraphExporter(Stream outputStream) : ICompr
 
     public void Complete()
     {
-        var groupedData = _results
-            .Select(result => new
-            {
-                Method = result.Request.CompressionMethod,
-                Level = result.Request.CompressionLevel,
-                CompressionRatio = 1d - (double)result.NumberOfBytesAfterCompression /
-                    result.Request.NumberOfBytesToCompress,
-            })
-            .GroupBy(x => x.Level)
-            .OrderBy(x => x.Key)
-            .ToList();
-        // HACK: Migration to Benchmarking.Helpers.BarChartBuilder is unfinished. Bars still need mapping from
-        // CompressionResult (average the ratio per method/level so each combination has one bar). Until then the
-        // hand-rolled PlotModel below is still used.
-        // new BarChartBuilder<CompressionMethod, NormalizedCompressionLevel>(
-        //     new BarChartConfiguration<CompressionMethod, NormalizedCompressionLevel>
-        //     {
-        //         Title = "Compression Methods against Compression Ratios",
-        //         CategoryAxisLabel = "Compression Methods",
-        //         ValueAxisLabel = "Compression Ratio",
-        //         SeriesLabel = "Compression Mode",
-        //     }).Build(_results
-        //     .Select(x => new BarChartBar<CompressionMethod, NormalizedCompressionLevel>()));
-        var model = new PlotModel
-        {
-            Title = "Compression Methods against Compression Ratios",
-        };
-
-        model.Legends.Add(
-            new Legend()
-            {
-                LegendTitle = "Compression Mode",
-                LegendPlacement = LegendPlacement.Outside,
-                LegendPosition = LegendPosition.BottomCenter,
-                LegendOrientation = LegendOrientation.Horizontal,
-                LegendBorderThickness = 0
-            });
-
-        foreach (var group in groupedData)
-        {
-            var entries = group
-                .GroupBy(x => x.Method)
-                .Select(g => new {Method = g.Key, CompressionRatio = g.Average(x => x.CompressionRatio)})
-                .OrderBy(x => x.Method);
-            var series = new BarSeries { Title = group.Key.ToString(), StrokeColor = OxyColors.Black, StrokeThickness = 1 };
-            foreach (var entry in entries)
-            {
-                series.Items.Add(new BarItem(entry.CompressionRatio));
-            }
-            model.Series.Add(series);
-        }
-
-        var categoryAxis = new CategoryAxis
-        {
-            Position = AxisPosition.Left,
-            Title = "Compression Method",
-        };
-        var labels = groupedData.SelectMany(x => x).Select(x => x.Method).Distinct();
-        foreach (var label in labels)
-        {
-            categoryAxis.Labels.Add(label.ToString());
-        }
-
-        var minDataValue = groupedData.Min(g => g.Min(x => x.CompressionRatio));
-        var axisMinimum = Math.Max(0, minDataValue - 0.02);
-        var valueAxis = new LinearAxis
-        {
-            Title = "Compression Ratio",
-            Position = AxisPosition.Bottom,
-            MinimumPadding = 0,
-            MaximumPadding = 0.06,
-            AbsoluteMinimum = axisMinimum,
-            MajorGridlineStyle = LineStyle.Solid,
-            MajorGridlineColor = OxyColors.Gray
-        };
-        model.Axes.Add(categoryAxis);
-        model.Axes.Add(valueAxis);
-
-        var exporter = new SvgExporter { Width = 1600, Height = 600 };
-        exporter.Export(model, outputStream);
+        PlotModelSvgWriter.Write(BuildChart(_results), outputFilePath);
     }
 
     public void Dispose()
     {
-        outputStream.Dispose();
+        // No resources to release
     }
+
+    /// <summary>
+    /// One bar per method and level: the space saved, averaged over every uncompressed size that was measured.
+    /// </summary>
+    public static List<BarChartBar<string, string>> ToBars(IEnumerable<CompressionResult> results)
+    {
+        return results
+            .GroupBy(result => (result.Request.CompressionMethod, result.Request.CompressionLevel))
+            .Select(group => new BarChartBar<string, string>(
+                MethodName(group.Key.CompressionMethod),
+                LevelName(group.Key.CompressionLevel),
+                group.Average(result => 100d * (1d - (double)result.NumberOfBytesAfterCompression /
+                    result.Request.NumberOfBytesToCompress))))
+            .ToList();
+    }
+
+    private static OxyPlot.PlotModel BuildChart(List<CompressionResult> results)
+    {
+        var sizes = results.Select(result => result.Request.NumberOfBytesToCompress).Distinct().Order().ToList();
+        var sizeRange = sizes.Count == 0
+            ? string.Empty
+            : $" Averaged over {sizes.First() / (1024 * 1024)}-{sizes.Last() / (1024 * 1024)} MB of simulated logs.";
+
+        return new BarChartBuilder<string, string>(
+            new BarChartConfiguration<string, string>
+            {
+                Title = "Compression ratio: cost of full flushes",
+                CategoryAxisLabel = "Gzip implementation",
+                ValueAxisLabel = "Space saved (%, higher is better)." + sizeRange,
+                SeriesLabel = "Compression level",
+                CategoryComparer = OrderedBy(MethodOrder),
+                SeriesComparer = OrderedBy(LevelOrder),
+                MinimumValue = 0,
+                ValueLabelFormat = "{0:0.00}",
+            }).Build(ToBars(results));
+    }
+
+    private static Comparer<string> OrderedBy(string[] order) =>
+        Comparer<string>.Create((x, y) => Array.IndexOf(order, x).CompareTo(Array.IndexOf(order, y)));
+
+    private static string MethodName(CompressionMethod method) => method switch
+    {
+        CompressionMethod.GZipUsingBaseClassLibrary => ".NET GZipStream",
+        CompressionMethod.GZipUsingZLib => "zlib",
+        CompressionMethod.GZipUsingZLibWithFullFlushing => "zlib + full flush every 1 MB",
+        _ => throw new ArgumentOutOfRangeException(nameof(method), method, null),
+    };
+
+    private static string LevelName(NormalizedCompressionLevel level) => level switch
+    {
+        NormalizedCompressionLevel.Fastest => "Fastest",
+        NormalizedCompressionLevel.Default => "Default",
+        NormalizedCompressionLevel.Smallest => "Smallest",
+        _ => throw new ArgumentOutOfRangeException(nameof(level), level, null),
+    };
 }
