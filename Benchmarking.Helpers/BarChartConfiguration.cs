@@ -10,4 +10,9 @@ public record BarChartConfiguration<TCategory, TSeries>
     public Comparer<TSeries> SeriesComparer { get; init; } = Comparer<TSeries>.Default;
     public double? MaximumValue { get; init; }
     public double? MinimumValue { get; init; }
+
+    /// <summary>
+    /// Standard numeric format string (e.g. <c>{0:0.00}</c>) used to print each bar's value next to it. No labels when null.
+    /// </summary>
+    public string? ValueLabelFormat { get; init; }
 }

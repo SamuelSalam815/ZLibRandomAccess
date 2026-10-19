@@ -6,6 +6,7 @@
   <Project Path="Benchmarking.CompressionRatio.Tests/Benchmarking.CompressionRatio.Tests.csproj" />
   <Project Path="Benchmarking.CompressionRatio/Benchmarking.CompressionRatio.csproj" />
   <Project Path="Benchmarking.Helpers/Benchmarking.Helpers.csproj" />
+  <Project Path="Benchmarking.Helpers.Tests/Benchmarking.Helpers.Tests.csproj" />
   <Project Path="Benchmarking.TextSearch.Tests/Benchmarking.TextSearch.Tests.csproj" />
   <Project Path="Benchmarking.TextSearch/Benchmarking.TextSearch.csproj" />
   <Project Path="LogSimulator.Application.Tests.Integration/LogSimulator.Application.Tests.Integration.csproj" />

@@ -49,8 +49,13 @@ public class BarChartBuilder<TCategory, TSeries>(BarChartConfiguration<TCategory
             {
                 Title = seriesGroup.Series?.ToString(),
                 StrokeColor = OxyColors.Black,
-                StrokeThickness = 1
+                StrokeThickness = 1,
             };
+            if (config.ValueLabelFormat is not null)
+            {
+                currentSeries.LabelFormatString = config.ValueLabelFormat;
+                currentSeries.LabelPlacement = LabelPlacement.Outside;
+            }
             foreach (var bar in seriesGroup.Data)
             {
                 currentSeries.Items.Add(new BarItem { Value = bar.Value });
@@ -63,6 +68,10 @@ public class BarChartBuilder<TCategory, TSeries>(BarChartConfiguration<TCategory
         {
             Position = AxisPosition.Left,
             Title = config.CategoryAxisLabel,
+            // OxyPlot draws the first category at the bottom. Reverse so the first category is on top,
+            // matching the order of the legend and of the bars within a category.
+            StartPosition = 1,
+            EndPosition = 0,
         };
 
         foreach (var category in categories)
