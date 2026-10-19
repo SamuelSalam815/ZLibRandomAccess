@@ -14,16 +14,9 @@
 
     <ItemGroup>
       <ProjectReference Include="..\ArchiveViewerBackend\ArchiveViewerBackend.csproj" />
+      <ProjectReference Include="..\Benchmarking.Helpers\Benchmarking.Helpers.csproj" />
       <ProjectReference Include="..\LogSimulator\LogSimulator.csproj" />
       <ProjectReference Include="..\ZLibWrapper\ZLibWrapper.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Update="2026-09-07results">
-            <CopyToOutputDirectory>
-                PreserveNewest
-            </CopyToOutputDirectory>
-        </None>
     </ItemGroup>
 
 </Project>

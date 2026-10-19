@@ -1,15 +1,28 @@
-﻿using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Running;
+using Benchmarking.Helpers;
 
 namespace Benchmarking.TextSearch;
 
-using BenchmarkDotNet.Running;
-
 public class Program
 {
-    public static void Main(string[] args)
+    /// <summary>
+    /// Runs the text search benchmarks, then writes the graph to the images directory (first argument, default
+    /// <c>images/</c> at the repository root). Run in Release; BenchmarkDotNet refuses to benchmark a Debug build.
+    /// </summary>
+    public static int Main(string[] args)
     {
-        // BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, new DebugInProcessConfig());
-        // var summary = BenchmarkRunner.Run<BenchmarkingRegexInGzipStream>();
-        GraphGenerator.Run();
+        var outputDirectory = ImagesDirectory.Resolve(args);
+        var summary = BenchmarkRunner.Run<BenchmarkingRegexInGzipStream>();
+
+        if (summary.HasCriticalValidationErrors || summary.Reports.Any(report => report.ResultStatistics is null))
+        {
+            Console.Error.WriteLine("The benchmarks did not complete! Existing graph was left unchanged.");
+            return 1;
+        }
+
+        var graphPath = Path.Combine(outputDirectory, "text-search-graph.svg");
+        PlotModelSvgWriter.Write(TextSearchGraph.Build(summary), graphPath);
+        Console.WriteLine("Wrote {0}", graphPath);
+        return 0;
     }
 }
