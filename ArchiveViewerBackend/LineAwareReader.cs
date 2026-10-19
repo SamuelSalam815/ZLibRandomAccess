@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 
 namespace ArchiveViewerBackend;
 
@@ -9,22 +9,17 @@ namespace ArchiveViewerBackend;
 /// </summary>
 public sealed class LineAwareReader
 {
-    private const int ChunkSizeInBytes = 4096;
-
-    private readonly Stream _source;
-    private readonly Encoding _encoding;
-    private readonly Decoder _decoder;
+    private readonly StreamReader _reader;
     private readonly int _targetLineCount;
     private readonly CompactingBuffer<char> _text;
-    private readonly byte[] _bytes = new byte[ChunkSizeInBytes];
     private int _lineFeedCount;
     private bool _isSkippingPartialLine;
 
-    /// <param name="source">A stream positioned at the first byte to read.</param>
-    /// <param name="targetLineCount">The number of lines <see cref="Fill"/> reads up to.</param>
-    /// <param name="capacityInChars">
-    /// The most characters the buffer holds. Must be at least <see cref="Utf16.MaxCodeUnitsPerCharacter"/>.
+    /// <param name="source">
+    /// A stream positioned at the first byte to read. It is read ahead, so do not rely on its position afterwards.
     /// </param>
+    /// <param name="targetLineCount">The number of lines <see cref="Fill"/> reads up to.</param>
+    /// <param name="capacityInChars">The most characters the buffer holds. Must be at least 1.</param>
     /// <param name="lineAtStart">The index of the line that <paramref name="source"/> is positioned in.</param>
     /// <param name="startsMidLine">
     /// True when <paramref name="source"/> is positioned inside a line, such as at a recovery point. The rest
@@ -38,10 +33,9 @@ public sealed class LineAwareReader
         long lineAtStart = 0,
         bool startsMidLine = false)
     {
-        ArgumentOutOfRangeException.ThrowIfLessThan(capacityInChars, Utf16.MaxCodeUnitsPerCharacter);
-        _source = source;
-        _encoding = encoding;
-        _decoder = encoding.GetDecoder();
+        ArgumentOutOfRangeException.ThrowIfLessThan(capacityInChars, 1);
+        // The source stays open: it belongs to the caller. A byte order mark would be data in the middle of a file.
+        _reader = new StreamReader(source, encoding, detectEncodingFromByteOrderMarks: false, bufferSize: -1, leaveOpen: true);
         _targetLineCount = targetLineCount;
         _text = new CompactingBuffer<char>(capacityInChars);
         FirstLineNumber = lineAtStart;
@@ -65,25 +59,20 @@ public sealed class LineAwareReader
     {
         while (LineCount < _targetLineCount && !IsAtEndOfStream)
         {
-            // The decoder throws if its output span is too small, so read only as many bytes as are certain to fit.
-            // n bytes can decode to n + 1 characters (see Encoding.GetMaxCharCount): the decoder keeps a partly
-            // received character between reads, and the next bytes can complete it. For example, 3 bytes of an
-            // emoji arrived last time and 1 byte arrives now; that 1 byte produces 2 characters. So one character
-            // of room is kept free as headroom.
-            var bytesToRead = Math.Clamp(_text.Capacity - _text.Length - 1, 0, _bytes.Length);
-            if (bytesToRead == 0)
+            var writable = _text.GetWritableSpan();
+            if (writable.IsEmpty)
             {
                 throw new LineTooLongException(_text.Capacity);
             }
 
-            var bytesRead = _source.Read(_bytes, 0, bytesToRead);
-            if (bytesRead == 0)
+            var charCount = _reader.Read(writable);
+            if (charCount == 0)
             {
                 IsAtEndOfStream = true;
                 return;
             }
 
-            AppendDecoded(bytesRead);
+            Commit(writable, charCount);
         }
     }
 
@@ -112,16 +101,15 @@ public sealed class LineAwareReader
         FirstLineNumber += count;
     }
 
-    private void AppendDecoded(int byteCount)
+    /// <summary>Adds the characters just read into <paramref name="writable"/> to the buffer.</summary>
+    private void Commit(Span<char> writable, int charCount)
     {
-        var writable = _text.GetWritableSpan(_encoding.GetMaxCharCount(byteCount));
-        var charCount = _decoder.GetChars(_bytes.AsSpan(0, byteCount), writable, flush: false);
         if (_isSkippingPartialLine)
         {
             var lineFeedIndex = writable[..charCount].IndexOf('\n');
             if (lineFeedIndex < 0)
             {
-                // The whole chunk is the rest of the partial line. Nothing is reported written, so it is discarded.
+                // The whole read is the rest of the partial line. Nothing is reported written, so it is discarded.
                 return;
             }
 
@@ -132,8 +120,8 @@ public sealed class LineAwareReader
             FirstLineNumber++;
         }
 
-        ReadOnlySpan<char> decoded = writable[..charCount];
-        _lineFeedCount += decoded.Count('\n');
+        ReadOnlySpan<char> read = writable[..charCount];
+        _lineFeedCount += read.Count('\n');
         _text.ReportWritten(charCount);
     }
 }
