@@ -19,5 +19,5 @@
     <ProjectReference Include="..\ArchiveAccessPointVisualizer\ArchiveAccessPointVisualizer.csproj" />
     <ProjectReference Include="..\ArchiveViewerBackend\ArchiveViewerBackend.csproj" />
   </ItemGroup>
-  
+
 </Project>

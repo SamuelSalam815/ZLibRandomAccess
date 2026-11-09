@@ -5,12 +5,16 @@ namespace ArchiveViewerBackend;
 public class StreamReaderWithByteCount : TextReader
 {
 
-    private readonly CircularArray<byte> _byteBuffer;
-    private readonly CircularArray<char> _characterBuffer;
+    private readonly CompactingBuffer<byte> _byteBuffer;
+    private readonly CompactingBuffer<char> _characterBuffer;
     private readonly Stream _stream;
     private readonly Encoding _encoding;
     private readonly Decoder _decoder;
+    // The decoder throws unless its output has room for what one more byte can decode to:
+    // two characters where a surrogate pair is possible, one for single-byte encodings.
+    private readonly int _roomForOneCharacter;
     public int NumberOfBytesRead { get; private set; }
+    private char _previousCharacter;
     private bool _isDisposed;
     private readonly bool _leaveInnerStreamOpen;
 
@@ -20,8 +24,10 @@ public class StreamReaderWithByteCount : TextReader
 
     public StreamReaderWithByteCount(Stream stream, Encoding encoding, int bufferSize = 1024, bool leaveOpen = false)
     {
-        _byteBuffer = new CircularArray<byte>(bufferSize);
-        _characterBuffer = new CircularArray<char>(bufferSize);
+        _roomForOneCharacter = encoding.GetMaxCharCount(1);
+        ArgumentOutOfRangeException.ThrowIfLessThan(bufferSize, _roomForOneCharacter);
+        _byteBuffer = new CompactingBuffer<byte>(bufferSize);
+        _characterBuffer = new CompactingBuffer<char>(bufferSize);
         _stream = stream;
         _leaveInnerStreamOpen = leaveOpen;
         _encoding = encoding;
@@ -36,7 +42,7 @@ public class StreamReaderWithByteCount : TextReader
     public override int Peek()
     {
         DecodeMoreCharactersIfAllCharactersHaveBeenRead();
-        return _characterBuffer[0];
+        return _characterBuffer.Length == 0 ? -1 : _characterBuffer.Contents[0];
     }
 
     private void DecodeMoreCharactersIfAllCharactersHaveBeenRead()
@@ -48,20 +54,20 @@ public class StreamReaderWithByteCount : TextReader
 
         while (_byteBuffer.Length < _byteBuffer.Capacity)
         {
-            var byteSpan = _byteBuffer.GetNextUnusedSpan();
+            var byteSpan = _byteBuffer.GetWritableSpan();
             var numBytesRead = _stream.Read(byteSpan);
-            _byteBuffer.SimulateAdd(numBytesRead);
+            _byteBuffer.ReportWritten(numBytesRead);
             if (numBytesRead < byteSpan.Length)
             {
                 break;
             }
         }
 
-        while (_byteBuffer.Length > 0 && _characterBuffer.Length < _characterBuffer.Capacity)
+        while (_byteBuffer.Length > 0 && _characterBuffer.Capacity - _characterBuffer.Length >= _roomForOneCharacter)
         {
-            _decoder.Convert(_byteBuffer.GetNextUsedSpan(), _characterBuffer.GetNextUnusedSpan(), false, out var bytesUsed, out var charsUsed, out _);
-            _byteBuffer.Drop(bytesUsed);
-            _characterBuffer.SimulateAdd(charsUsed);
+            _decoder.Convert(_byteBuffer.Contents, _characterBuffer.GetWritableSpan(), false, out var bytesUsed, out var charsUsed, out _);
+            _byteBuffer.DropFirst(bytesUsed);
+            _characterBuffer.ReportWritten(charsUsed);
         }
     }
 
@@ -72,10 +78,27 @@ public class StreamReaderWithByteCount : TextReader
         {
             return -1;
         }
-        var result = _characterBuffer[0];
-        NumberOfBytesRead += _encoding.GetByteCount([result]);
-        _characterBuffer.Drop();
+        var result = _characterBuffer.Contents[0];
+        NumberOfBytesRead += BytesToCount(result);
+        _previousCharacter = result;
+        _characterBuffer.DropFirst(1);
         return result;
+    }
+
+    /// <summary>
+    /// A surrogate pair is encoded as one character, so neither half has a size alone. The pair is counted
+    /// when its second half is read.
+    /// </summary>
+    private int BytesToCount(char character)
+    {
+        if (char.IsHighSurrogate(character))
+        {
+            return 0;
+        }
+
+        return char.IsLowSurrogate(character) && char.IsHighSurrogate(_previousCharacter)
+            ? _encoding.GetByteCount([_previousCharacter, character])
+            : _encoding.GetByteCount([character]);
     }
 
     protected override void Dispose(bool disposing)

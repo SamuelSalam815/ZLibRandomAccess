@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LogSimulator.Appliction\LogSimulator.Appliction.csproj" />
+    <ProjectReference Include="..\LogSimulator.Application\LogSimulator.Application.csproj" />
     <ProjectReference Include="..\ZLibBindings\ZLibBindings.csproj" />
     <ProjectReference Include="..\ZLibWrapper\ZLibWrapper.csproj" />
   </ItemGroup>

@@ -4,7 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using JetBrains.Annotations;
-using LogSimulator.Appliction;
+using LogSimulator.Application;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shouldly;
 using ZLibWrapper;
@@ -13,21 +13,23 @@ namespace LogSimulator.Application.Tests.Integration;
 
 [TestClass]
 [TestSubject(typeof(Program))]
-[TestCategory("Integration")]
 public class ProgramIntegrationTest
 {
 
+    // Snapshot of 1 MB of logs with a 64 KB recovery point interval. Regenerate with:
+    // dotnet run --project LogSimulator.Application -- <outputDirectory> 1 64
+    private static readonly DirectoryInfo TestArtifactsDirectory = new(Path.Combine(AppContext.BaseDirectory, "TestArtifacts"));
+
     public static IEnumerable<object[]> LogTimeStamps()
     {
-        yield return [new DateTimeOffset(2026, 7, 29, 14, 21, 6, TimeSpan.Zero)];
-        yield return [new DateTimeOffset(2026, 7, 30, 6, 24, 3, TimeSpan.Zero)];
+        yield return [new DateTimeOffset(2026, 10, 18, 21, 8, 28, TimeSpan.Zero)];
     }
 
     [TestMethod]
     [DynamicData(nameof(LogTimeStamps))]
     public void WhenLogsAreDecompressed_TheirDataAreIdentical(DateTimeOffset logTimestamp)
     {
-        var filePathFactory = new CompressionFilePathFactory(Program.TempDirectory, logTimestamp);
+        var filePathFactory = new CompressionFilePathFactory(TestArtifactsDirectory, logTimestamp);
         using var controlStream =
             new GZipStream(ReadFileStream(filePathFactory.BCLCompressionFile), CompressionMode.Decompress);
         using var zlibStream =

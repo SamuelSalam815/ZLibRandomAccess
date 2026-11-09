@@ -14,6 +14,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\ArchiveViewerBackend\ArchiveViewerBackend.csproj" />
+      <ProjectReference Include="..\Benchmarking.Helpers\Benchmarking.Helpers.csproj" />
       <ProjectReference Include="..\LogSimulator\LogSimulator.csproj" />
       <ProjectReference Include="..\ZLibWrapper\ZLibWrapper.csproj" />
     </ItemGroup>

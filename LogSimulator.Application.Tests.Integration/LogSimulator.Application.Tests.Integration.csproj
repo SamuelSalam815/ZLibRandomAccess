@@ -15,7 +15,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LogSimulator.Appliction\LogSimulator.Appliction.csproj" />
+    <None Include="TestArtifacts\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LogSimulator.Application\LogSimulator.Application.csproj" />
   </ItemGroup>
   
 </Project>

@@ -76,6 +76,47 @@ public class StreamReaderWithByteCountTest
     }
 
     [TestMethod]
+    [DataRow("UTF-8")]
+    [DataRow("utf-16")]
+    [DataRow("utf-32")]
+    public void NumberOfBytesRead_CountsASurrogatePairOnceWithItsEncodedSize(string encodingName)
+    {
+        var encoding = Encoding.GetEncoding(encodingName);
+        using var sut = new StreamReaderWithByteCount(EncodeWith("a😀b", encoding), encoding);
+        var bytesAfterEachRead = new List<int>();
+
+        for (var character = sut.Read(); character != -1; character = sut.Read())
+        {
+            bytesAfterEachRead.Add(sut.NumberOfBytesRead);
+        }
+
+        // The reads return "a", the two halves of the emoji, and "b".
+        bytesAfterEachRead.ShouldBe([
+            encoding.GetByteCount("a"),
+            encoding.GetByteCount("a"),
+            encoding.GetByteCount("a😀"),
+            encoding.GetByteCount("a😀b"),
+        ]);
+    }
+
+    [TestMethod]
+    public void Constructor_BufferTooSmallForOneCharacter_Throws()
+    {
+        // A surrogate pair can take two characters of room in UTF-8.
+        Should.Throw<ArgumentOutOfRangeException>(() =>
+            new StreamReaderWithByteCount(EncodeWith("a", Encoding.UTF8), Encoding.UTF8, bufferSize: 1));
+    }
+
+    [TestMethod]
+    public void Read_SingleByteEncoding_WorksWithAOneCharacterBuffer()
+    {
+        // Latin-1 never needs two characters of room for one character.
+        using var sut = new StreamReaderWithByteCount(EncodeWith("abc", Encoding.Latin1), Encoding.Latin1, bufferSize: 1);
+
+        sut.ReadToEnd().ShouldBe("abc");
+    }
+
+    [TestMethod]
     public void ResetByteCount_SetsByteCountToZero()
     {
         using var sut = new  StreamReaderWithByteCount(EncodeWith(SampleTexts.MixedNewLineStyles, TestEncoding), TestEncoding);
@@ -110,6 +151,38 @@ public class StreamReaderWithByteCountTest
     private static Stream EncodeWith(string input, Encoding testEncoding)
     {
         return new MemoryStream(testEncoding.GetBytes(input));
+    }
+
+    [TestMethod]
+    public void Peek_OnEmptyStream_ReturnsMinusOne()
+    {
+        using var sut = new StreamReaderWithByteCount(EncodeWith("", TestEncoding), TestEncoding);
+
+        sut.Peek().ShouldBe(-1);
+    }
+
+    [TestMethod]
+    public void Peek_AfterReadingEveryCharacter_ReturnsMinusOne()
+    {
+        using var sut = new StreamReaderWithByteCount(EncodeWith("ab", TestEncoding), TestEncoding);
+        sut.Read().ShouldBe('a');
+        sut.Read().ShouldBe('b');
+
+        sut.Peek().ShouldBe(-1);
+    }
+
+    [TestMethod]
+    [DataRow("UTF-8")]
+    [DataRow("utf-16")]
+    public void Read_CharactersThatNeedTwoCodeUnits_AreDecodedWhateverThePositionInTheBuffer(string encodingName)
+    {
+        // With a buffer of 4 characters, the three letters leave the next write position at the last cell,
+        // where a surrogate pair does not fit.
+        var encoding = Encoding.GetEncoding(encodingName);
+        const string text = "abc\U0001F600\U0001F600";
+        using var sut = new StreamReaderWithByteCount(EncodeWith(text, encoding), encoding, bufferSize: 4);
+
+        sut.ReadToEnd().ShouldBe(text);
     }
 
     [TestMethod]
