@@ -12,6 +12,12 @@ internal unsafe class ZLibInflateStreamWithRecoveryPoints : ZLibInflateStream
 {
     private readonly ZWindowBits _windowBits;
 
+    // Test-only knobs for reproducing the trailer skip bug (commit c6317d8).
+    internal int TrailerSeekBytes { get; set; } = 4;
+    internal bool UseProductionFix { get; set; }
+
+    private bool _isEndOfDataReached;
+
     public ZLibInflateStreamWithRecoveryPoints(
         Stream compressedStream,
         bool leaveOpen = false,
@@ -20,14 +26,10 @@ internal unsafe class ZLibInflateStreamWithRecoveryPoints : ZLibInflateStream
         _windowBits = windowBits;
     }
 
-    private bool _isEndOfDataReached;
-
     public override int Read(byte[] buffer, int offset, int count)
     {
         if (_isEndOfDataReached)
-        {
             return 0;
-        }
 
         if (offset + count > buffer.Length)
         {
@@ -47,12 +49,13 @@ internal unsafe class ZLibInflateStreamWithRecoveryPoints : ZLibInflateStream
                             ZLibStream->_zDataType.HasFlag(ZDataType.Z_END_OF_BLOCK);
         if (nextAction is ZLibPumpAction.Continue && isFinalBlockProcessed)
         {
-            // The only data left after processing the end of the final block is a check sum. Never give it to zlib:
-            // if we skipped some data by jumping to a recovery point, the checksum for the partial data read and the
-            // checksum for the entire file will not be the same. Skipping a fixed number of bytes instead is wrong
-            // whenever the input buffer ends part way through the check sum.
-            _isEndOfDataReached = true;
-            return true;
+            if (UseProductionFix)
+            {
+                _isEndOfDataReached = true;
+                return true;
+            }
+            ZLibStream->avail_in = 0;
+            CompressedStream.Seek(TrailerSeekBytes, SeekOrigin.Current);
         }
 
         return base.HandleZLibReadAction(nextAction);

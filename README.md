@@ -142,6 +142,17 @@ In practice a well-managed stack like [ELK](https://www.elastic.co/elastic-stack
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+<!-- LEARNING BRANCHES -->
+## Learning Branches
+
+Some branches exist as reference examples rather than code intended for merging:
+
+| Branch | Purpose |
+| --- | --- |
+| `learning/trailer-skip-bug` | Reproduces the gzip trailer skip bug (fixed in `c6317d8`) with hypothesis tests that vary the seek length to confirm the failure mechanism |
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 <!-- LICENSE -->
 ## License
 

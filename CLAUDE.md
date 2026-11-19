@@ -42,4 +42,8 @@ Tests use MSTest + Shouldly.
 
 Test projects are named `<Project>.Tests`. `LogSimulator.Application.Tests.Integration` holds the integration tests.
 
+## Learning branches
+
+Branches prefixed `learning/` are reference examples, not intended for merging. They contain temporary test code and intentionally broken production code for educational purposes. See the README for a list.
+
 **Integration test snapshot:** `ProgramIntegrationTest` decompresses the committed logs in `LogSimulator.Application.Tests.Integration/TestArtifacts` (1 MB of logs, 64 KB recovery point interval) and checks that the BCL, zlib and zlib-with-recovery-points outputs match. It takes about a second, so it runs with the normal tests. To regenerate the snapshot: `dotnet run --project LogSimulator.Application -- <outputDirectory> 1 64` (arguments: output directory, megabytes of logs, recovery point interval in KB), then update the timestamp in `ProgramIntegrationTest.LogTimeStamps`. The defaults (no arguments) write 128 MB to `C:\Temp`.
